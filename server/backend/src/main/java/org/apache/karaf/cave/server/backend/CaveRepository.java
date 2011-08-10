@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.cave.server.backend;
 
+import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -33,20 +34,25 @@ public interface CaveRepository {
     String getName();
 
     /**
-     * Get the location (path) of this repository.
+     * Set the name of the repository.
+     *
+     * @param name the name of the repository
+     */
+    void setName(String name);
+
+    /**
+     * Get the location (filesystem) of this repository.
      *
      * @return the location of this repository.
      */
-    String getLocation();
+    File getLocation();
 
     /**
-     * Upload an artifact from the given URL into the repository.
-     * TODO use a Artifact object in place of raw artifact
+     * Set the location (filesystem) of this repository.
      *
-     * @param location  location of the artifact to upload in the repository.
-     * @throws Exception in case of upload failure.
+     * @param location the location of this repository
      */
-    void upload(String location) throws Exception;
+    void setLocation(File location);
 
     /**
      * Upload an artifact from the given URL into the repository.
@@ -56,15 +62,6 @@ public interface CaveRepository {
      * @throws Exception in case of upload failure.
      */
     void upload(URL url) throws Exception;
-
-    /**
-     * Upload an artifact from a given stream into the repository.
-     * TODO use a Artifact object in place of raw artifact
-     *
-     * @param stream the input stream of the artifact.
-     * @throws Exception in case of upload failure.
-     */
-    void upload(InputStream stream) throws Exception;
 
     /**
      * Scan the whole repository, reading bundle MANIFEST, etc to update

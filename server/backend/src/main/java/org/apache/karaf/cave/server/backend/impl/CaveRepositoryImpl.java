@@ -1,9 +1,25 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.apache.karaf.cave.server.backend.impl;
 
+import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.bundlerepository.impl.DataModelHelperImpl;
 import org.apache.felix.bundlerepository.impl.RepositoryImpl;
-import org.apache.felix.bundlerepository.impl.ResourceImpl;
 import org.apache.karaf.cave.server.backend.CaveRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +35,12 @@ public class CaveRepositoryImpl implements CaveRepository {
     private final static Logger LOGGER = LoggerFactory.getLogger(CaveRepositoryImpl.class);
 
     private String name;
-    private String location;
-    private RepositoryImpl obrRepository;
+    private File location;
 
-    public CaveRepositoryImpl(String name, String location) throws Exception {
+    private RepositoryImpl obrRepository;
+    private RepositoryAdmin repositoryAdmin;
+
+    public CaveRepositoryImpl(String name, File location) throws Exception {
         this.name = name;
         this.location = location;
 
@@ -34,11 +52,10 @@ public class CaveRepositoryImpl implements CaveRepository {
      */
     private void createRepositoryDirectory() throws Exception {
         LOGGER.debug("Create Karaf Cave repository {} folder.", name);
-        File directory = new File(this.location);
-        if (!directory.exists()) {
-            directory.mkdirs();
+        if (!location.exists()) {
+            location.mkdirs();
             LOGGER.debug("Karaf Cave repository {} location has been created.", name);
-            LOGGER.debug(location);
+            LOGGER.debug(location.getAbsolutePath());
         }
         File repositoryXml = new File(location, "repository.xml");
         if (repositoryXml.exists()) {
@@ -52,88 +69,42 @@ public class CaveRepositoryImpl implements CaveRepository {
         return this.name;
     }
 
-    public String getLocation() {
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public File getLocation() {
         return this.location;
     }
 
+    public void setLocation(File location) {
+        this.location = location;
+    }
+
     /**
-     * Update the repository.xml with the artifact at the given URL.
+     * Generate the repository.xml with the artifact at the given URL.
      *
-     * @param resource the bundle resource
      * @throws Exception in case of repository.xml update failure.
      */
-    private void updateRepositoryXml(Resource resource) throws Exception {
+    private void generateRepositoryXml() throws Exception {
+        File repositoryXml = new File(location, "repository.xml");
+        OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(repositoryXml));
+        new DataModelHelperImpl().writeRepository(obrRepository, writer);
+        writer.flush();
+        writer.close();
+    }
+
+    /**
+     * Add a resource in the OBR repository.
+     *
+     * @param resource the resource to add.
+     * @throws Exception in case of failure.
+     */
+    private void addResource(Resource resource) throws Exception {
         if (resource != null) {
             obrRepository.addResource(resource);
             obrRepository.setLastModified(System.currentTimeMillis());
-            File repositoryXml = new File(location, "repository.xml");
-            OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(repositoryXml));
-            new DataModelHelperImpl().writeRepository(obrRepository, writer);
-            writer.flush();
-            writer.close();
         }
-    }
-
-    /**
-     * Add an artifact into this repository
-     *
-     * @param path the location of the raw artifact
-     * @throws Exception in case of upload failure
-     */
-    public void upload(String path) throws Exception {
-        LOGGER.debug("Upload new artifact from {}", location);
-        // copy the file
-        LOGGER.debug("Copy the file from {}", location);
-        File source = new File(path);
-        if (!source.exists()) {
-            throw new IllegalArgumentException("The artifact location " + location + " doesn't exist.");
-        }
-        File destination = new File(location, source.getName());
-        FileInputStream fis = new FileInputStream(source);
-        FileOutputStream fos = new FileOutputStream(destination);
-        byte[] buffer = new byte[1024];
-        int len;
-        while ((len = fis.read(buffer)) > 0) {
-            fos.write(buffer, 0, len);
-        }
-        fis.close();
-        fos.flush();
-        fos.close();
-        // update the repository.xml
-        Resource resource = new DataModelHelperImpl().createResource(destination.toURI().toURL());
-        if (resource == null) {
-            destination.delete();
-            throw new IllegalArgumentException("The " + path + " source is not a valid OSGi bundle");
-        }
-        this.updateRepositoryXml(resource);
-    }
-
-    /**
-     * Upload an artifact using a stream.
-     *
-     * @param stream the artifact stream.
-     * @throws Exception in case of upload failure.
-     */
-    public void upload(InputStream stream) throws Exception {
-        LOGGER.debug("Upload new artifact from a stream");
-        String artifactName = "artifact-" + System.currentTimeMillis();
-        File destination = new File(location, artifactName);
-        FileOutputStream fos = new FileOutputStream(destination);
-        byte[] buffer = new byte[1024];
-        int len;
-        while ((len = stream.read(buffer)) > 0) {
-            fos.write(buffer, 0, len);
-        }
-        fos.flush();
-        fos.close();
-        // update the repository.xml
-        Resource resource = new DataModelHelperImpl().createResource(destination.toURI().toURL());
-        if (resource == null) {
-            destination.delete();
-            throw new IllegalArgumentException("The stream source is not a valid OSGi bundle");
-        }
-        destination.renameTo(new File(location, resource.getSymbolicName() + "-" + resource.getVersion()));
-        this.updateRepositoryXml(resource);
     }
 
     /**
@@ -145,8 +116,8 @@ public class CaveRepositoryImpl implements CaveRepository {
     public void upload(URL url) throws Exception {
         LOGGER.debug("Upload new artifact from {}", url);
         String artifactName = "artifact-" + System.currentTimeMillis();
-        File destination = new File(location, artifactName);
-        FileOutputStream fos = new FileOutputStream(destination);
+        File temp = new File(location, artifactName);
+        FileOutputStream fos = new FileOutputStream(temp);
         InputStream stream = url.openStream();
         byte[] buffer = new byte[1024];
         int len;
@@ -157,13 +128,16 @@ public class CaveRepositoryImpl implements CaveRepository {
         fos.flush();
         fos.close();
         // update the repository.xml
-        Resource resource = new DataModelHelperImpl().createResource(destination.toURI().toURL());
+        Resource resource = new DataModelHelperImpl().createResource(temp.toURI().toURL());
         if (resource == null) {
-            destination.delete();
+            temp.delete();
             throw new IllegalArgumentException("The " + url + " artifact source is not a valid OSGi bundle");
         }
-        destination.renameTo(new File(location, resource.getSymbolicName() + "-" + resource.getVersion()));
-        this.updateRepositoryXml(resource);
+        File destination = new File(location, resource.getSymbolicName() + "-" + resource.getVersion() + ".jar");
+        temp.renameTo(destination);
+        resource = new DataModelHelperImpl().createResource(destination.toURI().toURL());
+        this.addResource(resource);
+        this.generateRepositoryXml();
     }
 
     /**
@@ -172,7 +146,27 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception in case of scan failure.
      */
     public void scan() throws Exception {
-        // TODO
+        this.scan(location);
+        this.generateRepositoryXml();
+    }
+
+    /**
+     * Recursive method to traverse all file in the repository.
+     *
+     * @param entry the
+     * @throws Exception
+     */
+    private void scan(File entry) throws Exception {
+        if (entry.isDirectory()) {
+            File[] children = entry.listFiles();
+            for (int i = 0; i < children.length; i++) {
+                scan(children[i]);
+            }
+        } else {
+            // populate the repository
+            Resource resource = new DataModelHelperImpl().createResource(entry.toURI().toURL());
+            this.addResource(resource);
+        }
     }
 
     /**
@@ -181,7 +175,8 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception in case of register failure.
      */
     public void register() throws Exception {
-        // TODO
+        File repositoryXml = new File(location, "repository.xml");
+        repositoryAdmin.addRepository(repositoryXml.toURI().toURL());
     }
 
     /**
@@ -190,8 +185,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception in case of destroy failure.
      */
     public void destroy() throws Exception {
-        File storage = new File(location);
-        storage.delete();
+        location.delete();
     }
 
 }

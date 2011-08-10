@@ -21,7 +21,7 @@ package org.apache.karaf.cave.server.backend;
  */
 public interface CaveRepositoryService {
 
-    CaveRepository createRepository(String name, String location) throws Exception;
+    CaveRepository createRepository(String name) throws Exception;
 
     CaveRepository[] getRepositories();
 
