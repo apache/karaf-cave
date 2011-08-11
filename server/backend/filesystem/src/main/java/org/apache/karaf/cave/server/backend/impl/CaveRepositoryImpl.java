@@ -84,6 +84,14 @@ public class CaveRepositoryImpl implements CaveRepository {
         this.location = location;
     }
 
+    public RepositoryAdmin getRepositoryAdmin() {
+        return this.repositoryAdmin;
+    }
+
+    public void setRepositoryAdmin(RepositoryAdmin repositoryAdmin) {
+        this.repositoryAdmin = repositoryAdmin;
+    }
+
     /**
      * Generate the repository.xml with the artifact at the given URL.
      *
@@ -184,7 +192,11 @@ public class CaveRepositoryImpl implements CaveRepository {
      */
     public void register() throws Exception {
         File repositoryXml = new File(location, "repository.xml");
-        repositoryAdmin.addRepository(repositoryXml.toURI().toURL());
+        if (repositoryXml != null && repositoryXml.exists()) {
+            repositoryAdmin.addRepository(repositoryXml.toURI().toURL());
+        } else {
+            throw new IllegalStateException("OBR repository.xml not found");
+        }
     }
 
     /**
