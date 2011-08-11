@@ -23,7 +23,10 @@
 
     <bean id="caveRepositoryService" class="org.apache.karaf.cave.server.backend.impl.CaveRepositoryServiceImpl">
         <property name="storageLocation" value="cave"/>
+        <property name="repositoryAdmin" ref="repositoryAdmin"/>
     </bean>
+
+    <reference id="repositoryAdmin" interface="org.apache.felix.bundlerepository.RepositoryAdmin"/>
 
     <service ref="caveRepositoryService" interface="org.apache.karaf.cave.server.backend.api.CaveRepositoryService"/>
 
