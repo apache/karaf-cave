@@ -16,8 +16,8 @@
  */
 package org.apache.karaf.cave.server.backend.impl;
 
-import org.apache.karaf.cave.server.backend.CaveRepository;
-import org.apache.karaf.cave.server.backend.CaveRepositoryService;
+import org.apache.karaf.cave.server.backend.api.CaveRepository;
+import org.apache.karaf.cave.server.backend.api.CaveRepositoryService;
 
 import java.io.File;
 import java.util.HashMap;
@@ -40,11 +40,16 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         this.storageLocation = storageLocation;
     }
 
-    public synchronized CaveRepository createRepository(String name) throws Exception {
+    public synchronized CaveRepository createRepository(String name, boolean scan) throws Exception {
+        File location = new File(storageLocation, name);
+        return this.createRepository(name, location.getAbsolutePath(), scan);
+    }
+
+    public synchronized CaveRepository createRepository(String name, String location, boolean scan) throws Exception {
         if (repositories.get(name) != null) {
             throw new IllegalArgumentException("Cave repository " + name + " already exists.");
         }
-        CaveRepository repository = new CaveRepositoryImpl(name, new File(storageLocation, name));
+        CaveRepository repository = new CaveRepositoryImpl(name, new File(location), scan);
         repositories.put(name, repository);
         return repository;
     }
