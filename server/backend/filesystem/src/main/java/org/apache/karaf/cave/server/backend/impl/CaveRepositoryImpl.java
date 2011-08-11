@@ -20,7 +20,7 @@ import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.bundlerepository.impl.DataModelHelperImpl;
 import org.apache.felix.bundlerepository.impl.RepositoryImpl;
-import org.apache.karaf.cave.server.backend.CaveRepository;
+import org.apache.karaf.cave.server.backend.api.CaveRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,11 +40,14 @@ public class CaveRepositoryImpl implements CaveRepository {
     private RepositoryImpl obrRepository;
     private RepositoryAdmin repositoryAdmin;
 
-    public CaveRepositoryImpl(String name, File location) throws Exception {
+    public CaveRepositoryImpl(String name, File location, boolean scan) throws Exception {
         this.name = name;
         this.location = location;
 
         this.createRepositoryDirectory();
+        if (scan) {
+            this.scan();
+        }
     }
 
     /**
@@ -131,7 +134,8 @@ public class CaveRepositoryImpl implements CaveRepository {
         Resource resource = new DataModelHelperImpl().createResource(temp.toURI().toURL());
         if (resource == null) {
             temp.delete();
-            throw new IllegalArgumentException("The " + url + " artifact source is not a valid OSGi bundle");
+            LOGGER.warn("The {} artifact source is not a valid OSGi bundle", url);
+            return;
         }
         File destination = new File(location, resource.getSymbolicName() + "-" + resource.getVersion() + ".jar");
         temp.renameTo(destination);
@@ -164,8 +168,12 @@ public class CaveRepositoryImpl implements CaveRepository {
             }
         } else {
             // populate the repository
-            Resource resource = new DataModelHelperImpl().createResource(entry.toURI().toURL());
-            this.addResource(resource);
+            try {
+                Resource resource = new DataModelHelperImpl().createResource(entry.toURI().toURL());
+                this.addResource(resource);
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn(e.getMessage());
+            }
         }
     }
 

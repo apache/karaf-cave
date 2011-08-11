@@ -16,7 +16,7 @@
  */
 package org.apache.karaf.cave.server.backend.impl;
 
-import org.apache.karaf.cave.server.backend.CaveRepository;
+import org.apache.karaf.cave.server.backend.api.CaveRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,7 +35,7 @@ public class CaveRepositoryImplTest {
 
     @Before
     public void setUp() throws Exception {
-        repository = new CaveRepositoryImpl("test", new File("target/test-repository"));
+        repository = new CaveRepositoryImpl("test", new File("target/test-repository"), false);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class CaveRepositoryImplTest {
         repository.upload(new URL("http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.commons-lang/2.4_5/org.apache.servicemix.bundles.commons-lang-2.4_5.jar"));
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testUploadNonBundleFromURL() throws Exception {
         repository.upload(new URL("http://repo1.maven.org/maven2/commons-vfs/commons-vfs/1.0/commons-vfs-1.0.jar"));
     }

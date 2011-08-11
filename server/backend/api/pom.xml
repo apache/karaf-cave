@@ -22,20 +22,31 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.cave</groupId>
-        <artifactId>org.apache.karaf.cave.server</artifactId>
+        <groupId>org.apache.karaf.cave.server</groupId>
+        <artifactId>org.apache.karaf.cave.server.backend</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.karaf.cave.server</groupId>
-    <artifactId>org.apache.karaf.cave.server.backend</artifactId>
-    <name>Apache Karaf :: Cave :: Server :: Backend</name>
-    <packaging>pom</packaging>
+    <groupId>org.apache.karaf.cave.server.backend</groupId>
+    <artifactId>org.apache.karaf.cave.server.backend.api</artifactId>
+    <name>Apache Karaf :: Cave :: Server :: Backend :: API</name>
+    <packaging>bundle</packaging>
 
-    <modules>
-        <module>api</module>
-        <module>filesystem</module>
-    </modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Export-Package>
+                            org.apache.karaf.cave.server.backend.api
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
