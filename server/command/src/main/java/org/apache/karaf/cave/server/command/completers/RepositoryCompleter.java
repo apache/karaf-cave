@@ -16,9 +16,9 @@
  */
 package org.apache.karaf.cave.server.command.completers;
 
-import jline.console.completer.Completer;
 import org.apache.karaf.cave.server.backend.api.CaveRepository;
 import org.apache.karaf.cave.server.backend.api.CaveRepositoryService;
+import org.apache.karaf.shell.console.Completer;
 import org.apache.karaf.shell.console.completer.StringsCompleter;
 
 import java.util.List;

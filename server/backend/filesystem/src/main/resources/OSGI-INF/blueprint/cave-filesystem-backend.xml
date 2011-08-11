@@ -22,7 +22,7 @@
            default-activation="lazy">
 
     <bean id="caveRepositoryService" class="org.apache.karaf.cave.server.backend.impl.CaveRepositoryServiceImpl">
-        <property name="storageLocation" value="${karaf.cave.repositories}"/>
+        <property name="storageLocation" value="cave"/>
     </bean>
 
     <service ref="caveRepositoryService" interface="org.apache.karaf.cave.server.backend.api.CaveRepositoryService"/>
