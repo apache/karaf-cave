@@ -50,7 +50,9 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>                    <instructions>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
                             org.apache.karaf.cave.server.backend.api;version="${project.version}",
                             org.slf4j*;resolution:=optional,
@@ -60,6 +62,7 @@
                             org.osgi.service.log,
                             org.osgi.service.url,
                             !org.apache.felix.shell,
+                            !org.apache.felix.bundlerepository.impl.wrapper,
                             !org.osgi.service.obr,
                             !javax.xml.stream,
                         </Import-Package>
@@ -67,7 +70,7 @@
                             org.kxml2.io,
                             org.xmlpull.v1,
                             org.apache.felix.utils*,
-                            org.apache.felix.bundlerepository.impl,
+                            org.apache.felix.bundlerepository.impl*,
                             org.apache.karaf.cave.server.backend.impl
                         </Private-Package>
                     </instructions>
