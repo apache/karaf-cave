@@ -35,16 +35,23 @@
 
     <properties>
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
+        <karaf.version>2.2.2</karaf.version>
     </properties>
 
     <modules>
         <module>server</module>
+        <module>assembly</module>
     </modules>
 
     <!-- TODO add scm section when moving to Karaf svn -->
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>org.apache.karaf.shell</groupId>
+                <artifactId>org.apache.karaf.shell.console</artifactId>
+                <version>${karaf.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.bundlerepository</artifactId>
