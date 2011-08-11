@@ -22,26 +22,26 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.cave.server</groupId>
-        <artifactId>org.apache.karaf.cave.server.backend</artifactId>
+        <groupId>org.apache.karaf.cave</groupId>
+        <artifactId>org.apache.karaf.cave.server</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.karaf.cave.server.backend</groupId>
-    <artifactId>org.apache.karaf.cave.server.backend.filesystem</artifactId>
-    <name>Apache Karaf :: Cave :: Server :: Backend :: Filesystem</name>
+    <groupId>org.apache.karaf.cave.server</groupId>
+    <artifactId>org.apache.karaf.cave.server.command</artifactId>
+    <name>Apache Karaf :: Cave :: Server :: Command</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.karaf.shell</groupId>
+            <artifactId>org.apache.karaf.shell.console</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.cave.server.backend</groupId>
             <artifactId>org.apache.karaf.cave.server.backend.api</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
         </dependency>
     </dependencies>
 
@@ -50,26 +50,15 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>                    <instructions>
+                <configuration>
+                    <instructions>
                         <Import-Package>
+                            org.apache.felix.service.command,
+                            org.apache.felix.gogo.commands,
+                            org.apache.karaf.shell.console,
                             org.apache.karaf.cave.server.backend.api;version="${project.version}",
-                            org.slf4j*;resolution:=optional,
-                            org.apache.felix.bundlerepository*;version="[2,3)",
-                            org.osgi.framework,
-                            org.osgi.service.blueprint,
-                            org.osgi.service.log,
-                            org.osgi.service.url,
-                            !org.apache.felix.shell,
-                            !org.osgi.service.obr,
-                            !javax.xml.stream,
+                            *
                         </Import-Package>
-                        <Private-Package>
-                            org.kxml2.io,
-                            org.xmlpull.v1,
-                            org.apache.felix.utils*,
-                            org.apache.felix.bundlerepository.impl,
-                            org.apache.karaf.cave.server.backend.impl
-                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
