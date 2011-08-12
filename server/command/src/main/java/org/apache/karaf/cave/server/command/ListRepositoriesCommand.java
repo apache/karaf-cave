@@ -16,12 +16,14 @@
  */
 package org.apache.karaf.cave.server.command;
 
+import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.cave.server.backend.api.CaveRepository;
 
 /**
  * Command to list all Karaf Cave repositories available.
  */
-public class ListRepositoryCommand extends CaveRepositoryCommandSupport {
+@Command(scope = "cave", name = "list-repositories", description = "List all Karaf Cave repositories")
+public class ListRepositoriesCommand extends CaveRepositoryCommandSupport {
 
     private static final String OUTPUT_FORMAT = "%-20s %-20s";
 

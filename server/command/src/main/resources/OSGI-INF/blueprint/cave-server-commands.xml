@@ -23,7 +23,7 @@
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
         <command name="cave/list-repository">
-            <action class="org.apache.karaf.cave.server.command.ListRepositoryCommand">
+            <action class="org.apache.karaf.cave.server.command.ListRepositoriesCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
         </command>
