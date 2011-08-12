@@ -43,6 +43,22 @@ public interface CaveRepositoryService {
     CaveRepository createRepository(String name, String location, boolean scan) throws Exception;
 
     /**
+     * Destroy an existing Karaf Cave repository.
+     *
+     * @param name the name of Karaf Cave repository to destroy.
+     * @throws Exception in case of destroy failure.
+     */
+    void destroy(String name) throws Exception;
+
+    /**
+     * Register a Karaf Cave repository into the OBR.
+     *
+     * @param name the name of the Karaf Cave repository.
+     * @throws Exception in case of registration failure.
+     */
+    void register(String name) throws Exception;
+
+    /**
      * Get the list of all Karaf Cave repositories.
      *
      * @return the Karaf Cave repositories.
