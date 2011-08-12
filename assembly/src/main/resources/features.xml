@@ -20,6 +20,9 @@
 
     <feature name="cave-server-filesystem-backend" version="${project.version}">
         <feature>obr</feature>
+        <configfile finalname="/etc/org.apache.karaf.cave.server.backend.filesystem.cfg">
+            mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/filesystem
+        </configfile>
         <bundle>mvn:org.apache.karaf.cave.server.backend/org.apache.karaf.cave.server.backend.api/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.cave.server.backend/org.apache.karaf.cave.server.backend.filesystem/${project.version}</bundle>
     </feature>
