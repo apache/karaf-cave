@@ -32,6 +32,15 @@
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
         </command>
+        <command name="cave/destroy-repository">
+            <action class="org.apache.karaf.cave.server.command.DestroyRepositoryCommand">
+                <property name="caveRepositoryService" ref="caveRepositoryService"/>
+            </action>
+            <completers>
+                <ref component-id="repositoryCompleter"/>
+                <null/>
+            </completers>
+        </command>
         <command name="cave/scan-repository">
             <action class="org.apache.karaf.cave.server.command.ScanRepositoryCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>

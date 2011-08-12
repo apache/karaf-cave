@@ -16,6 +16,8 @@
  */
 package org.apache.karaf.cave.server.backend.impl;
 
+import com.sun.org.apache.bcel.internal.Repository;
+import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.cave.server.backend.api.CaveRepository;
 import org.apache.karaf.cave.server.backend.api.CaveRepositoryService;
 
@@ -29,6 +31,7 @@ import java.util.Map;
 public class CaveRepositoryServiceImpl implements CaveRepositoryService {
 
     private File storageLocation;
+    private RepositoryAdmin repositoryAdmin;
 
     private Map<String, CaveRepository> repositories = new HashMap<String, CaveRepository>();
 
@@ -40,11 +43,36 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         this.storageLocation = storageLocation;
     }
 
+    public RepositoryAdmin getRepositoryAdmin() {
+        return this.repositoryAdmin;
+    }
+
+    public void setRepositoryAdmin(RepositoryAdmin repositoryAdmin) {
+        this.repositoryAdmin = repositoryAdmin;
+    }
+
+    /**
+     * Create a new Karaf Cave repository.
+     *
+     * @param name the name of the repository
+     * @param scan if true, the repository is scanned at creation time.
+     * @return  the Karaf Cave repository.
+     * @throws Exception in case of creation failure.
+     */
     public synchronized CaveRepository createRepository(String name, boolean scan) throws Exception {
         File location = new File(storageLocation, name);
         return this.createRepository(name, location.getAbsolutePath(), scan);
     }
 
+    /**
+     * Create a new Karaf Cave repository.
+     *
+     * @param name the name of the repository.
+     * @param location the storage location of the repository.
+     * @param scan if true, the repostory is scanned at creation time.
+     * @return the Karaf Cave repository.
+     * @throws Exception in case of creation failure.
+     */
     public synchronized CaveRepository createRepository(String name, String location, boolean scan) throws Exception {
         if (repositories.get(name) != null) {
             throw new IllegalArgumentException("Cave repository " + name + " already exists.");
@@ -54,10 +82,46 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         return repository;
     }
 
+    /**
+     * Destroy a Karaf Cave repository.
+     *
+     * @param name the name of Karaf Cave repository to destroy.
+     * @throws Exception in case of destroy failure.
+     */
+    public synchronized void destroy(String name) throws Exception {
+        CaveRepository repository = this.getRepository(name);
+        if (repository != null) {
+            repository.cleanup();
+            repositories.remove(name);
+        }
+    }
+
+    /**
+     * Register a Karaf Cave repository in the OBR service.
+     *
+     * @param name the name of the Karaf Cave repository.
+     * @throws Exception in case of registration failure.
+     */
+    public synchronized void register(String name) throws Exception {
+        CaveRepository caveRepository = this.getRepository(name);
+        repositoryAdmin.addRepository(caveRepository.getRepositoryXml());
+    }
+
+    /**
+     * Get the list of all Karaf Cave repositories.
+     *
+     * @return the list of all Karaf Cave repositories.
+     */
     public synchronized CaveRepository[] getRepositories() {
         return repositories.values().toArray(new CaveRepository[0]);
     }
 
+    /**
+     * Get the Karaf Cave repository identified by name.
+     *
+     * @param name the name of the Karaf Cave repository to look for.
+     * @return the corresponding Karaf Cave repository.
+     */
     public synchronized CaveRepository getRepository(String name) {
         return repositories.get(name);
     }

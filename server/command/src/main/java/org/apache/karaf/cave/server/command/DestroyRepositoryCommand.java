@@ -17,20 +17,17 @@
 package org.apache.karaf.cave.server.command;
 
 import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.cave.server.backend.api.CaveRepository;
 
 /**
- * Command to register a Karaf Cave repository into the Karaf OBR.
+ * Destroy a Karaf Cave repository (including content).
  */
-@Command(scope = "cave", name = "register-repository", description = "Register a Karaf Cave repository in the Karaf OBR")
-public class RegisterRepositoryCommand extends CaveRepositoryCommandSupport {
+public class DestroyRepositoryCommand extends CaveRepositoryCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "Name of Karaf Cave repository to register", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The Karaf Cave repository name", required = true, multiValued = false)
     String name = null;
 
     protected Object doExecute() throws Exception {
-        getCaveRepositoryService().register(name);
+        getCaveRepositoryService().destroy(name);
         return null;
     }
 

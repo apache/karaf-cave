@@ -72,18 +72,18 @@ public interface CaveRepository {
     void scan() throws Exception;
 
     /**
-     * Register the repository into the OBR, giving all repository artifacts visible
-     * for the OBR client.
+     * Return the repository URL of the OBR repository.xml.
      *
-     * @throws Exception in case of register failure.
+     * @return the URL of the OBR repository.xml.
+     * @throws Exception in case of failure to get repository.xml URL.
      */
-    void register() throws Exception;
+    URL getRepositoryXml() throws Exception;
 
     /**
-     * Destroy this repository, removing the contents of the repository and OBR metadata.
+     * Cleanup the repository storage.
      *
-     * @throws Exception in case of destroy failure.
+     * @throws Exception in case of cleanup failure.
      */
-    void destroy() throws Exception;
+    void cleanup() throws Exception;
 
 }

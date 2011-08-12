@@ -38,7 +38,6 @@ public class CaveRepositoryImpl implements CaveRepository {
     private File location;
 
     private RepositoryImpl obrRepository;
-    private RepositoryAdmin repositoryAdmin;
 
     public CaveRepositoryImpl(String name, File location, boolean scan) throws Exception {
         this.name = name;
@@ -84,21 +83,13 @@ public class CaveRepositoryImpl implements CaveRepository {
         this.location = location;
     }
 
-    public RepositoryAdmin getRepositoryAdmin() {
-        return this.repositoryAdmin;
-    }
-
-    public void setRepositoryAdmin(RepositoryAdmin repositoryAdmin) {
-        this.repositoryAdmin = repositoryAdmin;
-    }
-
     /**
      * Generate the repository.xml with the artifact at the given URL.
      *
      * @throws Exception in case of repository.xml update failure.
      */
     private void generateRepositoryXml() throws Exception {
-        File repositoryXml = new File(location, "repository.xml");
+        File repositoryXml = this.getRepositoryXmlFile();
         OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(repositoryXml));
         new DataModelHelperImpl().writeRepository(obrRepository, writer);
         writer.flush();
@@ -186,25 +177,32 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
-     * Register the repository (repository.xml) into the OBR (using the OBR RepositoryAdmin service).
+     * Get the File object of the OBR repository.xml file.
      *
-     * @throws Exception in case of register failure.
+     * @return the File corresponding to the OBR repository.xml.
+     * @throws Exception
      */
-    public void register() throws Exception {
-        File repositoryXml = new File(location, "repository.xml");
-        if (repositoryXml != null && repositoryXml.exists()) {
-            repositoryAdmin.addRepository(repositoryXml.toURI().toURL());
-        } else {
-            throw new IllegalStateException("OBR repository.xml not found");
-        }
+    private File getRepositoryXmlFile() throws Exception {
+        return new File(location, "repository.xml");
     }
 
     /**
-     * Destroy this repository by deleting the storage folder.
+     * Return the OBR repository.xml corresponding to this Karaf Cave repository.
+     *
+     * @return the URL of the OBR repository.xml.
+     * @throws Exception in case of lookup failure.
+     */
+    public URL getRepositoryXml() throws Exception {
+        File repositoryXml = this.getRepositoryXmlFile();
+        return repositoryXml.toURI().toURL();
+    }
+
+    /**
+     * Delete the repository storage folder.
      *
      * @throws Exception in case of destroy failure.
      */
-    public void destroy() throws Exception {
+    public void cleanup() throws Exception {
         location.delete();
     }
 
