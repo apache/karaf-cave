@@ -56,7 +56,7 @@
                         <Import-Package>
                             org.apache.felix.service.command,
                             org.apache.felix.gogo.commands,
-                            org.apache.karaf.shell.console,
+                            org.apache.karaf.shell.console*;version="[2.2,4)",
                             org.apache.karaf.cave.server.backend.api;version="${project.version}",
                             *
                         </Import-Package>
