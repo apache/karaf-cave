@@ -36,6 +36,7 @@
     <properties>
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
         <karaf.version>2.2.2</karaf.version>
+        <wagon.version>1.0</wagon.version>
     </properties>
 
     <modules>
