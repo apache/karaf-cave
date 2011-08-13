@@ -72,6 +72,14 @@ public interface CaveRepository {
     void scan() throws Exception;
 
     /**
+     * Proxy an URL (for instance a Maven repository) and add OBR information.
+     *
+     * @param url the URL to proxy.
+     * @throws Exception
+     */
+    void proxy(URL url) throws Exception;
+
+    /**
      * Return the repository URL of the OBR repository.xml.
      *
      * @return the URL of the OBR repository.xml.

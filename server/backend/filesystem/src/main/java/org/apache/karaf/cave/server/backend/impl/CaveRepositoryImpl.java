@@ -154,6 +154,16 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
+     * Proxy an URL (by adding repository.xml OBR information) in the Karaf Cave repository.
+     *
+     * @param url the URL to proxy. the URL to proxy.
+     * @throws Exception
+     */
+    public void proxy(URL url) throws Exception {
+
+    }
+
+    /**
      * Recursive method to traverse all file in the repository.
      *
      * @param entry the
