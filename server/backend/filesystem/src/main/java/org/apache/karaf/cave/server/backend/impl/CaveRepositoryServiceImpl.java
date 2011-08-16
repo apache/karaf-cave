@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.cave.server.backend.impl;
 
-import com.sun.org.apache.bcel.internal.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.cave.server.backend.api.CaveRepository;
 import org.apache.karaf.cave.server.backend.api.CaveRepositoryService;
