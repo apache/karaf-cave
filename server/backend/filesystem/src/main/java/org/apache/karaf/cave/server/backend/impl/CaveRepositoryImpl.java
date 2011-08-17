@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.cave.server.backend.impl;
 
-import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.bundlerepository.impl.DataModelHelperImpl;
 import org.apache.felix.bundlerepository.impl.RepositoryImpl;
@@ -25,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 
 /**
@@ -64,6 +64,7 @@ public class CaveRepositoryImpl implements CaveRepository {
             obrRepository = (RepositoryImpl) new DataModelHelperImpl().repository(repositoryXml.toURI().toURL());
         } else {
             obrRepository = new RepositoryImpl();
+            obrRepository.setName(name);
         }
     }
 
