@@ -35,6 +35,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.cave.server.backend</groupId>
             <artifactId>org.apache.karaf.cave.server.backend.api</artifactId>
             <version>${project.version}</version>
@@ -71,6 +75,7 @@
                             org.osgi.service.url,
                             org.apache.http*;version="[4,5)",
                             org.jsoup*;version="[1.6,2)",
+                            org.apache.commons.io*;version="[2,3)",
                             !org.apache.felix.shell,
                             !org.apache.felix.bundlerepository.impl.wrapper,
                             !org.osgi.service.obr,

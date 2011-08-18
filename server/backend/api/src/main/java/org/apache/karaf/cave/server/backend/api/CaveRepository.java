@@ -56,7 +56,6 @@ public interface CaveRepository {
 
     /**
      * Upload an artifact from the given URL into the repository.
-     * TODO use a Artifact object in place of raw artifact
      *
      * @param url the URL of the artifact.
      * @throws Exception in case of upload failure.
@@ -78,6 +77,15 @@ public interface CaveRepository {
      * @throws Exception
      */
     void proxy(URL url) throws Exception;
+
+    /**
+     * Populate from a remote URL (for instance a Maven repository), and eventually update the OBR information.
+     *
+     * @param url the URL to copy.
+     * @param update if true the OBR information is updated, false else.
+     * @throws Exception in case of copy failure.
+     */
+    void populate(URL url, boolean update) throws Exception;
 
     /**
      * Return the repository URL of the OBR repository.xml.
