@@ -158,6 +158,29 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
+     * Recursive method to traverse all file in the repository.
+     *
+     * @param entry the
+     * @throws Exception
+     */
+    private void scan(File entry) throws Exception {
+        if (entry.isDirectory()) {
+            File[] children = entry.listFiles();
+            for (int i = 0; i < children.length; i++) {
+                scan(children[i]);
+            }
+        } else {
+            // populate the repository
+            try {
+                ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(entry.toURI().toURL());
+                this.addResource(resource);
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn(e.getMessage());
+            }
+        }
+    }
+
+    /**
      * Proxy an URL (by adding repository.xml OBR information) in the Karaf Cave repository.
      *
      * @param url the URL to proxyFilesystem. the URL to proxyFilesystem.
@@ -282,17 +305,16 @@ public class CaveRepositoryImpl implements CaveRepository {
             }
         } else {
             try {
-                Resource resource = new DataModelHelperImpl().createResource(filesystem.toURI().toURL());
+                ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(filesystem.toURI().toURL());
                 if (resource != null) {
                     // copy the resource
                     File destination = new File(new File(location), filesystem.getName());
                     LOGGER.debug("Copy from {} to {}", filesystem.getAbsolutePath(), destination.getAbsolutePath());
                     FileUtils.copyFile(filesystem, destination);
                     if (update) {
-                        resource = new DataModelHelperImpl().createResource(destination.toURI().toURL());
+                        resource = (ResourceImpl) new DataModelHelperImpl().createResource(destination.toURI().toURL());
                         LOGGER.debug("Update the OBR metadata with {}", resource.getId());
-                        obrRepository.addResource(resource);
-                        obrRepository.setLastModified(System.currentTimeMillis());
+                        this.addResource(resource);
                     }
                 }
             } catch (IllegalArgumentException e) {
@@ -321,7 +343,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                     || entity.getContentType().getValue().equals("application/octet-stream")) {
                 // I have a jar/binary, potentially a resource
                 try {
-                    Resource resource = new DataModelHelperImpl().createResource(new URL(url));
+                    ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(new URL(url));
                     if (resource != null) {
                         LOGGER.debug("Copy {} into the Karaf Cave repository storage", url);
                         int index = url.lastIndexOf("/");
@@ -334,10 +356,9 @@ public class CaveRepositoryImpl implements CaveRepository {
                         outputStream.flush();
                         outputStream.close();
                         if (update) {
-                            resource = new DataModelHelperImpl().createResource(destination.toURI().toURL());
+                            resource = (ResourceImpl) new DataModelHelperImpl().createResource(destination.toURI().toURL());
                             LOGGER.debug("Update OBR metadata with {}", resource.getId());
-                            obrRepository.addResource(resource);
-                            obrRepository.setLastModified(System.currentTimeMillis());
+                            this.addResource(resource);
                         }
                     }
                 } catch (IllegalArgumentException e) {
@@ -355,29 +376,6 @@ public class CaveRepositoryImpl implements CaveRepository {
                         this.populateFromHttp(absoluteHref, update);
                     }
                 }
-            }
-        }
-    }
-
-    /**
-     * Recursive method to traverse all file in the repository.
-     *
-     * @param entry the
-     * @throws Exception
-     */
-    private void scan(File entry) throws Exception {
-        if (entry.isDirectory()) {
-            File[] children = entry.listFiles();
-            for (int i = 0; i < children.length; i++) {
-                scan(children[i]);
-            }
-        } else {
-            // populate the repository
-            try {
-                ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(entry.toURI().toURL());
-                this.addResource(resource);
-            } catch (IllegalArgumentException e) {
-                LOGGER.warn(e.getMessage());
             }
         }
     }
