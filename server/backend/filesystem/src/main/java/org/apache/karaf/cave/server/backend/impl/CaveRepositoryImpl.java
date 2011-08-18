@@ -181,6 +181,7 @@ public class CaveRepositoryImpl implements CaveRepository {
             // HTTP proxyFilesystem
             this.proxyHttp(url.toExternalForm());
         }
+        this.generateRepositoryXml();
     }
 
     /**
