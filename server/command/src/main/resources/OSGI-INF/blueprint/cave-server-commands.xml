@@ -59,6 +59,15 @@
                 <null/>
             </completers>
         </command>
+        <command name="cave/populate-repository">
+            <action class="org.apache.karaf.cave.server.command.PopulateRepositoryCommand">
+                <property name="caveRepositoryService" ref="caveRepositoryService"/>
+            </action>
+            <completers>
+                <ref component-id="repositoryCompleter"/>
+                <null/>
+            </completers>
+        </command>
         <command name="cave/register-repository">
             <action class="org.apache.karaf.cave.server.command.RegisterRepositoryCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>

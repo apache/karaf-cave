@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.cave.server.backend.impl;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.bundlerepository.impl.DataModelHelperImpl;
 import org.apache.felix.bundlerepository.impl.RepositoryImpl;
@@ -131,16 +132,7 @@ public class CaveRepositoryImpl implements CaveRepository {
         LOGGER.debug("Upload new artifact from {}", url);
         String artifactName = "artifact-" + System.currentTimeMillis();
         File temp = new File(new File(location), artifactName);
-        FileOutputStream fos = new FileOutputStream(temp);
-        InputStream stream = url.openStream();
-        byte[] buffer = new byte[1024];
-        int len;
-        while ((len = stream.read(buffer)) > 0) {
-            fos.write(buffer, 0, len);
-        }
-        stream.close();
-        fos.flush();
-        fos.close();
+        FileUtils.copyURLToFile(url, temp);
         // update the repository.xml
         ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(temp.toURI().toURL());
         if (resource == null) {
@@ -149,7 +141,7 @@ public class CaveRepositoryImpl implements CaveRepository {
             return;
         }
         File destination = new File(new File(location), resource.getSymbolicName() + "-" + resource.getVersion() + ".jar");
-        temp.renameTo(destination);
+        FileUtils.moveFile(temp, destination);
         resource = (ResourceImpl) new DataModelHelperImpl().createResource(destination.toURI().toURL());
         this.addResource(resource);
         this.generateRepositoryXml();
@@ -215,7 +207,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @param url the HTTP URL to proxy.
      * @throws Exception in case of proxy failure.
      */
-    protected void proxyHttp(String url) throws Exception {
+    private void proxyHttp(String url) throws Exception {
         LOGGER.debug("Proxying HTTP URL {}", url);
         HttpClient httpClient = new DefaultHttpClient();
 
@@ -246,6 +238,121 @@ public class CaveRepositoryImpl implements CaveRepository {
                         Element link = links.get(i);
                         String absoluteHref = link.attr("abs:href");
                         this.proxyHttp(absoluteHref);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Populate an URL into the Karaf Cave repository, and eventually update the OBR information.
+     *
+     * @param url the URL to copy.
+     * @param update if true the OBR information is updated, false else.
+     * @throws Exception in case of populate failure.
+     */
+    public void populate(URL url, boolean update) throws Exception {
+        if (url.getProtocol().equals("file")) {
+            // populate the Karaf Cave repository from a filesystem folder
+            File populateFolder = new File(url.toURI());
+            this.populateFromFilesystem(populateFolder, update);
+        }
+        if (url.getProtocol().equals("http")) {
+            // populate the Karaf Cave repository from a HTTP URL
+            this.populateFromHttp(url.toExternalForm(), update);
+        }
+        if (update) {
+            this.generateRepositoryXml();
+        }
+    }
+
+    /**
+     * Populate the Karaf Cave repository using a filesystem directory.
+     *
+     * @param filesystem the "source" directory.
+     * @param update if true, the resources are added into the OBR metadata, false else.
+     * @throws Exception in case of populate failure.
+     */
+    private void populateFromFilesystem(File filesystem, boolean update) throws Exception {
+        LOGGER.debug("Populating from filesystem {}", filesystem.getAbsolutePath());
+        if (filesystem.isDirectory()) {
+            File[] children = filesystem.listFiles();
+            for (int i = 0; i < children.length; i++) {
+                populateFromFilesystem(children[i], update);
+            }
+        } else {
+            try {
+                Resource resource = new DataModelHelperImpl().createResource(filesystem.toURI().toURL());
+                if (resource != null) {
+                    // copy the resource
+                    File destination = new File(new File(location), filesystem.getName());
+                    LOGGER.debug("Copy from {} to {}", filesystem.getAbsolutePath(), destination.getAbsolutePath());
+                    FileUtils.copyFile(filesystem, destination);
+                    if (update) {
+                        resource = new DataModelHelperImpl().createResource(destination.toURI().toURL());
+                        LOGGER.debug("Update the OBR metadata with {}", resource.getId());
+                        obrRepository.addResource(resource);
+                        obrRepository.setLastModified(System.currentTimeMillis());
+                    }
+                }
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Populate the Karaf Cave repository using the given URL.
+     *
+     * @param url the "source" HTTP URL.
+     * @param update true if the OBR metadata should be updated, false else.
+     * @throws Exception in case of populate failure.
+     */
+    private void populateFromHttp(String url, boolean update) throws Exception {
+        LOGGER.debug("Populating from HTTP URL {}", url);
+        HttpClient httpClient = new DefaultHttpClient();
+
+        HttpGet httpGet = new HttpGet(url);
+        HttpResponse response = httpClient.execute(httpGet);
+        HttpEntity entity = response.getEntity();
+
+        if (entity != null) {
+            if (entity.getContentType().getValue().equals("application/java-archive")
+                    || entity.getContentType().getValue().equals("application/octet-stream")) {
+                // I have a jar/binary, potentially a resource
+                try {
+                    Resource resource = new DataModelHelperImpl().createResource(new URL(url));
+                    if (resource != null) {
+                        LOGGER.debug("Copy {} into the Karaf Cave repository storage", url);
+                        int index = url.lastIndexOf("/");
+                        if (index > 0) {
+                            url = url.substring(index);
+                        }
+                        File destination = new File(new File(location), url);
+                        FileOutputStream outputStream = new FileOutputStream(destination);
+                        entity.writeTo(outputStream);
+                        outputStream.flush();
+                        outputStream.close();
+                        if (update) {
+                            resource = new DataModelHelperImpl().createResource(destination.toURI().toURL());
+                            LOGGER.debug("Update OBR metadata with {}", resource.getId());
+                            obrRepository.addResource(resource);
+                            obrRepository.setLastModified(System.currentTimeMillis());
+                        }
+                    }
+                } catch (IllegalArgumentException e) {
+                    LOGGER.warn(e.getMessage());
+                }
+            } else {
+                // try to find link to "browse"
+                Document document = Jsoup.connect(url).get();
+
+                Elements links = document.select("a");
+                if (links.size() > 1) {
+                    for (int i = 1; i < links.size(); i++) {
+                        Element link = links.get(i);
+                        String absoluteHref = link.attr("abs:href");
+                        this.populateFromHttp(absoluteHref, update);
                     }
                 }
             }
@@ -319,7 +426,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception in case of destroy failure.
      */
     public void cleanup() throws Exception {
-        new File(location).delete();
+        FileUtils.deleteDirectory(new File(location));
     }
 
 }
