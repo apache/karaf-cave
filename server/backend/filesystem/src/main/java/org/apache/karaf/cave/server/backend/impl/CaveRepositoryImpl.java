@@ -20,12 +20,20 @@ import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.bundlerepository.impl.DataModelHelperImpl;
 import org.apache.felix.bundlerepository.impl.RepositoryImpl;
 import org.apache.felix.bundlerepository.impl.ResourceImpl;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.karaf.cave.server.backend.api.CaveRepository;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.URI;
 import java.net.URL;
 
 /**
@@ -36,11 +44,11 @@ public class CaveRepositoryImpl implements CaveRepository {
     private final static Logger LOGGER = LoggerFactory.getLogger(CaveRepositoryImpl.class);
 
     private String name;
-    private File location;
+    private String location;
 
     private RepositoryImpl obrRepository;
 
-    public CaveRepositoryImpl(String name, File location, boolean scan) throws Exception {
+    public CaveRepositoryImpl(String name, String location, boolean scan) throws Exception {
         this.name = name;
         this.location = location;
 
@@ -55,12 +63,13 @@ public class CaveRepositoryImpl implements CaveRepository {
      */
     private void createRepositoryDirectory() throws Exception {
         LOGGER.debug("Create Karaf Cave repository {} folder.", name);
-        if (!location.exists()) {
-            location.mkdirs();
+        File locationFile = new File(location);
+        if (!locationFile.exists()) {
+            locationFile.mkdirs();
             LOGGER.debug("Karaf Cave repository {} location has been created.", name);
-            LOGGER.debug(location.getAbsolutePath());
+            LOGGER.debug(locationFile.getAbsolutePath());
         }
-        File repositoryXml = new File(location, "repository.xml");
+        File repositoryXml = new File(locationFile, "repository.xml");
         if (repositoryXml.exists()) {
             obrRepository = (RepositoryImpl) new DataModelHelperImpl().repository(repositoryXml.toURI().toURL());
         } else {
@@ -77,11 +86,11 @@ public class CaveRepositoryImpl implements CaveRepository {
         this.name = name;
     }
 
-    public File getLocation() {
+    public String getLocation() {
         return this.location;
     }
 
-    public void setLocation(File location) {
+    public void setLocation(String location) {
         this.location = location;
     }
 
@@ -121,7 +130,7 @@ public class CaveRepositoryImpl implements CaveRepository {
     public void upload(URL url) throws Exception {
         LOGGER.debug("Upload new artifact from {}", url);
         String artifactName = "artifact-" + System.currentTimeMillis();
-        File temp = new File(location, artifactName);
+        File temp = new File(new File(location), artifactName);
         FileOutputStream fos = new FileOutputStream(temp);
         InputStream stream = url.openStream();
         byte[] buffer = new byte[1024];
@@ -139,7 +148,7 @@ public class CaveRepositoryImpl implements CaveRepository {
             LOGGER.warn("The {} artifact source is not a valid OSGi bundle", url);
             return;
         }
-        File destination = new File(location, resource.getSymbolicName() + "-" + resource.getVersion() + ".jar");
+        File destination = new File(new File(location), resource.getSymbolicName() + "-" + resource.getVersion() + ".jar");
         temp.renameTo(destination);
         resource = (ResourceImpl) new DataModelHelperImpl().createResource(destination.toURI().toURL());
         this.addResource(resource);
@@ -152,18 +161,94 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception in case of scan failure.
      */
     public void scan() throws Exception {
-        this.scan(location);
+        this.scan(new File(location));
         this.generateRepositoryXml();
     }
 
     /**
      * Proxy an URL (by adding repository.xml OBR information) in the Karaf Cave repository.
      *
-     * @param url the URL to proxy. the URL to proxy.
+     * @param url the URL to proxyFilesystem. the URL to proxyFilesystem.
      * @throws Exception
      */
     public void proxy(URL url) throws Exception {
+        if (url.getProtocol().equals("file")) {
+            // filesystem proxyFilesystem (to another folder)
+            File proxyFolder = new File(url.toURI());
+            this.proxyFilesystem(proxyFolder);
+        }
+        if (url.getProtocol().equals("http")) {
+            // HTTP proxyFilesystem
+            this.proxyHttp(url.toExternalForm());
+        }
+    }
 
+    /**
+     * Proxy a local filesystem (folder).
+     * @param entry the filesystem to proxyFilesystem.
+     * @throws Exception in case of proxyFilesystem failure
+     */
+    private void proxyFilesystem(File entry) throws Exception {
+        LOGGER.debug("Proxying filesystem {}", entry.getAbsolutePath());
+        if (entry.isDirectory()) {
+            File[] children = entry.listFiles();
+            for (int i = 0; i < children.length; i++) {
+                proxyFilesystem(children[i]);
+            }
+        } else {
+            try {
+                Resource resource = new DataModelHelperImpl().createResource(entry.toURI().toURL());
+                if (resource != null) {
+                    obrRepository.addResource(resource);
+                    obrRepository.setLastModified(System.currentTimeMillis());
+                }
+            } catch (IllegalArgumentException e) {
+                LOGGER.warn(e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * Proxy a HTTP URL locally.
+     *
+     * @param url the HTTP URL to proxy.
+     * @throws Exception in case of proxy failure.
+     */
+    protected void proxyHttp(String url) throws Exception {
+        LOGGER.debug("Proxying HTTP URL {}", url);
+        HttpClient httpClient = new DefaultHttpClient();
+
+        HttpGet httpGet = new HttpGet(url);
+        HttpResponse response = httpClient.execute(httpGet);
+        HttpEntity entity = response.getEntity();
+
+        if (entity != null) {
+            if (entity.getContentType().getValue().equals("application/java-archive")
+                    || entity.getContentType().getValue().equals("application/octet-stream")) {
+                // I have a jar/binary, potentially a resource
+                try {
+                    Resource resource = new DataModelHelperImpl().createResource(new URL(url));
+                    if (resource != null) {
+                        obrRepository.addResource(resource);
+                        obrRepository.setLastModified(System.currentTimeMillis());
+                    }
+                } catch (IllegalArgumentException e) {
+                    LOGGER.warn(e.getMessage());
+                }
+            } else {
+                // try to find link to "browse"
+                Document document = Jsoup.connect(url).get();
+
+                Elements links = document.select("a");
+                if (links.size() > 1) {
+                    for (int i = 1; i < links.size(); i++) {
+                        Element link = links.get(i);
+                        String absoluteHref = link.attr("abs:href");
+                        this.proxyHttp(absoluteHref);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -191,15 +276,15 @@ public class CaveRepositoryImpl implements CaveRepository {
 
     /**
      * Convert the Resource absolute URI to an URI relative to the repository one.
+     *
      * @param resource the Resource to manipulate.
      * @throws Exception in cave of URI convertion failure.
      */
     private void useResourceRelativeUri(ResourceImpl resource) throws Exception {
         String resourceURI = resource.getURI();
-        String repositoryURI = location.toURI().toString();
-        LOGGER.debug("Converting resource URI " + resourceURI + " relatively to repository URI " + repositoryURI);
-        if (resourceURI.startsWith(repositoryURI)) {
-            resourceURI = resourceURI.substring(repositoryURI.length());
+        LOGGER.debug("Converting resource URI " + resourceURI + " relatively to repository URI " + location);
+        if (resourceURI.startsWith(location)) {
+            resourceURI = resourceURI.substring(location.length());
             LOGGER.debug("Resource URI converted to " + resourceURI);
             resource.put(Resource.URI, resourceURI);
         }
@@ -213,7 +298,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception
      */
     private File getRepositoryXmlFile() throws Exception {
-        return new File(location, "repository.xml");
+        return new File(new File(location), "repository.xml");
     }
 
     /**
@@ -233,7 +318,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception in case of destroy failure.
      */
     public void cleanup() throws Exception {
-        location.delete();
+        new File(location).delete();
     }
 
 }

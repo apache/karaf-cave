@@ -31,11 +31,11 @@ import java.net.URL;
 @RunWith(JUnit4.class)
 public class CaveRepositoryImplTest {
 
-    private CaveRepository repository;
+    private CaveRepositoryImpl repository;
 
     @Before
     public void setUp() throws Exception {
-        repository = new CaveRepositoryImpl("test", new File("target/test-repository"), false);
+        repository = new CaveRepositoryImpl("test", "target/test-repository", false);
     }
 
     @Test
@@ -47,6 +47,13 @@ public class CaveRepositoryImplTest {
     @Test
     public void testUploadNonBundleFromURL() throws Exception {
         repository.upload(new URL("http://repo1.maven.org/maven2/commons-vfs/commons-vfs/1.0/commons-vfs-1.0.jar"));
+    }
+
+    @Test
+    public void testHttpProxy() throws Exception {
+        repository.proxyHttp("http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.commons-lang/");
+        repository.proxyHttp("http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.abdera/0.4.0-incubating_5/org.apache.servicemix.bundles.abdera-0.4.0-incubating_5.jar");
+        repository.proxyHttp("https://repository.apache.org/content/groups/snapshots-group/commons-beanutils/commons-beanutils/1.8.4-SNAPSHOT/commons-beanutils-1.8.4-20110805.033640-1.jar");
     }
 
 }
