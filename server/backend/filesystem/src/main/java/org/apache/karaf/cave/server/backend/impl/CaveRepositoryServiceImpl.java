@@ -76,7 +76,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         if (repositories.get(name) != null) {
             throw new IllegalArgumentException("Cave repository " + name + " already exists.");
         }
-        CaveRepository repository = new CaveRepositoryImpl(name, new File(location), scan);
+        CaveRepository repository = new CaveRepositoryImpl(name, location, scan);
         repositories.put(name, repository);
         return repository;
     }

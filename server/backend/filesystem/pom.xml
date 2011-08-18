@@ -43,6 +43,14 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.bundlerepository</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-osgi</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
@@ -61,6 +69,8 @@
                             org.osgi.service.blueprint,
                             org.osgi.service.log,
                             org.osgi.service.url,
+                            org.apache.http*;version="[4,5)",
+                            org.jsoup*;version="[1.6,2)",
                             !org.apache.felix.shell,
                             !org.apache.felix.bundlerepository.impl.wrapper,
                             !org.osgi.service.obr,

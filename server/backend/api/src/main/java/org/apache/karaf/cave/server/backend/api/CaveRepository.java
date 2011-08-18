@@ -45,14 +45,14 @@ public interface CaveRepository {
      *
      * @return the location of this repository.
      */
-    File getLocation();
+    String getLocation();
 
     /**
      * Set the location (filesystem) of this repository.
      *
      * @param location the location of this repository
      */
-    void setLocation(File location);
+    void setLocation(String location);
 
     /**
      * Upload an artifact from the given URL into the repository.

@@ -22,7 +22,7 @@
     <reference id="caveRepositoryService" interface="org.apache.karaf.cave.server.backend.api.CaveRepositoryService"/>
 
     <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="cave/list-repository">
+        <command name="cave/list-repositories">
             <action class="org.apache.karaf.cave.server.command.ListRepositoriesCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
@@ -43,6 +43,15 @@
         </command>
         <command name="cave/scan-repository">
             <action class="org.apache.karaf.cave.server.command.ScanRepositoryCommand">
+                <property name="caveRepositoryService" ref="caveRepositoryService"/>
+            </action>
+            <completers>
+                <ref component-id="repositoryCompleter"/>
+                <null/>
+            </completers>
+        </command>
+        <command name="cave/proxy-repository">
+            <action class="org.apache.karaf.cave.server.command.ProxyRepositoryCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
             <completers>
