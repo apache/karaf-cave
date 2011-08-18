@@ -19,6 +19,7 @@ package org.apache.karaf.cave.server.backend.impl;
 import org.apache.felix.bundlerepository.Resource;
 import org.apache.felix.bundlerepository.impl.DataModelHelperImpl;
 import org.apache.felix.bundlerepository.impl.RepositoryImpl;
+import org.apache.felix.bundlerepository.impl.ResourceImpl;
 import org.apache.karaf.cave.server.backend.api.CaveRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,8 +104,9 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @param resource the resource to add.
      * @throws Exception in case of failure.
      */
-    private void addResource(Resource resource) throws Exception {
+    private void addResource(ResourceImpl resource) throws Exception {
         if (resource != null) {
+            this.useResourceRelativeUri(resource);
             obrRepository.addResource(resource);
             obrRepository.setLastModified(System.currentTimeMillis());
         }
@@ -131,7 +133,7 @@ public class CaveRepositoryImpl implements CaveRepository {
         fos.flush();
         fos.close();
         // update the repository.xml
-        Resource resource = new DataModelHelperImpl().createResource(temp.toURI().toURL());
+        ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(temp.toURI().toURL());
         if (resource == null) {
             temp.delete();
             LOGGER.warn("The {} artifact source is not a valid OSGi bundle", url);
@@ -139,7 +141,7 @@ public class CaveRepositoryImpl implements CaveRepository {
         }
         File destination = new File(location, resource.getSymbolicName() + "-" + resource.getVersion() + ".jar");
         temp.renameTo(destination);
-        resource = new DataModelHelperImpl().createResource(destination.toURI().toURL());
+        resource = (ResourceImpl) new DataModelHelperImpl().createResource(destination.toURI().toURL());
         this.addResource(resource);
         this.generateRepositoryXml();
     }
@@ -179,12 +181,29 @@ public class CaveRepositoryImpl implements CaveRepository {
         } else {
             // populate the repository
             try {
-                Resource resource = new DataModelHelperImpl().createResource(entry.toURI().toURL());
+                ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(entry.toURI().toURL());
                 this.addResource(resource);
             } catch (IllegalArgumentException e) {
                 LOGGER.warn(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Convert the Resource absolute URI to an URI relative to the repository one.
+     * @param resource the Resource to manipulate.
+     * @throws Exception in cave of URI convertion failure.
+     */
+    private void useResourceRelativeUri(ResourceImpl resource) throws Exception {
+        String resourceURI = resource.getURI();
+        String repositoryURI = location.toURI().toString();
+        LOGGER.debug("Converting resource URI " + resourceURI + " relatively to repository URI " + repositoryURI);
+        if (resourceURI.startsWith(repositoryURI)) {
+            resourceURI = resourceURI.substring(repositoryURI.length());
+            LOGGER.debug("Resource URI converted to " + resourceURI);
+            resource.put(Resource.URI, resourceURI);
+        }
+
     }
 
     /**
