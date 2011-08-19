@@ -33,6 +33,9 @@
     </feature>
 
     <feature name="cave-server-rest" version="${project.version}">
+        <configfile finalname="/etc/org.apache.cxf.osgi.cfg">
+            mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/cxf
+        </configfile>
         <feature version="[2.4.2,3)">cxf</feature>
         <feature version="${project.version}">cave-server</feature>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.rest/${project.version}</bundle>
