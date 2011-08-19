@@ -80,7 +80,7 @@ public class CaveService {
     }
 
     /**
-     * A wrapper to the Karaf Cave repository to exchange with the REST client.
+     * A wrapper to the Karaf Cave repository list to exchange with the REST client.
      */
     public static class CaveRepositoriesWrapper {
 
@@ -96,6 +96,9 @@ public class CaveService {
 
     }
 
+    /**
+     * A weapper to the  Karaf Cave repository to exchange with the REST client.
+     */
     public static class CaveRepositoryWrapper {
 
         private final String name;

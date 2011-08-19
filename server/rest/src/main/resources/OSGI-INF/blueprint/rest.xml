@@ -17,12 +17,16 @@
         </cxf:features>
     </cxf:bus>
 
-     <jaxrs:server id="caveService" address="/cave">
+    <jaxrs:server id="caveService" address="/cave">
         <jaxrs:serviceBeans>
-           <ref component-id="caveServiceBean" />
+            <ref component-id="caveServiceBean"/>
         </jaxrs:serviceBeans>
-     </jaxrs:server>
+    </jaxrs:server>
 
-     <bean id="caveServiceBean" class="org.apache.karaf.cave.server.rest.CaveService"/>
+    <bean id="caveServiceBean" class="org.apache.karaf.cave.server.rest.CaveService">
+        <property name="caveRepositoryService" ref="caveRepositoryService"/>
+    </bean>
+
+    <reference id="caveRepositoryService" interface="org.apache.karaf.cave.server.backend.api.CaveRepositoryService"/>
 
 </blueprint>

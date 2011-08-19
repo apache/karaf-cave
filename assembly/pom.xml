@@ -87,6 +87,11 @@
                                     <type>cfg</type>
                                     <classifier>filesystem</classifier>
                                 </artifact>
+                                <artifact>
+                                    <file>target/classes/cxf.cfg</file>
+                                    <type>cfg</type>
+                                    <classifier>cxf</classifier>
+                                </artifact>
                             </artifacts>
                         </configuration>
                     </execution>
