@@ -63,8 +63,11 @@
                         <Import-Package>
                             org.apache.karaf.cave.server.backend.api;version=${project.version},
                             org.apache.felix.bundlerepository*;version="[2,3)",
-                            javax.ws.rs
+                            javax.ws.rs,
+                            *
                         </Import-Package>
+                        <Web-ContextPath>cave</Web-ContextPath>
+                        <Webapp-Context>cave</Webapp-Context>
                     </instructions>
                 </configuration>
             </plugin>
