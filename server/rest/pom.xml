@@ -30,7 +30,45 @@
 
     <groupId>org.apache.karaf.cave.server</groupId>
     <artifactId>org.apache.karaf.cave.server.rest</artifactId>
-    <name>Apache Karaf :: Cave :: Server :: REST API</name>
-    <packaging>pom</packaging>
+    <name>Apache Karaf :: Cave :: Server :: REST Service</name>
+    <packaging>bundle</packaging>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.felix</groupId>
+            <artifactId>org.apache.felix.bundlerepository</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf.cave.server.backend</groupId>
+            <artifactId>org.apache.karaf.cave.server.backend.api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>
+                            org.apache.karaf.cave.server.rest*;version=${project.version}
+                        </Export-Package>
+                        <Import-Package>
+                            org.apache.karaf.cave.server.backend.api;version=${project.version},
+                            org.apache.felix.bundlerepository*;version="[2,3)",
+                            javax.ws.rs
+                        </Import-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

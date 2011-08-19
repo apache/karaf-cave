@@ -35,6 +35,7 @@
 
     <modules>
         <module>backend</module>
+        <module>rest</module>
         <module>command</module>
     </modules>
 

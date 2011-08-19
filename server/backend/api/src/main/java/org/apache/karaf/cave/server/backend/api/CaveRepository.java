@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.cave.server.backend.api;
 
-import java.io.File;
-import java.io.InputStream;
 import java.net.URL;
 
 /**
