@@ -22,47 +22,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf.cave</groupId>
-        <artifactId>org.apache.karaf.cave.server</artifactId>
+        <groupId>org.apache.karaf</groupId>
+        <artifactId>cave</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.karaf.cave.server</groupId>
-    <artifactId>org.apache.karaf.cave.server.rest</artifactId>
-    <name>Apache Karaf :: Cave :: Server :: REST Service</name>
+    <groupId>org.apache.karaf.cave</groupId>
+    <artifactId>org.apache.karaf.cave.client</artifactId>
+    <name>Apache Karaf :: Cave :: Client</name>
     <packaging>bundle</packaging>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.cave.server.backend</groupId>
-            <artifactId>org.apache.karaf.cave.server.backend.api</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <configuration>
-                    <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Export-Package>
-                            org.apache.karaf.cave.server.rest*;version=${project.version}
-                        </Export-Package>
-                        <Require-Bundle>org.apache.cxf.bundle,org.springframework.beans</Require-Bundle>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>
