@@ -16,41 +16,54 @@
  */
 package org.apache.karaf.cave.server.backend.api;
 
+import javax.xml.bind.annotation.XmlRootElement;
 import java.net.URL;
 
 /**
  * Cave repository is a storage area where to upload artifacts.
  * It's already the basement of the OBR repository.xml metadata.
  */
-public interface CaveRepository {
+@XmlRootElement(name = "cave-repository")
+public abstract class CaveRepository {
+
+    private String name;
+    private String location;
 
     /**
      * Get the name of the repository.
      *
      * @return the name of the repository
      */
-    String getName();
+    public String getName() {
+        return this.name;
+    }
 
     /**
      * Set the name of the repository.
      *
      * @param name the name of the repository
      */
-    void setName(String name);
+    public void setName(String name) {
+        this.name = name;
+    }
 
     /**
      * Get the location (filesystem) of this repository.
      *
      * @return the location of this repository.
      */
-    String getLocation();
+    public String getLocation() {
+        return this.location;
+    }
 
     /**
      * Set the location (filesystem) of this repository.
      *
      * @param location the location of this repository
      */
-    void setLocation(String location);
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
     /**
      * Upload an artifact from the given URL into the repository.
@@ -58,7 +71,7 @@ public interface CaveRepository {
      * @param url the URL of the artifact.
      * @throws Exception in case of upload failure.
      */
-    void upload(URL url) throws Exception;
+    public abstract void upload(URL url) throws Exception;
 
     /**
      * Scan the whole repository, reading bundle MANIFEST, etc to update
@@ -66,7 +79,7 @@ public interface CaveRepository {
      *
      * @throws Exception in case of scan failure.
      */
-    void scan() throws Exception;
+    public abstract void scan() throws Exception;
 
     /**
      * Proxy an URL (for instance a Maven repository) and add OBR information.
@@ -74,7 +87,7 @@ public interface CaveRepository {
      * @param url the URL to proxy.
      * @throws Exception
      */
-    void proxy(URL url) throws Exception;
+    public abstract void proxy(URL url) throws Exception;
 
     /**
      * Populate from a remote URL (for instance a Maven repository), and eventually update the OBR information.
@@ -83,7 +96,7 @@ public interface CaveRepository {
      * @param update if true the OBR information is updated, false else.
      * @throws Exception in case of copy failure.
      */
-    void populate(URL url, boolean update) throws Exception;
+    public abstract void populate(URL url, boolean update) throws Exception;
 
     /**
      * Return the repository URL of the OBR repository.xml.
@@ -91,13 +104,13 @@ public interface CaveRepository {
      * @return the URL of the OBR repository.xml.
      * @throws Exception in case of failure to get repository.xml URL.
      */
-    URL getRepositoryXml() throws Exception;
+    public abstract URL getRepositoryXml() throws Exception;
 
     /**
      * Cleanup the repository storage.
      *
      * @throws Exception in case of cleanup failure.
      */
-    void cleanup() throws Exception;
+    public abstract void cleanup() throws Exception;
 
 }

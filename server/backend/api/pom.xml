@@ -33,6 +33,13 @@
     <name>Apache Karaf :: Cave :: Server :: Backend :: API</name>
     <packaging>bundle</packaging>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>
