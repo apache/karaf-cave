@@ -40,18 +40,17 @@ import java.net.URL;
 /**
  * Default implementation of a Karaf Cave repository.
  */
-public class CaveRepositoryImpl implements CaveRepository {
+public class CaveRepositoryImpl extends CaveRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CaveRepositoryImpl.class);
-
-    private String name;
-    private String location;
 
     private RepositoryImpl obrRepository;
 
     public CaveRepositoryImpl(String name, String location, boolean scan) throws Exception {
-        this.name = name;
-        this.location = location;
+        super();
+
+        this.setName(name);
+        this.setLocation(location);
 
         this.createRepositoryDirectory();
         if (scan) {
@@ -63,11 +62,11 @@ public class CaveRepositoryImpl implements CaveRepository {
      * Check if the repository folder exists and create it if not.
      */
     private void createRepositoryDirectory() throws Exception {
-        LOGGER.debug("Create Karaf Cave repository {} folder.", name);
-        File locationFile = new File(location);
+        LOGGER.debug("Create Karaf Cave repository {} folder.", this.getName());
+        File locationFile = new File(this.getLocation());
         if (!locationFile.exists()) {
             locationFile.mkdirs();
-            LOGGER.debug("Karaf Cave repository {} location has been created.", name);
+            LOGGER.debug("Karaf Cave repository {} location has been created.", this.getName());
             LOGGER.debug(locationFile.getAbsolutePath());
         }
         File repositoryXml = new File(locationFile, "repository.xml");
@@ -75,24 +74,8 @@ public class CaveRepositoryImpl implements CaveRepository {
             obrRepository = (RepositoryImpl) new DataModelHelperImpl().repository(repositoryXml.toURI().toURL());
         } else {
             obrRepository = new RepositoryImpl();
-            obrRepository.setName(name);
+            obrRepository.setName(this.getName());
         }
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLocation() {
-        return this.location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
     }
 
     /**
@@ -131,7 +114,7 @@ public class CaveRepositoryImpl implements CaveRepository {
     public void upload(URL url) throws Exception {
         LOGGER.debug("Upload new artifact from {}", url);
         String artifactName = "artifact-" + System.currentTimeMillis();
-        File temp = new File(new File(location), artifactName);
+        File temp = new File(new File(this.getLocation()), artifactName);
         FileUtils.copyURLToFile(url, temp);
         // update the repository.xml
         ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(temp.toURI().toURL());
@@ -140,7 +123,7 @@ public class CaveRepositoryImpl implements CaveRepository {
             LOGGER.warn("The {} artifact source is not a valid OSGi bundle", url);
             return;
         }
-        File destination = new File(new File(location), resource.getSymbolicName() + "-" + resource.getVersion() + ".jar");
+        File destination = new File(new File(this.getLocation()), resource.getSymbolicName() + "-" + resource.getVersion() + ".jar");
         FileUtils.moveFile(temp, destination);
         resource = (ResourceImpl) new DataModelHelperImpl().createResource(destination.toURI().toURL());
         this.addResource(resource);
@@ -153,7 +136,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception in case of scan failure.
      */
     public void scan() throws Exception {
-        this.scan(new File(location));
+        this.scan(new File(this.getLocation()));
         this.generateRepositoryXml();
     }
 
@@ -308,7 +291,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                 ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(filesystem.toURI().toURL());
                 if (resource != null) {
                     // copy the resource
-                    File destination = new File(new File(location), filesystem.getName());
+                    File destination = new File(new File(this.getLocation()), filesystem.getName());
                     LOGGER.debug("Copy from {} to {}", filesystem.getAbsolutePath(), destination.getAbsolutePath());
                     FileUtils.copyFile(filesystem, destination);
                     if (update) {
@@ -350,7 +333,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                         if (index > 0) {
                             url = url.substring(index);
                         }
-                        File destination = new File(new File(location), url);
+                        File destination = new File(new File(this.getLocation()), url);
                         FileOutputStream outputStream = new FileOutputStream(destination);
                         entity.writeTo(outputStream);
                         outputStream.flush();
@@ -388,9 +371,9 @@ public class CaveRepositoryImpl implements CaveRepository {
      */
     private void useResourceRelativeUri(ResourceImpl resource) throws Exception {
         String resourceURI = resource.getURI();
-        LOGGER.debug("Converting resource URI " + resourceURI + " relatively to repository URI " + location);
-        if (resourceURI.startsWith(location)) {
-            resourceURI = resourceURI.substring(location.length());
+        LOGGER.debug("Converting resource URI {} relatively to repository URI {}", resourceURI, this.getLocation());
+        if (resourceURI.startsWith(this.getLocation())) {
+            resourceURI = resourceURI.substring(this.getLocation().length());
             LOGGER.debug("Resource URI converted to " + resourceURI);
             resource.put(Resource.URI, resourceURI);
         }
@@ -404,7 +387,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception
      */
     private File getRepositoryXmlFile() throws Exception {
-        return new File(new File(location), "repository.xml");
+        return new File(new File(this.getLocation()), "repository.xml");
     }
 
     /**
@@ -424,7 +407,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception in case of destroy failure.
      */
     public void cleanup() throws Exception {
-        FileUtils.deleteDirectory(new File(location));
+        FileUtils.deleteDirectory(new File(this.getLocation()));
     }
 
 }

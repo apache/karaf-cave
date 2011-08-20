@@ -16,9 +16,12 @@
  */
 package org.apache.karaf.cave.server.backend.api;
 
+import javax.ws.rs.*;
+
 /**
  * Service to manipulate Cave repository.
  */
+@Path("/")
 public interface CaveRepositoryService {
 
     /**
@@ -29,6 +32,9 @@ public interface CaveRepositoryService {
      * @return the Karaf Cave repository.
      * @throws Exception in case of creation failure.
      */
+    @POST
+    @Consumes("application/xml")
+    @Produces("application/xml")
     CaveRepository createRepository(String name, boolean scan) throws Exception;
 
     /**
@@ -40,6 +46,9 @@ public interface CaveRepositoryService {
      * @return the Karaf Cave repository.
      * @throws Exception in case of creation failure.
      */
+    @POST
+    @Consumes("application/xml")
+    @Produces("application/xml")
     CaveRepository createRepository(String name, String location, boolean scan) throws Exception;
 
     /**
@@ -48,6 +57,8 @@ public interface CaveRepositoryService {
      * @param name the name of Karaf Cave repository to destroy.
      * @throws Exception in case of destroy failure.
      */
+    @POST
+    @Consumes("text/plain")
     void destroy(String name) throws Exception;
 
     /**
@@ -56,6 +67,8 @@ public interface CaveRepositoryService {
      * @param name the name of the Karaf Cave repository.
      * @throws Exception in case of registration failure.
      */
+    @POST
+    @Consumes("text/plain")
     void register(String name) throws Exception;
 
     /**
@@ -63,6 +76,9 @@ public interface CaveRepositoryService {
      *
      * @return the Karaf Cave repositories.
      */
+    @GET
+    @Path("/repositories")
+    @Produces("application/xml")
     CaveRepository[] getRepositories();
 
     /**
@@ -71,6 +87,9 @@ public interface CaveRepositoryService {
      * @param name the name of the Karaf Cave repository to look for.
      * @return the Karaf Cave repository
      */
-    CaveRepository getRepository(String name);
+    @GET
+    @Path("/repositories/{name}")
+    @Produces("application/xml")
+    CaveRepository getRepository(@PathParam("name") String name);
 
 }
