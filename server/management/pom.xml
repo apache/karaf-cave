@@ -22,25 +22,22 @@
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
-        <groupId>org.apache.karaf</groupId>
-        <artifactId>cave</artifactId>
+        <groupId>org.apache.karaf.cave</groupId>
+        <artifactId>org.apache.karaf.cave.server</artifactId>
         <version>3.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <groupId>org.apache.karaf.cave</groupId>
-    <artifactId>org.apache.karaf.cave.client</artifactId>
-    <name>Apache Karaf :: Cave :: Client</name>
+    <groupId>org.apache.karaf.cave.server</groupId>
+    <artifactId>org.apache.karaf.cave.server.management</artifactId>
     <packaging>bundle</packaging>
+    <name>Apache Karaf :: Cave :: Server :: Management</name>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.cxf</groupId>
-            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
+            <groupId>org.apache.karaf.cave.server.backend</groupId>
+            <artifactId>org.apache.karaf.cave.server.backend.api</artifactId>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
@@ -49,6 +46,23 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
+                <configuration>
+                    <instructions>
+                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+                        <Export-Package>
+                            org.apache.karaf.cave.server.management*;version=${project.version}
+                        </Export-Package>
+                        <Import-Package>
+                            !org.apache.karaf.cave.server.management*,
+                            javax.management,
+                            javax.management.loading,
+                            javax.management.openmbean,
+                            org.apache.karaf.management*;version="[2,4)",
+                            org.apache.karaf.cave.server.backend.api;version=${project.version},
+                            *
+                        </Import-Package>
+                    </instructions>
+                </configuration>
             </plugin>
         </plugins>
     </build>
