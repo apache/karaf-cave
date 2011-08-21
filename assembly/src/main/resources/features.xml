@@ -33,6 +33,7 @@
         <bundle>mvn:org.jsoup/jsoup/${jsoup.version}</bundle>
         <bundle>mvn:org.apache.karaf.cave.server.backend/org.apache.karaf.cave.server.backend.api/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.cave.server.backend/org.apache.karaf.cave.server.backend.filesystem/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.management/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.command/${project.version}</bundle>
     </feature>
 

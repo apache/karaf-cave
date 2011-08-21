@@ -45,7 +45,7 @@
 
     <modules>
         <module>server</module>
-        <module>client</module>
+        <!-- <module>client</module> -->
         <module>assembly</module>
     </modules>
 
