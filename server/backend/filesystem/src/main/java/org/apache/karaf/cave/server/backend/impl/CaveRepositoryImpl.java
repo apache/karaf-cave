@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URL;
 
 /**
@@ -388,6 +389,11 @@ public class CaveRepositoryImpl extends CaveRepository {
      */
     private File getRepositoryXmlFile() throws Exception {
         return new File(new File(this.getLocation()), "repository.xml");
+    }
+
+    public void getResourceByUri(String uri) {
+        // construct the file starting from the repository URI
+
     }
 
     /**

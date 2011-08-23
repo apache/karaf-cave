@@ -17,6 +17,7 @@
 package org.apache.karaf.cave.server.backend.api;
 
 import javax.ws.rs.*;
+import java.io.InputStream;
 
 /**
  * Service to manipulate Cave repository.
@@ -91,5 +92,29 @@ public interface CaveRepositoryService {
     @Path("/repositories/{name}")
     @Produces("application/xml")
     CaveRepository getRepository(@PathParam("name") String name);
+
+    /**
+     * Get the input stream of a resource identified by the given ID.
+     *
+     * @param id the ID of the resource.
+     * @return the input stream of the resource.
+     * @throws Exception in case of multiple resources associated to the ID.
+     */
+    @GET
+    @Path("/resources/{id}")
+    @Produces("application/octet-stream")
+    InputStream getResourceById(@PathParam("id") String id) throws Exception;
+
+    /**
+     * Get the input stream of a resource identified by the given URI.
+     *
+     * @param uri the URI of the resource.
+     * @return the input stream of the resource.
+     * @throws Exception in case of multiple resources associated to the URI.
+     */
+    @GET
+    @Path("/resources/{uri}")
+    @Produces("application/octet-stream")
+    InputStream getResourceByUri(@PathParam("uri") String uri) throws Exception;
 
 }

@@ -17,10 +17,13 @@
 package org.apache.karaf.cave.server.backend.impl;
 
 import org.apache.felix.bundlerepository.RepositoryAdmin;
+import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cave.server.backend.api.CaveRepository;
 import org.apache.karaf.cave.server.backend.api.CaveRepositoryService;
 
 import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -123,6 +126,33 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      */
     public synchronized CaveRepository getRepository(String name) {
         return repositories.get(name);
+    }
+
+    /**
+     * Return the input stream to the resource identified by the given ID.
+     *
+     * @param id the resource ID.
+     * @return the input stream of the resource.
+     * @throws Exception if multiple resources are found for the given ID
+     */
+    public InputStream getResourceById(String id) throws Exception {
+        Resource[] resources = repositoryAdmin.discoverResources("(id = " + id + ")");
+        if (resources.length != 1) {
+            throw new IllegalArgumentException("Multiple resources correspond to the ID " + id);
+        }
+        Resource resource = resources[0];
+        URL resourceURL = new URL(resource.getURI());
+        return resourceURL.openStream();
+    }
+
+    public InputStream getResourceByUri(String uri) throws Exception {
+        Resource[] resources = repositoryAdmin.discoverResources("(uri = " + uri + ")");
+        if (resources.length != 1) {
+            throw new IllegalArgumentException("Multiple resources correspond to the URI " + uri);
+        }
+        Resource resource = resources[0];
+        URL resourceURL = new URL(resource.getURI());
+        return resourceURL.openStream();
     }
 
 }
