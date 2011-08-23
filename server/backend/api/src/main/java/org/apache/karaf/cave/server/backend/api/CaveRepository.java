@@ -17,6 +17,7 @@
 package org.apache.karaf.cave.server.backend.api;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.OutputStream;
 import java.net.URL;
 
 /**
@@ -97,6 +98,24 @@ public abstract class CaveRepository {
      * @throws Exception in case of copy failure.
      */
     public abstract void populate(URL url, boolean update) throws Exception;
+
+    /**
+     * Return the output stream of the resource at the given URI.
+     *
+     * @param uri the resource URI.
+     * @return the output stream of the resource.
+     * @throws Exception in case of read failure.
+     */
+    //public abstract OutputStream getResourceByUri(String uri) throws Exception;
+
+    /**
+     * Return the output stream of the resource identified by the given ID.
+     *
+     * @param id the resource ID.
+     * @return the output stream of the resource.
+     * @throws Exception in case of read failure.
+     */
+    //public abstract OutputStream getResourceById(String id) throws Exception;
 
     /**
      * Return the repository URL of the OBR repository.xml.
