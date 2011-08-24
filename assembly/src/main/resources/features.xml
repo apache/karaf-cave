@@ -18,12 +18,15 @@
 -->
 <features xmlns="http://karaf.apache.org/xmlns/features/v1.0.0">
 
+    <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
+
     <feature name="cave-server" version="${project.version}">
         <configfile finalname="/etc/org.apache.cxf.osgi.cfg">
             mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/cxf
         </configfile>
-        <feature version="[2.4.2,3)">cxf</feature>
+        <feature version="[2.4,3)">cxf</feature>
         <feature>obr</feature>
+        <feature>war</feature>
         <configfile finalname="/etc/org.apache.karaf.cave.server.backend.filesystem.cfg">
             mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/filesystem
         </configfile>
@@ -35,6 +38,7 @@
         <bundle>mvn:org.apache.karaf.cave.server.backend/org.apache.karaf.cave.server.backend.filesystem/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.management/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.command/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.http/${project.version}</bundle>
     </feature>
 
 </features>
