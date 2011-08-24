@@ -37,6 +37,7 @@
         <module>backend</module>
         <module>management</module>
         <module>command</module>
+        <module>http</module>
     </modules>
 
 </project>
