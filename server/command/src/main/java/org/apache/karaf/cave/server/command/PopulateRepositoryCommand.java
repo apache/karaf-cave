@@ -29,7 +29,7 @@ import java.net.URL;
 @Command(scope = "cave", name = "populate-repository", description = "Populate a Karaf Cave repository with the artifacts present at the given URL")
 public class PopulateRepositoryCommand extends CaveRepositoryCommandSupport {
 
-    @Option(name = "-u", aliases = { "--update" }, description = "True to update the OBR metadata on the fly", required = false, multiValued = false)
+    @Option(name = "-u", aliases = { "--update" }, description = "Update the OBR metadata on the fly", required = false, multiValued = false)
     boolean update = false;
 
     @Argument(index = 0, name = "name", description = "The name of the Karaf Cave repository", required = true, multiValued = false)

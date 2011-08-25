@@ -20,7 +20,7 @@ import javax.ws.rs.*;
 import java.io.InputStream;
 
 /**
- * Service to manipulate Cave repository.
+ * Service to manipulate a Cave repository.
  */
 @Path("/")
 public interface CaveRepositoryService {
@@ -43,7 +43,7 @@ public interface CaveRepositoryService {
      *
      * @param name the name of the repository.
      * @param location the storage location of the repository.
-     * @param scan if true, the repostory is scanned at creation time.
+     * @param scan if true, the repository is scanned at creation time.
      * @return the Karaf Cave repository.
      * @throws Exception in case of creation failure.
      */
