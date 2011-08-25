@@ -38,7 +38,7 @@ import java.net.URL;
 import java.rmi.server.UnicastRemoteObject;
 
 /**
- * Wrapper servlet which "expose" Karaf Cave repository resources in HTTP.
+ * Wrapper servlet which "exposes" Karaf Cave repository resources in HTTP.
  */
 public class WrapperServlet extends HttpServlet {
 

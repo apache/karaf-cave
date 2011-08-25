@@ -30,10 +30,10 @@ public class CreateRepositoryCommand extends CaveRepositoryCommandSupport {
     @Option(name = "-l", aliases = {"--location"}, description = "Location of the new Cave Repository on the file system", required = false, multiValued = false)
     String location;
 
-    @Option(name = "-s", aliases = {"--scan"}, description = "If the Cave Repository should be scan now", required = false, multiValued = false)
+    @Option(name = "-s", aliases = {"--scan"}, description = "If the Cave Repository should be scanned now", required = false, multiValued = false)
     boolean scan;
 
-    @Option(name = "-r", aliases = {"--register"}, description = "If the Cave Repository should be register in Karaf OBR", required = false, multiValued = false)
+    @Option(name = "-r", aliases = {"--register"}, description = "If the Cave Repository should be registered in Karaf OBR", required = false, multiValued = false)
     boolean register;
 
     @Argument(index = 0, name = "name", description = "The name of the Cave Repository", required = true, multiValued = false)

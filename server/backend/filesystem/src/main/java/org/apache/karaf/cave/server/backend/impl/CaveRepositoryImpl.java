@@ -142,7 +142,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     }
 
     /**
-     * Recursive method to traverse all file in the repository.
+     * Recursive method to traverse all files in the repository.
      *
      * @param entry the
      * @throws Exception
