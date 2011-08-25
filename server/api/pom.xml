@@ -29,19 +29,14 @@
     </parent>
 
     <groupId>org.apache.karaf.cave.server</groupId>
-    <artifactId>org.apache.karaf.cave.server.command</artifactId>
-    <name>Apache Karaf :: Cave :: Server :: Command</name>
+    <artifactId>org.apache.karaf.cave.server.api</artifactId>
+    <name>Apache Karaf :: Cave :: Server :: API</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.shell</groupId>
-            <artifactId>org.apache.karaf.shell.console</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.cave.server</groupId>
-            <artifactId>org.apache.karaf.cave.server.api</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxrs</artifactId>
         </dependency>
     </dependencies>
 
@@ -53,13 +48,9 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Import-Package>
-                            org.apache.felix.service.command,
-                            org.apache.felix.gogo.commands,
-                            org.apache.karaf.shell.console*;version="[2.2,4)",
-                            org.apache.karaf.cave.server.api;version="${project.version}",
-                            *
-                        </Import-Package>
+                        <Export-Package>
+                            org.apache.karaf.cave.server.api
+                        </Export-Package>
                     </instructions>
                 </configuration>
             </plugin>

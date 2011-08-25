@@ -18,7 +18,7 @@ package org.apache.karaf.cave.server.command;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.cave.server.backend.api.CaveRepository;
+import org.apache.karaf.cave.server.api.CaveRepository;
 
 /**
  *  Command to scan an existing repository and update the OBR metadata

@@ -17,7 +17,7 @@
 package org.apache.karaf.cave.server.command;
 
 import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.cave.server.backend.api.CaveRepository;
+import org.apache.karaf.cave.server.api.CaveRepository;
 
 /**
  * Command to list all Karaf Cave repositories available.
