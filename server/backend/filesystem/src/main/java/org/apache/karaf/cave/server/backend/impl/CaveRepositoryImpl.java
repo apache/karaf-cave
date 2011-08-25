@@ -372,9 +372,10 @@ public class CaveRepositoryImpl extends CaveRepository {
      */
     private void useResourceRelativeUri(ResourceImpl resource) throws Exception {
         String resourceURI = resource.getURI();
-        LOGGER.debug("Converting resource URI {} relatively to repository URI {}", resourceURI, this.getLocation());
-        if (resourceURI.startsWith(this.getLocation())) {
-            resourceURI = resourceURI.substring(this.getLocation().length());
+        String locationURI = "file:" + this.getLocation();
+        LOGGER.debug("Converting resource URI {} relatively to repository URI {}", resourceURI, locationURI);
+        if (resourceURI.startsWith(locationURI)) {
+            resourceURI = resourceURI.substring(locationURI.length() + 1);
             LOGGER.debug("Resource URI converted to " + resourceURI);
             resource.put(Resource.URI, resourceURI);
         }
