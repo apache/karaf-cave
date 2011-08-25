@@ -45,8 +45,8 @@
             <artifactId>org.apache.felix.bundlerepository</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.karaf.cave.server.backend</groupId>
-            <artifactId>org.apache.karaf.cave.server.backend.api</artifactId>
+            <groupId>org.apache.karaf.cave.server</groupId>
+            <artifactId>org.apache.karaf.cave.server.api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -66,6 +66,10 @@
                         <Export-Package>
                             org.apache.karaf.cave.server.http*;version=${project.version}
                         </Export-Package>
+                        <Import-Package>
+                            org.apache.karaf.cave.server.api*;version=${project.version},
+                            *
+                        </Import-Package>
                         <Webapp-Context>/cave</Webapp-Context>
                         <Web-ContextPath>/cave</Web-ContextPath>
                     </instructions>

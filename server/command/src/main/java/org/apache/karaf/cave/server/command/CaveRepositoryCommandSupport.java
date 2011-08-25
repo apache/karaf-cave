@@ -16,9 +16,8 @@
  */
 package org.apache.karaf.cave.server.command;
 
-import org.apache.aries.blueprint.di.Repository;
-import org.apache.karaf.cave.server.backend.api.CaveRepository;
-import org.apache.karaf.cave.server.backend.api.CaveRepositoryService;
+import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
 /**

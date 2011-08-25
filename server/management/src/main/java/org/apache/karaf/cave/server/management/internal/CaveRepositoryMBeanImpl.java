@@ -14,8 +14,8 @@
 
 package org.apache.karaf.cave.server.management.internal;
 
-import org.apache.karaf.cave.server.backend.api.CaveRepository;
-import org.apache.karaf.cave.server.backend.api.CaveRepositoryService;
+import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.apache.karaf.cave.server.management.CaveRepositoryMBean;
 
 import javax.management.NotCompliantMBeanException;

@@ -16,11 +16,10 @@
  */
 package org.apache.karaf.cave.server.http;
 
-import com.sun.org.omg.CORBA.Repository;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.felix.bundlerepository.Resource;
-import org.apache.karaf.cave.server.backend.api.CaveRepository;
-import org.apache.karaf.cave.server.backend.api.CaveRepositoryService;
+import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
 
@@ -78,18 +77,23 @@ public class WrapperServlet extends HttpServlet {
         try {
             URL url = null;
 
-            if (uri.endsWith("repository.xml")) {
+            if (uri.endsWith("-repository.xml")) {
                 // the user wants to get the Cave repository repository.xml
+                // the expected format is {cave-repo-name}-repository.xml
+                int index = uri.indexOf("-repository.xml");
+                String caveRepositoryName = uri.substring(0, index);
 
-                ServiceReference caveRepositoryAdminReference = bundleContext.getServiceReference(CaveRepositoryService.class.getName());
-                if (caveRepositoryAdminReference != null) {
-                    CaveRepositoryService caveRepositoryService = (CaveRepositoryService) bundleContext.getService(caveRepositoryAdminReference);
+                ServiceReference caveRepositoryServiceReference = bundleContext.getServiceReference(CaveRepositoryService.class.getName());
+                if (caveRepositoryServiceReference != null) {
+                    CaveRepositoryService caveRepositoryService = (CaveRepositoryService) bundleContext.getService(caveRepositoryServiceReference);
                     if (caveRepositoryService != null) {
-                        CaveRepository caveRepository = caveRepositoryService.getRepository(uri);
-                        url = caveRepository.getRepositoryXml();
-                        response.setContentType("text/xml");
+                        CaveRepository caveRepository = caveRepositoryService.getRepository(caveRepositoryName);
+                        if (caveRepository != null) {
+                            url = caveRepository.getRepositoryXml();
+                            response.setContentType("text/xml");
+                        }
                     }
-                    bundleContext.ungetService(caveRepositoryAdminReference);
+                    bundleContext.ungetService(caveRepositoryServiceReference);
                 }
             } else {
                 Resource[] resources = repositoryAdmin.discoverResources("(uri=*" + uri + ")");
@@ -104,16 +108,20 @@ public class WrapperServlet extends HttpServlet {
                 response.setContentType("application/java-archive");
             }
 
-            // send the resource content to the HTTP response
-            InputStream inputStream = url.openStream();
-            OutputStream outputStream = response.getOutputStream();
-            int c;
-            while ((c = inputStream.read()) >= 0) {
-                outputStream.write(c);
+            if (url != null) {
+                // send the resource content to the HTTP response
+                InputStream inputStream = url.openStream();
+                OutputStream outputStream = response.getOutputStream();
+                int c;
+                while ((c = inputStream.read()) >= 0) {
+                    outputStream.write(c);
+                }
+                inputStream.close();
+                outputStream.flush();
+                outputStream.close();
+            } else {
+                throw new ServletException("No resource look-up provided");
             }
-            inputStream.close();
-            outputStream.flush();
-            outputStream.close();
 
         } catch (ServletException servletException) {
             throw servletException;

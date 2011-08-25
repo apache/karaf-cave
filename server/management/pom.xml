@@ -35,8 +35,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.karaf.cave.server.backend</groupId>
-            <artifactId>org.apache.karaf.cave.server.backend.api</artifactId>
+            <groupId>org.apache.karaf.cave.server</groupId>
+            <artifactId>org.apache.karaf.cave.server.api</artifactId>
             <version>${project.version}</version>
         </dependency>
     </dependencies>
@@ -58,7 +58,7 @@
                             javax.management.loading,
                             javax.management.openmbean,
                             org.apache.karaf.management*;version="[2,4)",
-                            org.apache.karaf.cave.server.backend.api;version=${project.version},
+                            org.apache.karaf.cave.server.api;version=${project.version},
                             *
                         </Import-Package>
                     </instructions>

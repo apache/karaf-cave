@@ -2,7 +2,7 @@
 <blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0">
 
     <!-- reference to the Cave repository service -->
-    <reference id="caveRepositoryService" interface="org.apache.karaf.cave.server.backend.api.CaveRepositoryService"/>
+    <reference id="caveRepositoryService" interface="org.apache.karaf.cave.server.api.CaveRepositoryService"/>
 
     <!-- reference to the Karaf MBean server -->
     <reference id="mbeanServer" interface="javax.management.MBeanServer">
