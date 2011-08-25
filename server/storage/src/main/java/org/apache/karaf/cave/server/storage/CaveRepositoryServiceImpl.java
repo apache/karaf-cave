@@ -82,6 +82,19 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
     }
 
     /**
+     * Remove a Karaf Cave repository from the repositories registry.
+     *
+     * @param name the name of Karaf Cave repository to remove.
+     * @throws Exception in case of remove failure.
+     */
+    public synchronized void remove(String name) throws Exception {
+        CaveRepository repository = this.getRepository(name);
+        if (repository != null) {
+            repositories.remove(name);
+        }
+    }
+
+    /**
      * Destroy a Karaf Cave repository.
      *
      * @param name the name of Karaf Cave repository to destroy.

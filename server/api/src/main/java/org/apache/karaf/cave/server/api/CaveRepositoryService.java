@@ -53,6 +53,7 @@ public interface CaveRepositoryService {
 
     /**
      * Destroy an existing Karaf Cave repository.
+     * Warning: destroy also remove the Karaf Cave repository storage.
      *
      * @param name the name of Karaf Cave repository to destroy.
      * @throws Exception in case of destroy failure.
@@ -60,6 +61,15 @@ public interface CaveRepositoryService {
     @POST
     @Consumes("text/plain")
     void destroy(String name) throws Exception;
+
+    /**
+     * Remove an existing Karaf Cave repository from the registry.
+     * NB: the Karaf Cave repository storage is not removed.
+     *
+     * @param name the name of Karaf Cave repository to remove.
+     * @throws Exception in case of remove failure.
+     */
+    void remove(String name) throws Exception;
 
     /**
      * Register a Karaf Cave repository into the OBR.
