@@ -30,11 +30,11 @@ public class CreateRepositoryCommand extends CaveRepositoryCommandSupport {
     @Option(name = "-l", aliases = {"--location"}, description = "Location of the new Cave Repository on the file system", required = false, multiValued = false)
     String location;
 
-    @Option(name = "-s", aliases = {"--scan"}, description = "If the Cave Repository should be scanned now", required = false, multiValued = false)
-    boolean scan;
+    @Option(name = "-nu", aliases = {"--no-update"}, description = "Disable the OBR metadata generation at creation time", required = false, multiValued = false)
+    boolean noUpdate = false;
 
-    @Option(name = "-r", aliases = {"--register"}, description = "If the Cave Repository should be registered in Karaf OBR", required = false, multiValued = false)
-    boolean register;
+    @Option(name = "-nr", aliases = {"--no-register"}, description = "Disable the registration of this Cave Repository in the OBR service", required = false, multiValued = false)
+    boolean noRegister;
 
     @Argument(index = 0, name = "name", description = "The name of the Cave Repository", required = true, multiValued = false)
     String name = null;
@@ -46,10 +46,10 @@ public class CreateRepositoryCommand extends CaveRepositoryCommandSupport {
             getCaveRepositoryService().createRepository(name, false);
         }
         CaveRepository caveRepository = getExistingRepository(name);
-        if (scan) {
+        if (!noUpdate) {
             caveRepository.scan();
         }
-        if (register) {
+        if (!noRegister) {
             getCaveRepositoryService().register(name);
         }
         return null;
