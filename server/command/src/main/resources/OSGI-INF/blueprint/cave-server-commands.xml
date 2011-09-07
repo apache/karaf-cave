@@ -50,8 +50,8 @@
                 <null/>
             </completers>
         </command>
-        <command name="cave/scan-repository">
-            <action class="org.apache.karaf.cave.server.command.ScanRepositoryCommand">
+        <command name="cave/update-repository">
+            <action class="org.apache.karaf.cave.server.command.UpdateRepositoryCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
             <completers>

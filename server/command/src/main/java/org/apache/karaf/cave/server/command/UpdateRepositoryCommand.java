@@ -21,10 +21,10 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.cave.server.api.CaveRepository;
 
 /**
- *  Command to scan an existing repository and update the OBR metadata
+ *  Command to update the OBR metadata
  */
-@Command(scope = "cave", name = "scan-repository", description = "Scan an existing Karaf Cave repository and update OBR metadata")
-public class ScanRepositoryCommand extends CaveRepositoryCommandSupport {
+@Command(scope = "cave", name = "update-repository", description = "Update OBR metadata of a Cave Repository")
+public class UpdateRepositoryCommand extends CaveRepositoryCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the Karaf Cave repository", required = true, multiValued = false)
     String name = null;

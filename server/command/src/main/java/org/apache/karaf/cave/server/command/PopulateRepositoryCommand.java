@@ -29,8 +29,8 @@ import java.net.URL;
 @Command(scope = "cave", name = "populate-repository", description = "Populate a Karaf Cave repository with the artifacts present at the given URL")
 public class PopulateRepositoryCommand extends CaveRepositoryCommandSupport {
 
-    @Option(name = "-u", aliases = { "--update" }, description = "Update the OBR metadata on the fly", required = false, multiValued = false)
-    boolean update = false;
+    @Option(name = "-nu", aliases = { "--no-update" }, description = "Update the OBR metadata on the fly", required = false, multiValued = false)
+    boolean noUpdate = false;
 
     @Argument(index = 0, name = "name", description = "The name of the Karaf Cave repository", required = true, multiValued = false)
     String name = null;
@@ -40,7 +40,7 @@ public class PopulateRepositoryCommand extends CaveRepositoryCommandSupport {
 
     protected Object doExecute() throws Exception {
         CaveRepository repository = getExistingRepository(name);
-        repository.populate(new URL(url), update);
+        repository.populate(new URL(url), !noUpdate);
         return null;
     }
 
