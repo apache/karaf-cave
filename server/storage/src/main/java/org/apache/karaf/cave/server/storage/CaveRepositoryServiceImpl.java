@@ -110,6 +110,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
 
     /**
      * Register a Karaf Cave repository in the OBR service.
+     * NB: this method allows refresh the repository in the OBR "client".
      *
      * @param name the name of the Karaf Cave repository.
      * @throws Exception in case of registration failure.

@@ -18,6 +18,7 @@ package org.apache.karaf.cave.server.command;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.cave.server.api.CaveRepository;
 
 import java.net.URL;
@@ -34,9 +35,15 @@ public class UploadArtifactCommand extends CaveRepositoryCommandSupport {
     @Argument(index = 1, name = "artifact", description = "The URL of the artifact to upload", required = true, multiValued = false)
     String url = null;
 
+    @Option(name = "-nu", aliases = { "--no-update", "--no-refresh", "--no-register" }, description = "Not refresh the OBR repository service", required = false, multiValued = true)
+    boolean noUpdate = false;
+
     public Object doExecute() throws Exception {
         CaveRepository caveRepository = getExistingRepository(name);
         caveRepository.upload(new URL(url));
+        if (!noUpdate) {
+            getCaveRepositoryService().register(name);
+        }
         return null;
     }
 

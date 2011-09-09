@@ -34,7 +34,7 @@ public class CreateRepositoryCommand extends CaveRepositoryCommandSupport {
     boolean noUpdate = false;
 
     @Option(name = "-nr", aliases = {"--no-register"}, description = "Disable the registration of this Cave Repository in the OBR service", required = false, multiValued = false)
-    boolean noRegister;
+    boolean noRegister = false;
 
     @Argument(index = 0, name = "name", description = "The name of the Cave Repository", required = true, multiValued = false)
     String name = null;
