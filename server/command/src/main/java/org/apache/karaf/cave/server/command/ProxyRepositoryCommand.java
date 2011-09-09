@@ -18,6 +18,7 @@ package org.apache.karaf.cave.server.command;
 
 import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.cave.server.api.CaveRepository;
 
 import java.net.URL;
@@ -34,9 +35,15 @@ public class ProxyRepositoryCommand extends CaveRepositoryCommandSupport {
     @Argument(index = 1, name = "URL", description = "The URL to proxy in the Karaf Cave repository", required = true, multiValued = false)
     String url = null;
 
+    @Option(name = "-nu", aliases = { "--no-update", "--no-refresh", "--no-register" }, description = "No refresh of the OBR URLs", required = false, multiValued = false)
+    boolean noUpdate = false;
+
     protected Object doExecute() throws Exception {
         CaveRepository repository = getExistingRepository(name);
         repository.proxy(new URL(url));
+        if (!noUpdate) {
+            getCaveRepositoryService().register(name);
+        }
         return null;
     }
 
