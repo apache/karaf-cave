@@ -27,7 +27,7 @@ public class RemoveRepositoryCommand extends CaveRepositoryCommandSupport {
     String name = null;
 
     protected Object doExecute() throws Exception {
-        getCaveRepositoryService().destroy(name);
+        getCaveRepositoryService().remove(name);
         return null;
     }
 

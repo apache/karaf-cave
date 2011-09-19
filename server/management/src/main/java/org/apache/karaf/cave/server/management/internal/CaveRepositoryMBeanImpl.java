@@ -68,8 +68,8 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
         caveRepositoryService.createRepository(name, true);
     }
 
-    public void destroyRepository(String name) throws Exception {
-        caveRepositoryService.destroy(name);
+    public void removeRepository(String name) throws Exception {
+        caveRepositoryService.remove(name);
     }
 
 }
