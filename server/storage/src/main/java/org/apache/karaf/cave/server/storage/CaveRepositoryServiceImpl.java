@@ -95,20 +95,6 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
     }
 
     /**
-     * Destroy a Karaf Cave repository.
-     *
-     * @param name the name of Karaf Cave repository to destroy.
-     * @throws Exception in case of destroy failure.
-     */
-    public synchronized void destroy(String name) throws Exception {
-        CaveRepository repository = this.getRepository(name);
-        if (repository != null) {
-            repository.cleanup();
-            repositories.remove(name);
-        }
-    }
-
-    /**
      * Register a Karaf Cave repository in the OBR service.
      * NB: this method allows refresh the repository in the OBR "client".
      *

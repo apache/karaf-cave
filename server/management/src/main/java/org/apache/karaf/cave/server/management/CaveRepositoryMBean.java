@@ -23,6 +23,6 @@ public interface CaveRepositoryMBean {
     TabularData getCaveRepositories() throws Exception;
 
     void createRepository(String name) throws Exception;
-    void destroyRepository(String name) throws Exception;
+    void removeRepository(String name) throws Exception;
 
 }

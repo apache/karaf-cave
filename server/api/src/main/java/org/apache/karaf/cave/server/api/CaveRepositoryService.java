@@ -52,17 +52,6 @@ public interface CaveRepositoryService {
     CaveRepository createRepository(String name, String location, boolean scan) throws Exception;
 
     /**
-     * Destroy an existing Karaf Cave repository.
-     * Warning: destroy also remove the Karaf Cave repository storage.
-     *
-     * @param name the name of Karaf Cave repository to destroy.
-     * @throws Exception in case of destroy failure.
-     */
-    @POST
-    @Consumes("text/plain")
-    void destroy(String name) throws Exception;
-
-    /**
      * Remove an existing Karaf Cave repository from the registry.
      * NB: the Karaf Cave repository storage is not removed.
      *
