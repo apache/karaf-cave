@@ -17,10 +17,12 @@
 package org.apache.karaf.cave.server.command;
 
 import org.apache.felix.gogo.commands.Argument;
+import org.apache.felix.gogo.commands.Command;
 
 /**
  * Remove a Karaf Cave repository from the repositories registry.
  */
+@Command(scope = "cave", name = "remove-repository", description = "Remove a Karaf Cave repository from the Cave repository list")
 public class RemoveRepositoryCommand extends CaveRepositoryCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The Karaf Cave repository name", required = true, multiValued = false)

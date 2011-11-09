@@ -90,7 +90,10 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
     public synchronized void remove(String name) throws Exception {
         CaveRepository repository = this.getRepository(name);
         if (repository != null) {
+            repositoryAdmin.removeRepository(repository.getRepositoryXml().toString());
             repositories.remove(name);
+        } else {
+            throw new IllegalArgumentException("Cave repository " + name + " not found.");
         }
     }
 
@@ -103,7 +106,11 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      */
     public synchronized void register(String name) throws Exception {
         CaveRepository caveRepository = this.getRepository(name);
-        repositoryAdmin.addRepository(caveRepository.getRepositoryXml());
+        if (caveRepository != null) {
+            repositoryAdmin.addRepository(caveRepository.getRepositoryXml());
+        } else {
+            throw new IllegalArgumentException("Cave repository " + name + " not found.");
+        }
     }
 
     /**
