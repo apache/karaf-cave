@@ -71,13 +71,8 @@ public class CaveRepositoryImpl extends CaveRepository {
             LOGGER.debug("Karaf Cave repository {} location has been created.", this.getName());
             LOGGER.debug(locationFile.getAbsolutePath());
         }
-        File repositoryXml = new File(locationFile, "repository.xml");
-        if (repositoryXml.exists()) {
-            obrRepository = (RepositoryImpl) new DataModelHelperImpl().repository(repositoryXml.toURI().toURL());
-        } else {
-            obrRepository = new RepositoryImpl();
-            obrRepository.setName(this.getName());
-        }
+        obrRepository = new RepositoryImpl();
+        obrRepository.setName(this.getName());
     }
 
     /**
@@ -138,6 +133,8 @@ public class CaveRepositoryImpl extends CaveRepository {
      * @throws Exception in case of scan failure.
      */
     public void scan() throws Exception {
+        obrRepository = new RepositoryImpl();
+        obrRepository.setName(this.getName());
         this.scan(new File(this.getLocation()));
         this.generateRepositoryXml();
     }
