@@ -30,10 +30,10 @@ public class CreateRepositoryCommand extends CaveRepositoryCommandSupport {
     @Option(name = "-l", aliases = {"--location"}, description = "Location of the new Cave Repository on the file system", required = false, multiValued = false)
     String location;
 
-    @Option(name = "-nu", aliases = {"--no-update"}, description = "Disable the OBR metadata generation at creation time", required = false, multiValued = false)
+    @Option(name = "-nu", aliases = {"--no-update"}, description = "Omit generating OBR metadata during creation", required = false, multiValued = false)
     boolean noUpdate = false;
 
-    @Option(name = "-nr", aliases = {"--no-register"}, description = "Disable the registration of this Cave Repository in the OBR service", required = false, multiValued = false)
+    @Option(name = "-nr", aliases = {"--no-register"}, description = "Do not register the Cave repository within the OBR service", required = false, multiValued = false)
     boolean noRegister = false;
 
     @Argument(index = 0, name = "name", description = "The name of the Cave Repository", required = true, multiValued = false)
