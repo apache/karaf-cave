@@ -154,12 +154,27 @@ public class CaveRepositoryImpl extends CaveRepository {
         } else {
             // populate the repository
             try {
-                ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(entry.toURI().toURL());
-                this.addResource(resource);
+                URL bundleUrl = entry.toURI().toURL();
+                if (isPotentialBundle(bundleUrl.toString())) {
+                    ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(bundleUrl);
+                    this.addResource(resource);
+                }
             } catch (IllegalArgumentException e) {
                 LOGGER.warn(e.getMessage());
             }
         }
+    }
+
+    /**
+     * Convenience method to filter Maven files with common non-bundle extensions.
+     *
+     * @param bundleUrl the file URL to check.
+     * @return true if the file is a potential bundle, false else.
+     */
+    private boolean isPotentialBundle(String bundleUrl) {
+        return !bundleUrl.matches(".*\\.sha1") && !bundleUrl.matches(".*\\.pom")
+                && !bundleUrl.matches(".*\\.xml") && !bundleUrl.matches(".*\\.repositories")
+                && !bundleUrl.matches(".*\\.properties") && !bundleUrl.matches(".*\\.lastUpdated");
     }
 
     /**
