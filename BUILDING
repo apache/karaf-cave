@@ -42,10 +42,14 @@ Building
 
 3) Run
 
-        $> mvn install
+        $> mvn clean install
 
    This will compile Apache Karaf Cave and run all of the tests in the
    Apache Karaf Cave source distribution.
+
+	$> mvn clean install -DskipTests
+
+   This will compile Apache Karaf Cave without running the tests (faster).
 
 4) Apache Karaf Cave is now present in your local Maven repository. Read the README file
    to installl Cave into a running Apache Karaf instance.
