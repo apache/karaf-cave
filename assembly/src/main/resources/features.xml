@@ -20,7 +20,7 @@
 
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
 
-    <feature name="cave-server" version="${project.version}">
+    <feature name="cave-obr-server" version="${project.version}">
         <configfile finalname="/etc/org.apache.cxf.osgi.cfg">
             mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/cxf
         </configfile>
