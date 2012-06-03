@@ -37,7 +37,7 @@
         <manual.dir>${project.build.directory}/manual</manual.dir>
         <manual>${manual.dir}/cave-manual-${project.version}</manual>
         <scala.version>2.8.1</scala.version>
-        <scalata.version>1.3.2</scalata.version>
+        <scalate.version>1.3.2</scalate.version>
         <cave.version>${project.version}</cave.version>
     </properties>
 
