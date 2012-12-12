@@ -28,6 +28,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.jsoup.Jsoup;
+import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
@@ -198,6 +199,7 @@ public class CaveRepositoryImpl extends CaveRepository {
 
     /**
      * Proxy a local filesystem (folder).
+     *
      * @param entry the filesystem to proxyFilesystem.
      * @throws Exception in case of proxyFilesystem failure
      */
@@ -250,15 +252,19 @@ public class CaveRepositoryImpl extends CaveRepository {
                 }
             } else {
                 // try to find link to "browse"
-                Document document = Jsoup.connect(url).get();
+                try {
+                    Document document = Jsoup.connect(url).get();
 
-                Elements links = document.select("a");
-                if (links.size() > 1) {
-                    for (int i = 1; i < links.size(); i++) {
-                        Element link = links.get(i);
-                        String absoluteHref = link.attr("abs:href");
-                        this.proxyHttp(absoluteHref);
+                    Elements links = document.select("a");
+                    if (links.size() > 1) {
+                        for (int i = 1; i < links.size(); i++) {
+                            Element link = links.get(i);
+                            String absoluteHref = link.attr("abs:href");
+                            this.proxyHttp(absoluteHref);
+                        }
                     }
+                } catch (UnsupportedMimeTypeException e) {
+                    // ignore
                 }
             }
         }
@@ -267,7 +273,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     /**
      * Populate an URL into the Karaf Cave repository, and eventually update the OBR information.
      *
-     * @param url the URL to copy.
+     * @param url    the URL to copy.
      * @param update if true the OBR information is updated, false else.
      * @throws Exception in case of populate failure.
      */
@@ -290,7 +296,7 @@ public class CaveRepositoryImpl extends CaveRepository {
      * Populate the Karaf Cave repository using a filesystem directory.
      *
      * @param filesystem the "source" directory.
-     * @param update if true, the resources are added into the OBR metadata, false else.
+     * @param update     if true, the resources are added into the OBR metadata, false else.
      * @throws Exception in case of populate failure.
      */
     private void populateFromFilesystem(File filesystem, boolean update) throws Exception {
@@ -323,7 +329,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     /**
      * Populate the Karaf Cave repository using the given URL.
      *
-     * @param url the "source" HTTP URL.
+     * @param url    the "source" HTTP URL.
      * @param update true if the OBR metadata should be updated, false else.
      * @throws Exception in case of populate failure.
      */
