@@ -68,6 +68,7 @@
                         </Export-Package>
                         <Import-Package>
                             org.apache.karaf.cave.server.api*;version=${project.version},
+                            org.osgi.framework;version="[1,4)",
                             *
                         </Import-Package>
                         <Webapp-Context>/cave</Webapp-Context>

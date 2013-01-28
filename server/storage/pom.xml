@@ -73,7 +73,7 @@
                             org.apache.karaf.cave.server.api;version="${project.version}",
                             org.slf4j*;resolution:=optional,
                             org.apache.felix.bundlerepository*;version="[2,3)",
-                            org.osgi.framework,
+                            org.osgi.framework;version="[1,4)",
                             org.osgi.service.blueprint,
                             org.osgi.service.log,
                             org.osgi.service.url,
@@ -83,7 +83,7 @@
                             !org.apache.felix.shell,
                             !org.apache.felix.bundlerepository.impl.wrapper,
                             !org.osgi.service.obr,
-                            !javax.xml.stream,
+                            !javax.xml.stream
                         </Import-Package>
                         <Private-Package>
                             org.kxml2.io,
