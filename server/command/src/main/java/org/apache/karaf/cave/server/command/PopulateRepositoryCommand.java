@@ -32,6 +32,9 @@ public class PopulateRepositoryCommand extends CaveRepositoryCommandSupport {
     @Option(name = "-nu", aliases = { "--no-update" }, description = "Not update the OBR metadata", required = false, multiValued = false)
     boolean noUpdate = false;
 
+    @Option(name = "-f", aliases = { "--filter" }, description = "Regex filter on the artifacts URL", required = false, multiValued = false)
+    String filter;
+
     @Argument(index = 0, name = "name", description = "The name of the Karaf Cave repository", required = true, multiValued = false)
     String name = null;
 
@@ -40,7 +43,7 @@ public class PopulateRepositoryCommand extends CaveRepositoryCommandSupport {
 
     protected Object doExecute() throws Exception {
         CaveRepository repository = getExistingRepository(name);
-        repository.populate(new URL(url), !noUpdate);
+        repository.populate(new URL(url), filter, !noUpdate);
         if (!noUpdate) {
             getCaveRepositoryService().register(name);
         }

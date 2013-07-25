@@ -38,9 +38,12 @@ public class ProxyRepositoryCommand extends CaveRepositoryCommandSupport {
     @Option(name = "-nu", aliases = { "--no-update", "--no-refresh", "--no-register" }, description = "No refresh of the OBR URLs", required = false, multiValued = false)
     boolean noUpdate = false;
 
+    @Option(name = "-f", aliases = { "--filter" }, description = "Regex filter on the artifacts URL", required = false, multiValued = false)
+    String filter;
+
     protected Object doExecute() throws Exception {
         CaveRepository repository = getExistingRepository(name);
-        repository.proxy(new URL(url));
+        repository.proxy(new URL(url), filter);
         if (!noUpdate) {
             getCaveRepositoryService().register(name);
         }
