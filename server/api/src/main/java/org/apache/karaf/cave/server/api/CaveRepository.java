@@ -90,6 +90,15 @@ public abstract class CaveRepository {
     public abstract void proxy(URL url) throws Exception;
 
     /**
+     * Proxy an URL (for instance a Maven repository), eventually filtering some artifacts, and add OBR information.
+     *
+     * @param url the URL to proxy.
+     * @param filter regex filter on the artifacts URL.
+     * @throws Exception
+     */
+    public abstract void proxy(URL url, String filter) throws Exception;
+
+    /**
      * Populate from a remote URL (for instance a Maven repository), and eventually update the OBR information.
      *
      * @param url the URL to copy.
@@ -97,6 +106,16 @@ public abstract class CaveRepository {
      * @throws Exception in case of copy failure.
      */
     public abstract void populate(URL url, boolean update) throws Exception;
+
+    /**
+     * Populate from a remote URL (for instance a Maven repository), eventually filtering artifacts, and eventually update the OBR information.
+     *
+     * @param url the URL to copy.
+     * @param filter regex filter on the artifacts URL.
+     * @param update if true the OBR information is updated, false else.
+     * @throws Exception
+     */
+    public abstract void populate(URL url, String filter, boolean update) throws Exception;
 
     /**
      * Return the output stream of the resource at the given URI.
