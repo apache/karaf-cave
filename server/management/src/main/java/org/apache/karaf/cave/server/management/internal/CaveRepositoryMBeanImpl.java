@@ -69,7 +69,7 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
     }
 
     public void removeRepository(String name) throws Exception {
-        caveRepositoryService.remove(name);
+        caveRepositoryService.uninstall(name);
     }
 
 }

@@ -52,23 +52,23 @@ public interface CaveRepositoryService {
     CaveRepository createRepository(String name, String location, boolean scan) throws Exception;
 
     /**
-     * Remove an existing Karaf Cave repository from the registry.
+     * Uninstall (remove) an existing Karaf Cave repository from the OBR registry.
      * NB: the Karaf Cave repository storage is not removed.
      *
      * @param name the name of Karaf Cave repository to remove.
      * @throws Exception in case of remove failure.
      */
-    void remove(String name) throws Exception;
+    void uninstall(String name) throws Exception;
 
     /**
-     * Register a Karaf Cave repository into the OBR.
+     * Install (register) a Karaf Cave repository into the OBR registry.
      *
      * @param name the name of the Karaf Cave repository.
      * @throws Exception in case of registration failure.
      */
     @POST
     @Consumes("text/plain")
-    void register(String name) throws Exception;
+    void install(String name) throws Exception;
 
     /**
      * Get the list of all Karaf Cave repositories.

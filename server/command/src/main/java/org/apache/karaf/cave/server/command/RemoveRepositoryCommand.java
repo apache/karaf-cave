@@ -29,7 +29,7 @@ public class RemoveRepositoryCommand extends CaveRepositoryCommandSupport {
     String name = null;
 
     protected Object doExecute() throws Exception {
-        getCaveRepositoryService().remove(name);
+        getCaveRepositoryService().uninstall(name);
         return null;
     }
 

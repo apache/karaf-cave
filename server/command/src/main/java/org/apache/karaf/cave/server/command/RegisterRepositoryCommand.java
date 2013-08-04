@@ -30,7 +30,7 @@ public class RegisterRepositoryCommand extends CaveRepositoryCommandSupport {
     String name = null;
 
     protected Object doExecute() throws Exception {
-        getCaveRepositoryService().register(name);
+        getCaveRepositoryService().install(name);
         return null;
     }
 
