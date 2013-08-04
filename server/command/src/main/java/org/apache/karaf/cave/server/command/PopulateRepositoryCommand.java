@@ -45,7 +45,7 @@ public class PopulateRepositoryCommand extends CaveRepositoryCommandSupport {
         CaveRepository repository = getExistingRepository(name);
         repository.populate(new URL(url), filter, !noUpdate);
         if (!noUpdate) {
-            getCaveRepositoryService().register(name);
+            getCaveRepositoryService().install(name);
         }
         return null;
     }

@@ -45,7 +45,7 @@ public class ProxyRepositoryCommand extends CaveRepositoryCommandSupport {
         CaveRepository repository = getExistingRepository(name);
         repository.proxy(new URL(url), filter);
         if (!noUpdate) {
-            getCaveRepositoryService().register(name);
+            getCaveRepositoryService().install(name);
         }
         return null;
     }

@@ -50,7 +50,7 @@ public class CreateRepositoryCommand extends CaveRepositoryCommandSupport {
             caveRepository.scan();
         }
         if (!noRegister) {
-            getCaveRepositoryService().register(name);
+            getCaveRepositoryService().install(name);
         }
         return null;
     }

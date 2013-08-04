@@ -82,12 +82,12 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
     }
 
     /**
-     * Remove a Karaf Cave repository from the repositories registry.
+     * Uninstall (remove) a Karaf Cave repository from the repositories registry.
      *
      * @param name the name of Karaf Cave repository to remove.
      * @throws Exception in case of remove failure.
      */
-    public synchronized void remove(String name) throws Exception {
+    public synchronized void uninstall(String name) throws Exception {
         CaveRepository repository = this.getRepository(name);
         if (repository != null) {
             repositoryAdmin.removeRepository(repository.getRepositoryXml().toString());
@@ -98,13 +98,13 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
     }
 
     /**
-     * Register a Karaf Cave repository in the OBR service.
+     * Install (register) a Karaf Cave repository in the OBR service.
      * NB: this method allows refresh the repository in the OBR "client".
      *
      * @param name the name of the Karaf Cave repository.
      * @throws Exception in case of registration failure.
      */
-    public synchronized void register(String name) throws Exception {
+    public synchronized void install(String name) throws Exception {
         CaveRepository caveRepository = this.getRepository(name);
         if (caveRepository != null) {
             repositoryAdmin.addRepository(caveRepository.getRepositoryXml());

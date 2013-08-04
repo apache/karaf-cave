@@ -42,7 +42,7 @@ public class UploadArtifactCommand extends CaveRepositoryCommandSupport {
         CaveRepository caveRepository = getExistingRepository(name);
         caveRepository.upload(new URL(url));
         if (!noUpdate) {
-            getCaveRepositoryService().register(name);
+            getCaveRepositoryService().install(name);
         }
         return null;
     }
