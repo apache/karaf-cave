@@ -50,8 +50,8 @@
                 <null/>
             </completers>
         </command>
-        <command name="cave/repository-proxy-url">
-            <action class="org.apache.karaf.cave.server.command.RepositoryProxyUrlCommand">
+        <command name="cave/repository-proxy">
+            <action class="org.apache.karaf.cave.server.command.RepositoryProxyCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
             <completers>

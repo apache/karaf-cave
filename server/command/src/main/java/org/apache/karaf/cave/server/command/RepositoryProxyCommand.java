@@ -26,8 +26,8 @@ import java.net.URL;
 /**
  * Add an URL to proxy in the Karaf Cave repository.
  */
-@Command(scope = "cave", name = "repository-proxy-url", description = "Proxy a given URL in the Karaf Cave repository")
-public class RepositoryProxyUrlCommand extends CaveRepositoryCommandSupport {
+@Command(scope = "cave", name = "repository-proxy", description = "Proxy a given URL in the Karaf Cave repository")
+public class RepositoryProxyCommand extends CaveRepositoryCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The repository proxying the URL", required = true, multiValued = false)
     String name = null;
