@@ -34,7 +34,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URL;
-import java.rmi.server.UnicastRemoteObject;
 
 /**
  * Wrapper servlet which "exposes" Karaf Cave repository resources in HTTP.
@@ -74,6 +73,27 @@ public class WrapperServlet extends HttpServlet {
         // remove the starting /
         uri = uri.substring(1);
 
+        // listing the repositories
+        if (request.getParameter("repositories") != null) {
+            ServiceReference caveRepositoryServiceReference = bundleContext.getServiceReference(CaveRepositoryService.class.getName());
+            if (caveRepositoryServiceReference != null) {
+                CaveRepositoryService caveRepositoryService = (CaveRepositoryService) bundleContext.getService(caveRepositoryServiceReference);
+                if (caveRepositoryService != null) {
+                    CaveRepository[] caveRepositories = caveRepositoryService.getRepositories();
+                    response.setContentType("text/plain");
+                    PrintWriter writer = response.getWriter();
+                    for (CaveRepository caveRepository : caveRepositories) {
+                        writer.println(caveRepository.getName());
+                    }
+                    writer.flush();
+                    writer.close();
+                }
+                bundleContext.ungetService(caveRepositoryServiceReference);
+            }
+            return;
+        }
+
+        // wrapping content (repository.xml or directly artifacts)
         try {
             URL url = null;
 
