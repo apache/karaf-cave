@@ -16,20 +16,25 @@
  */
 package org.apache.karaf.cave.server.command;
 
-import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
+import org.apache.karaf.cave.server.api.CaveRepository;
 
 /**
- * Remove a Karaf Cave repository from the repositories registry.
+ * Command to list all Karaf Cave repositories available.
  */
-@Command(scope = "cave", name = "remove-repository", description = "Remove a Karaf Cave repository from the Cave repository list")
-public class RemoveRepositoryCommand extends CaveRepositoryCommandSupport {
+@Command(scope = "cave", name = "repositories-list", description = "List all Karaf Cave repositories")
+public class RepositoriesListCommand extends CaveRepositoryCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The Karaf Cave repository name", required = true, multiValued = false)
-    String name = null;
+    private static final String OUTPUT_FORMAT = "%-20s %-20s";
 
     protected Object doExecute() throws Exception {
-        getCaveRepositoryService().uninstall(name);
+        CaveRepository[] repositories = getCaveRepositoryService().getRepositories();
+
+        System.out.println(String.format(OUTPUT_FORMAT, "Name", "Location"));
+        for (int i = 0; i < repositories.length; i++) {
+            System.out.println(String.format(OUTPUT_FORMAT, "[" + repositories[i].getName() + "]", "[" + repositories[i].getLocation() + "]"));
+        }
+
         return null;
     }
 
