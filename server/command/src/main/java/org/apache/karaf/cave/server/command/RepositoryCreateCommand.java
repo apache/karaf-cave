@@ -24,19 +24,19 @@ import org.apache.karaf.cave.server.api.CaveRepository;
 /**
  * Command to create a Karaf Cave repository.
  */
-@Command(scope = "cave", name = "create-repository", description = "Creates a new Karaf Cave repository")
-public class CreateRepositoryCommand extends CaveRepositoryCommandSupport {
+@Command(scope = "cave", name = "repository-create", description = "Create a new Karaf Cave repository")
+public class RepositoryCreateCommand extends CaveRepositoryCommandSupport {
 
-    @Option(name = "-l", aliases = {"--location"}, description = "Location of the new Cave Repository on the file system", required = false, multiValued = false)
+    @Option(name = "-l", aliases = {"--location"}, description = "Location of the new repository on the file system", required = false, multiValued = false)
     String location;
 
-    @Option(name = "-nu", aliases = {"--no-update"}, description = "Omit generating OBR metadata during creation", required = false, multiValued = false)
+    @Option(name = "-nu", aliases = {"--no-update"}, description = "Do not generate OBR metadata during creation", required = false, multiValued = false)
     boolean noUpdate = false;
 
-    @Option(name = "-nr", aliases = {"--no-register"}, description = "Do not register the Cave repository within the OBR service", required = false, multiValued = false)
+    @Option(name = "-nr", aliases = {"--no-register"}, description = "Do not register the repository within the OBR service", required = false, multiValued = false)
     boolean noRegister = false;
 
-    @Argument(index = 0, name = "name", description = "The name of the Cave Repository", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
     String name = null;
 
     protected Object doExecute() throws Exception {

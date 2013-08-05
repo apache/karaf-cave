@@ -21,12 +21,12 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.cave.server.api.CaveRepository;
 
 /**
- * Command to register a Karaf Cave repository into the Karaf OBR.
+ * Command to install a Karaf Cave repository into the Karaf OBR service.
  */
-@Command(scope = "cave", name = "register-repository", description = "Register a Karaf Cave repository in the Karaf OBR")
-public class RegisterRepositoryCommand extends CaveRepositoryCommandSupport {
+@Command(scope = "cave", name = "repository-install", description = "Install (register) a Karaf Cave repository in the Karaf OBR service")
+public class RepositoryInstallCommand extends CaveRepositoryCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "Name of Karaf Cave repository to register", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "Name of repository", required = true, multiValued = false)
     String name = null;
 
     protected Object doExecute() throws Exception {

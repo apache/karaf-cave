@@ -24,26 +24,23 @@ import org.apache.karaf.cave.server.api.CaveRepository;
 import java.net.URL;
 
 /**
- * Add an URL to proxy in the Karaf Cave repository.
+ *  Command to upload an artifact into a Karaf Cave repository
  */
-@Command(scope = "cave", name = "proxy-repository", description = "Proxy a given URL in the Karaf Cave repository")
-public class ProxyRepositoryCommand extends CaveRepositoryCommandSupport {
+@Command(scope = "cave", name = "repository-upload-artifact", description = "Upload an artifact in a Karaf Cave repository")
+public class RepositoryUploadArtifactCommand extends CaveRepositoryCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The Karaf Cave repository in which we want to proxy the URL", required = true, multiValued = false)
+    @Argument(index = 0, name = "repository", description = "The name of the repository", required = true, multiValued = false)
     String name = null;
 
-    @Argument(index = 1, name = "URL", description = "The URL to proxy in the Karaf Cave repository", required = true, multiValued = false)
+    @Argument(index = 1, name = "artifact", description = "The URL of the artifact to upload", required = true, multiValued = false)
     String url = null;
 
-    @Option(name = "-nu", aliases = { "--no-update", "--no-refresh", "--no-register" }, description = "No refresh of the OBR URLs", required = false, multiValued = false)
+    @Option(name = "-nu", aliases = { "--no-update", "--no-refresh", "--no-register" }, description = "Do not refresh the OBR repository service", required = false, multiValued = true)
     boolean noUpdate = false;
 
-    @Option(name = "-f", aliases = { "--filter" }, description = "Regex filter on the artifacts URL", required = false, multiValued = false)
-    String filter;
-
-    protected Object doExecute() throws Exception {
-        CaveRepository repository = getExistingRepository(name);
-        repository.proxy(new URL(url), filter);
+    public Object doExecute() throws Exception {
+        CaveRepository caveRepository = getExistingRepository(name);
+        caveRepository.upload(new URL(url));
         if (!noUpdate) {
             getCaveRepositoryService().install(name);
         }

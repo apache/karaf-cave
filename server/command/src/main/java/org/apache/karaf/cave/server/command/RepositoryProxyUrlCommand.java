@@ -24,26 +24,26 @@ import org.apache.karaf.cave.server.api.CaveRepository;
 import java.net.URL;
 
 /**
- * Command to populate a Karaf Cave repository from a given URL.
+ * Add an URL to proxy in the Karaf Cave repository.
  */
-@Command(scope = "cave", name = "populate-repository", description = "Populate a Karaf Cave repository with the artifacts present at the given URL")
-public class PopulateRepositoryCommand extends CaveRepositoryCommandSupport {
+@Command(scope = "cave", name = "repository-proxy-url", description = "Proxy a given URL in the Karaf Cave repository")
+public class RepositoryProxyUrlCommand extends CaveRepositoryCommandSupport {
 
-    @Option(name = "-nu", aliases = { "--no-update" }, description = "Not update the OBR metadata", required = false, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The repository proxying the URL", required = true, multiValued = false)
+    String name = null;
+
+    @Argument(index = 1, name = "URL", description = "The URL to proxy", required = true, multiValued = false)
+    String url = null;
+
+    @Option(name = "-nu", aliases = { "--no-update", "--no-refresh", "--no-register" }, description = "No refresh of the OBR URLs", required = false, multiValued = false)
     boolean noUpdate = false;
 
     @Option(name = "-f", aliases = { "--filter" }, description = "Regex filter on the artifacts URL", required = false, multiValued = false)
     String filter;
 
-    @Argument(index = 0, name = "name", description = "The name of the Karaf Cave repository", required = true, multiValued = false)
-    String name = null;
-
-    @Argument(index = 1, name = "url", description = "The source URL to scan", required = true, multiValued = false)
-    String url = null;
-
     protected Object doExecute() throws Exception {
         CaveRepository repository = getExistingRepository(name);
-        repository.populate(new URL(url), filter, !noUpdate);
+        repository.proxy(new URL(url), filter);
         if (!noUpdate) {
             getCaveRepositoryService().install(name);
         }
