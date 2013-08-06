@@ -19,15 +19,22 @@ package org.apache.karaf.cave.server.storage;
 import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Default implementation of the Cave Repository Service.
  */
 public class CaveRepositoryServiceImpl implements CaveRepositoryService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CaveRepositoryServiceImpl.class);
+
+    public static final String STORAGE_FILE = "repositories.properties";
 
     private File storageLocation;
     private RepositoryAdmin repositoryAdmin;
@@ -74,10 +81,11 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      */
     public synchronized CaveRepository createRepository(String name, String location, boolean scan) throws Exception {
         if (repositories.get(name) != null) {
-            throw new IllegalArgumentException("Cave repository " + name + " already exists.");
+            throw new IllegalArgumentException("Cave repository " + name + " already exists");
         }
         CaveRepository repository = new CaveRepositoryImpl(name, location, scan);
         repositories.put(name, repository);
+        save();
         return repository;
     }
 
@@ -92,8 +100,9 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         if (repository != null) {
             repositoryAdmin.removeRepository(repository.getRepositoryXml().toString());
             repositories.remove(name);
+            save();
         } else {
-            throw new IllegalArgumentException("Cave repository " + name + " not found.");
+            throw new IllegalArgumentException("Cave repository " + name + " not found");
         }
     }
 
@@ -109,7 +118,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         if (caveRepository != null) {
             repositoryAdmin.addRepository(caveRepository.getRepositoryXml());
         } else {
-            throw new IllegalArgumentException("Cave repository " + name + " not found.");
+            throw new IllegalArgumentException("Cave repository " + name + " not found");
         }
     }
 
@@ -130,6 +139,85 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      */
     public synchronized CaveRepository getRepository(String name) {
         return repositories.get(name);
+    }
+
+    /**
+     * Store the repositories into the properties file
+     */
+    synchronized void save() throws Exception {
+        Properties storage = new Properties();
+        CaveRepository[] repositories = this.getRepositories();
+        storage.setProperty("count", Integer.toString(repositories.length));
+        for (int i = 0; i < repositories.length; i++) {
+            storage.setProperty("item." + i + ".name", repositories[i].getName());
+            storage.setProperty("item." + i + ".location", repositories[i].getLocation());
+        }
+        saveStorage(storage, new File(storageLocation, STORAGE_FILE), "Karaf Cave Service storage");
+    }
+
+    /**
+     * Write the Cave repositories storage properties into a file.
+     *
+     * @param properties the Cave repositories storage properties.
+     * @param location the output file location.
+     * @param comment a comment to write in the properties file.
+     * @throws IOException in case of saving failure.
+     */
+    private void saveStorage(Properties properties, File location, String comment) throws IOException {
+        OutputStream os = null;
+        try {
+            os = new FileOutputStream(location);
+            properties.store(os, comment);
+        } finally {
+            if (os != null) {
+                os.close();
+            }
+        }
+    }
+
+    /**
+     * Load a storage property from a given file.
+     *
+     * @param location the properties file to load.
+     * @return the loaded Properties.
+     * @throws IOException in case of loading failure.
+     */
+    private Properties loadStorage(File location) throws IOException {
+        InputStream is = null;
+        try {
+            is = new FileInputStream(location);
+            Properties props = new Properties();
+            props.load(is);
+            return props;
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+    }
+
+    /**
+     * Load the Cave repositories set from the storage properties file.
+     */
+    public synchronized void init() throws Exception {
+        try {
+            File storageFile = new File(storageLocation, STORAGE_FILE);
+            Properties storage = loadStorage(storageFile);
+            int count = 0;
+            if (storage.getProperty("count") != null) {
+                count = Integer.parseInt(storage.getProperty("count"));
+            }
+            for (int i = 0; i < count; i++) {
+                String name = storage.getProperty("item." + i + ".name");
+                String location = storage.getProperty("item." + i + ".location");
+                if (name != null) {
+                    CaveRepository repository = new CaveRepositoryImpl(name, location, false);
+                    repositories.put(name, repository);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Unable to load Cave repositories", e);
+        }
     }
 
 }
