@@ -21,16 +21,20 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.cave.server.api.CaveRepository;
 
 /**
- *  Command to update the OBR metadata of a Karaf Cave repository
+ *  Update the OBR metadata of a Cave repository
  */
-@Command(scope = "cave", name = "repository-update", description = "Update OBR metadata of a Karaf Cave repository")
+@Command(scope = "cave", name = "repository-update", description = "Update OBR metadata of a Cave repository")
 public class RepositoryUpdateCommand extends CaveRepositoryCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
     String name = null;
 
     protected Object doExecute() throws Exception {
-        CaveRepository caveRepository = getExistingRepository(name);
+        if (getCaveRepositoryService().getRepository(name) == null) {
+            System.err.println("Cave repository " + name + " doesn't exist");
+            return null;
+        }
+        CaveRepository caveRepository = getCaveRepositoryService().getRepository(name);
         caveRepository.scan();
         return null;
     }

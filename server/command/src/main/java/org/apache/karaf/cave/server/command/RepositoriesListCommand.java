@@ -20,9 +20,9 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.cave.server.api.CaveRepository;
 
 /**
- * Command to list all Karaf Cave repositories available.
+ * Command to list all Cave repositories
  */
-@Command(scope = "cave", name = "repositories-list", description = "List all Karaf Cave repositories")
+@Command(scope = "cave", name = "repositories-list", description = "List all Cave repositories")
 public class RepositoriesListCommand extends CaveRepositoryCommandSupport {
 
     private static final String OUTPUT_FORMAT = "%-20s %-20s";

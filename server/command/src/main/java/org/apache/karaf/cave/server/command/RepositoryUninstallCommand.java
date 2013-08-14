@@ -20,15 +20,19 @@ import org.apache.felix.gogo.commands.Argument;
 import org.apache.felix.gogo.commands.Command;
 
 /**
- * Uninstall a Karaf Cave repository from the repositories registry.
+ * Uninstall a Cave repository from the repositories registry
  */
-@Command(scope = "cave", name = "repository-uninstall", description = "Uninstall a Karaf Cave repository from the Cave repository registry")
+@Command(scope = "cave", name = "repository-uninstall", description = "Uninstall a Cave repository from the repositories registry")
 public class RepositoryUninstallCommand extends CaveRepositoryCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The repository name", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
     String name = null;
 
     protected Object doExecute() throws Exception {
+        if (getCaveRepositoryService().getRepository(name) == null) {
+            System.err.println("Cave repository " + name + " doesn't exist");
+            return null;
+        }
         getCaveRepositoryService().uninstall(name);
         return null;
     }

@@ -22,34 +22,38 @@ import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.cave.server.api.CaveRepository;
 
 /**
- * Command to create a Karaf Cave repository.
+ * Create a Cave repository.
  */
-@Command(scope = "cave", name = "repository-create", description = "Create a new Karaf Cave repository")
+@Command(scope = "cave", name = "repository-create", description = "Create a Cave repository")
 public class RepositoryCreateCommand extends CaveRepositoryCommandSupport {
 
-    @Option(name = "-l", aliases = {"--location"}, description = "Location of the new repository on the file system", required = false, multiValued = false)
+    @Option(name = "-l", aliases = {"--location"}, description = "Location of the repository on the file system", required = false, multiValued = false)
     String location;
 
-    @Option(name = "-nu", aliases = {"--no-update"}, description = "Do not generate OBR metadata during creation", required = false, multiValued = false)
-    boolean noUpdate = false;
+    @Option(name = "-no", aliases = {"--no-obr-generate"}, description = "Do not generate OBR metadata", required = false, multiValued = false)
+    boolean noOBRGenerate = false;
 
-    @Option(name = "-nr", aliases = {"--no-register"}, description = "Do not register the repository within the OBR service", required = false, multiValued = false)
-    boolean noRegister = false;
+    @Option(name = "-ni", aliases = {"--no-install"}, description = "Do not install the repository in the OBR service", required = false, multiValued = false)
+    boolean noInstall = false;
 
     @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
     String name = null;
 
     protected Object doExecute() throws Exception {
+        if (getCaveRepositoryService().getRepository(name) != null) {
+            System.err.println("Cave repository " + name + " already exists");
+            return null;
+        }
         if (location != null) {
             getCaveRepositoryService().createRepository(name, location, false);
         } else {
             getCaveRepositoryService().createRepository(name, false);
         }
-        CaveRepository caveRepository = getExistingRepository(name);
-        if (!noUpdate) {
+        CaveRepository caveRepository = getCaveRepositoryService().getRepository(name);
+        if (!noOBRGenerate) {
             caveRepository.scan();
         }
-        if (!noRegister) {
+        if (!noInstall) {
             getCaveRepositoryService().install(name);
         }
         return null;

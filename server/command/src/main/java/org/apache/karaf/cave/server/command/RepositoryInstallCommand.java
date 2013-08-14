@@ -21,15 +21,19 @@ import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.cave.server.api.CaveRepository;
 
 /**
- * Command to install a Karaf Cave repository into the Karaf OBR service.
+ * Command to install a Cave repository into the OBR service.
  */
-@Command(scope = "cave", name = "repository-install", description = "Install (register) a Karaf Cave repository in the Karaf OBR service")
+@Command(scope = "cave", name = "repository-install", description = "Install a Cave repository in the OBR service")
 public class RepositoryInstallCommand extends CaveRepositoryCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "Name of repository", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
     String name = null;
 
     protected Object doExecute() throws Exception {
+        if (getCaveRepositoryService().getRepository(name) == null) {
+            System.err.println("Cave repository " + name + " doesn't exist");
+            return null;
+        }
         getCaveRepositoryService().install(name);
         return null;
     }
