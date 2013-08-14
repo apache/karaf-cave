@@ -24,9 +24,9 @@ import org.apache.karaf.cave.server.api.CaveRepository;
 import java.net.URL;
 
 /**
- *  Command to upload an artifact into a Karaf Cave repository
+ * Upload an artifact into a Cave repository
  */
-@Command(scope = "cave", name = "repository-upload-artifact", description = "Upload an artifact in a Karaf Cave repository")
+@Command(scope = "cave", name = "repository-upload-artifact", description = "Upload an artifact in a Cave repository")
 public class RepositoryUploadArtifactCommand extends CaveRepositoryCommandSupport {
 
     @Argument(index = 0, name = "repository", description = "The name of the repository", required = true, multiValued = false)
@@ -35,11 +35,15 @@ public class RepositoryUploadArtifactCommand extends CaveRepositoryCommandSuppor
     @Argument(index = 1, name = "artifact", description = "The URL of the artifact to upload", required = true, multiValued = false)
     String url = null;
 
-    @Option(name = "-nu", aliases = { "--no-update", "--no-refresh", "--no-register" }, description = "Do not refresh the OBR repository service", required = false, multiValued = true)
+    @Option(name = "-no", aliases = { "--no-update", "--no-refresh", "--no-obr-register" }, description = "Do not refresh the OBR service", required = false, multiValued = true)
     boolean noUpdate = false;
 
     public Object doExecute() throws Exception {
-        CaveRepository caveRepository = getExistingRepository(name);
+        if (getCaveRepositoryService().getRepository(name) == null) {
+            System.err.println("Cave repository " + name + " doesn't exist");
+            return null;
+        }
+        CaveRepository caveRepository = getCaveRepositoryService().getRepository(name);
         caveRepository.upload(new URL(url));
         if (!noUpdate) {
             getCaveRepositoryService().install(name);

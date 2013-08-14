@@ -24,25 +24,29 @@ import org.apache.karaf.cave.server.api.CaveRepository;
 import java.net.URL;
 
 /**
- * Add an URL to proxy in the Karaf Cave repository.
+ * Add an URL to proxy in the Cave repository.
  */
 @Command(scope = "cave", name = "repository-proxy", description = "Proxy a given URL in the Karaf Cave repository")
 public class RepositoryProxyCommand extends CaveRepositoryCommandSupport {
 
-    @Argument(index = 0, name = "name", description = "The repository proxying the URL", required = true, multiValued = false)
+    @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
     String name = null;
 
     @Argument(index = 1, name = "URL", description = "The URL to proxy", required = true, multiValued = false)
     String url = null;
 
-    @Option(name = "-nu", aliases = { "--no-update", "--no-refresh", "--no-register" }, description = "No refresh of the OBR URLs", required = false, multiValued = false)
+    @Option(name = "-no", aliases = { "--no-update", "--no-refresh", "--no-obr-register" }, description = "No refresh of the OBR service", required = false, multiValued = false)
     boolean noUpdate = false;
 
     @Option(name = "-f", aliases = { "--filter" }, description = "Regex filter on the artifacts URL", required = false, multiValued = false)
     String filter;
 
     protected Object doExecute() throws Exception {
-        CaveRepository repository = getExistingRepository(name);
+        if (getCaveRepositoryService().getRepository(name) == null) {
+            System.err.println("Cave repository " + name + " doesn't exist");
+            return null;
+        }
+        CaveRepository repository = getCaveRepositoryService().getRepository(name);
         repository.proxy(new URL(url), filter);
         if (!noUpdate) {
             getCaveRepositoryService().install(name);

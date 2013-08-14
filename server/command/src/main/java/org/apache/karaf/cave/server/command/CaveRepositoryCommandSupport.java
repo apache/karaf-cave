@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.cave.server.command;
 
-import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.apache.karaf.shell.console.OsgiCommandSupport;
 
@@ -33,14 +32,6 @@ public abstract class CaveRepositoryCommandSupport extends OsgiCommandSupport {
 
     public void setCaveRepositoryService(CaveRepositoryService caveRepositoryService) {
         this.caveRepositoryService = caveRepositoryService;
-    }
-
-    protected CaveRepository getExistingRepository(String name) {
-        CaveRepository caveRepository = caveRepositoryService.getRepository(name);
-        if (caveRepository == null) {
-            throw new IllegalArgumentException("Cave repository " + name + " does not exist");
-        }
-        return caveRepository;
     }
 
 }

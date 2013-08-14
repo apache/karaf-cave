@@ -24,12 +24,12 @@ import org.apache.karaf.cave.server.api.CaveRepository;
 import java.net.URL;
 
 /**
- * Command to populate a Karaf Cave repository from a given URL.
+ * Populate a Cave repository from a given URL
  */
-@Command(scope = "cave", name = "repository-populate", description = "Populate a Karaf Cave repository with the artifacts present at the given URL")
+@Command(scope = "cave", name = "repository-populate", description = "Populate a Cave repository with the artifacts available at a given URL")
 public class RepositoryPopulateCommand extends CaveRepositoryCommandSupport {
 
-    @Option(name = "-nu", aliases = { "--no-update" }, description = "Do not update the OBR metadata", required = false, multiValued = false)
+    @Option(name = "-no", aliases = { "--no-obr-generate" }, description = "Do not generate the OBR metadata", required = false, multiValued = false)
     boolean noUpdate = false;
 
     @Option(name = "-f", aliases = { "--filter" }, description = "Regex filter on the artifacts URL", required = false, multiValued = false)
@@ -38,11 +38,15 @@ public class RepositoryPopulateCommand extends CaveRepositoryCommandSupport {
     @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
     String name = null;
 
-    @Argument(index = 1, name = "url", description = "The source URL to scan", required = true, multiValued = false)
+    @Argument(index = 1, name = "url", description = "The source URL to use", required = true, multiValued = false)
     String url = null;
 
     protected Object doExecute() throws Exception {
-        CaveRepository repository = getExistingRepository(name);
+        if (getCaveRepositoryService().getRepository(name) == null) {
+            System.err.println("Cave repository " + name + " doesn't exist");
+            return null;
+        }
+        CaveRepository repository = getCaveRepositoryService().getRepository(name);
         repository.populate(new URL(url), filter, !noUpdate);
         if (!noUpdate) {
             getCaveRepositoryService().install(name);
