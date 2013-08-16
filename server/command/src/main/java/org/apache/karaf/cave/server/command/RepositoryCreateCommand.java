@@ -45,9 +45,9 @@ public class RepositoryCreateCommand extends CaveRepositoryCommandSupport {
             return null;
         }
         if (location != null) {
-            getCaveRepositoryService().createRepository(name, location, false);
+            getCaveRepositoryService().create(name, location, false);
         } else {
-            getCaveRepositoryService().createRepository(name, false);
+            getCaveRepositoryService().create(name, false);
         }
         CaveRepository caveRepository = getCaveRepositoryService().getRepository(name);
         if (!noOBRGenerate) {

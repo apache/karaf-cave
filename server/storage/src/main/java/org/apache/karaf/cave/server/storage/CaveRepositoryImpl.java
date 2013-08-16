@@ -41,7 +41,7 @@ import java.io.OutputStreamWriter;
 import java.net.URL;
 
 /**
- * Default implementation of a Karaf Cave repository.
+ * Default implementation of a Cave repository.
  */
 public class CaveRepositoryImpl extends CaveRepository {
 
@@ -65,11 +65,11 @@ public class CaveRepositoryImpl extends CaveRepository {
      * Check if the repository folder exists and create it if not.
      */
     private void createRepositoryDirectory() throws Exception {
-        LOGGER.debug("Create Karaf Cave repository {} folder.", this.getName());
+        LOGGER.debug("Create Cave repository {} folder.", this.getName());
         File locationFile = new File(this.getLocation());
         if (!locationFile.exists()) {
             locationFile.mkdirs();
-            LOGGER.debug("Karaf Cave repository {} location has been created.", this.getName());
+            LOGGER.debug("Cave repository {} location has been created.", this.getName());
             LOGGER.debug(locationFile.getAbsolutePath());
         }
         obrRepository = new RepositoryImpl();
@@ -179,7 +179,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     }
 
     /**
-     * Proxy an URL (by adding repository.xml OBR information) in the Karaf Cave repository.
+     * Proxy an URL (by adding repository.xml OBR information) in the Cave repository.
      *
      * @param url the URL to proxyFilesystem. the URL to proxyFilesystem.
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
@@ -199,7 +199,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     }
 
     /**
-     * Proxy an URL (by adding repository.xml OBR information) in the Karaf Cave repository.
+     * Proxy an URL (by adding repository.xml OBR information) in the Cave repository.
      *
      * @param url the URL to proxy.
      * @throws Exception
@@ -288,7 +288,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     }
 
     /**
-     * Populate an URL into the Karaf Cave repository, and eventually update the OBR information.
+     * Populate an URL into the Cave repository, and eventually update the OBR information.
      *
      * @param url    the URL to copy.
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
@@ -297,12 +297,12 @@ public class CaveRepositoryImpl extends CaveRepository {
      */
     public void populate(URL url, String filter, boolean update) throws Exception {
         if (url.getProtocol().equals("file")) {
-            // populate the Karaf Cave repository from a filesystem folder
+            // populate the Cave repository from a filesystem folder
             File populateFolder = new File(url.toURI());
             this.populateFromFilesystem(populateFolder, filter, update);
         }
         if (url.getProtocol().equals("http")) {
-            // populate the Karaf Cave repository from a HTTP URL
+            // populate the Cave repository from a HTTP URL
             this.populateFromHttp(url.toExternalForm(), filter, update);
         }
         if (update) {
@@ -311,7 +311,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     }
 
     /**
-     * Populate an URL into the Karaf Cave repository, and eventually update the OBR information.
+     * Populate an URL into the Cave repository, and eventually update the OBR information.
      *
      * @param url the URL to copy.
      * @param update if true the OBR information is updated, false else.
@@ -322,7 +322,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     }
 
     /**
-     * Populate the Karaf Cave repository using a filesystem directory.
+     * Populate the Cave repository using a filesystem directory.
      *
      * @param filesystem the "source" directory.
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
@@ -359,7 +359,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     }
 
     /**
-     * Populate the Karaf Cave repository using the given URL.
+     * Populate the Cave repository using the given URL.
      *
      * @param url    the "source" HTTP URL.
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
@@ -382,7 +382,7 @@ public class CaveRepositoryImpl extends CaveRepository {
                     if ((filter == null) || (url.matches(filter))) {
                         ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(new URL(url));
                         if (resource != null) {
-                            LOGGER.debug("Copy {} into the Karaf Cave repository storage", url);
+                            LOGGER.debug("Copy {} into the Cave repository storage", url);
                             int index = url.lastIndexOf("/");
                             if (index > 0) {
                                 url = url.substring(index);
@@ -422,7 +422,7 @@ public class CaveRepositoryImpl extends CaveRepository {
      * Convert the Resource absolute URI to an URI relative to the repository one.
      *
      * @param resource the Resource to manipulate.
-     * @throws Exception in cave of URI convertion failure.
+     * @throws Exception in cave of URI conversion failure.
      */
     private void useResourceRelativeUri(ResourceImpl resource) throws Exception {
         String resourceURI = resource.getURI();
@@ -452,7 +452,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     }
 
     /**
-     * Return the OBR repository.xml corresponding to this Karaf Cave repository.
+     * Return the OBR repository.xml corresponding to this Cave repository.
      *
      * @return the URL of the OBR repository.xml.
      * @throws Exception in case of lookup failure.
