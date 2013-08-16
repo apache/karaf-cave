@@ -25,45 +25,60 @@ import javax.ws.rs.*;
 public interface CaveRepositoryService {
 
     /**
-     * Create a new Karaf Cave repository.
+     * Create a Cave repository.
      *
      * @param name the name of the repository
-     * @param scan if true, the repository is scanned at creation time.
-     * @return the Karaf Cave repository.
+     * @param scan if true, the repository is scanned at creation time, and the OBR metadata are created.
+     * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
     @POST
     @Consumes("application/xml")
     @Produces("application/xml")
-    CaveRepository createRepository(String name, boolean scan) throws Exception;
+    CaveRepository create(String name, boolean scan) throws Exception;
 
     /**
-     * Create a new Karaf Cave repository.
+     * Create a Cave repository.
      *
      * @param name the name of the repository.
      * @param location the storage location of the repository.
-     * @param scan if true, the repository is scanned at creation time.
-     * @return the Karaf Cave repository.
+     * @param scan if true, the repository is scanned at creation time, and the OBR metadata are created.
+     * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
     @POST
     @Consumes("application/xml")
     @Produces("application/xml")
-    CaveRepository createRepository(String name, String location, boolean scan) throws Exception;
+    CaveRepository create(String name, String location, boolean scan) throws Exception;
 
     /**
-     * Uninstall (remove) an existing Karaf Cave repository from the OBR registry.
-     * NB: the Karaf Cave repository storage is not removed.
+     * Uninstall a Cave repository from the OBR service.
      *
-     * @param name the name of Karaf Cave repository to remove.
-     * @throws Exception in case of remove failure.
+     * @param name the name of the repository.
+     * @throws Exception in case of uninstall failure.
      */
     void uninstall(String name) throws Exception;
 
     /**
-     * Install (register) a Karaf Cave repository into the OBR registry.
+     * Remove a Cave repository from the repositories registry.
      *
-     * @param name the name of the Karaf Cave repository.
+     * @param name the name of the repository.
+     * @throws Exception in case of remove failure.
+     */
+    void remove(String name) throws Exception;
+
+    /**
+     * Destroy a Cave repository, including the storage.
+     *
+     * @param name the name of the repository.
+     * @throws Exception incase of remove failure.
+     */
+    void destroy(String name) throws Exception;
+
+    /**
+     * Install a Cave repository into the OBR service.
+     *
+     * @param name the name of the Cave repository.
      * @throws Exception in case of registration failure.
      */
     @POST
@@ -71,9 +86,9 @@ public interface CaveRepositoryService {
     void install(String name) throws Exception;
 
     /**
-     * Get the list of all Karaf Cave repositories.
+     * Get the list of all Cave repositories.
      *
-     * @return the Karaf Cave repositories.
+     * @return the Cave repositories.
      */
     @GET
     @Path("/repositories")
@@ -81,10 +96,10 @@ public interface CaveRepositoryService {
     CaveRepository[] getRepositories();
 
     /**
-     * Get the Karaf Cave repository identified by the given name.
+     * Get a Cave repository identified by the given name.
      *
-     * @param name the name of the Karaf Cave repository to look for.
-     * @return the Karaf Cave repository
+     * @param name the name of the Cave repository.
+     * @return the Cave repository
      */
     @GET
     @Path("/repositories/{name}")
