@@ -32,6 +32,11 @@
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
         </command>
+        <command name="cave/repository-destroy">
+            <action class="org.apache.karaf.cave.server.command.RepositoryDestroyCommand">
+                <property name="CaveRepositoryService" ref="caveRepositoryService"/>
+            </action>
+        </command>
         <command name="cave/repository-uninstall">
             <action class="org.apache.karaf.cave.server.command.RepositoryUninstallCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
