@@ -34,7 +34,7 @@
         </command>
         <command name="cave/repository-destroy">
             <action class="org.apache.karaf.cave.server.command.RepositoryDestroyCommand">
-                <property name="CaveRepositoryService" ref="caveRepositoryService"/>
+                <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
             <completers>
                 <ref component-id="repositoryCompleter"/>
