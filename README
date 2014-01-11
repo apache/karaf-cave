@@ -47,7 +47,7 @@ BUILDING for instructions on building Apache Karaf Cave.
 
 To install Apache Karaf Cave, first you have to register the Cave features descriptor:
 
-karaf@root> features:addurl mvn:org.apache.karaf.cave/apache-karaf-cave/2.3.0-SNAPSHOT/xml/features
+karaf@root> features:addurl mvn:org.apache.karaf.cave/apache-karaf-cave/3.0.0-SNAPSHOT/xml/features
 
 Now, you can install the Cave feature simply by typing:
 
