@@ -21,6 +21,7 @@ import org.apache.karaf.cave.server.management.CaveRepositoryMBean;
 import javax.management.NotCompliantMBeanException;
 import javax.management.StandardMBean;
 import javax.management.openmbean.*;
+import java.net.URL;
 
 /**
  * Implementation of the Cave repository MBean.
@@ -64,12 +65,84 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
         return table;
     }
 
-    public void createRepository(String name) throws Exception {
-        caveRepositoryService.create(name, true);
+    public void createRepository(String name, String location, boolean generateObr, boolean install) throws Exception {
+        if (getCaveRepositoryService().getRepository(name) != null) {
+            throw new IllegalArgumentException("Cave repository " + name + " already exists");
+        }
+        if (location != null) {
+            getCaveRepositoryService().create(name, location, false);
+        } else {
+            getCaveRepositoryService().create(name, false);
+        }
+        CaveRepository caveRepository = getCaveRepositoryService().getRepository(name);
+        if (generateObr) {
+            caveRepository.scan();
+        }
+        if (install) {
+            getCaveRepositoryService().install(name);
+        }
     }
 
-    public void removeRepository(String name) throws Exception {
+    public void destroyRepository(String name) throws Exception {
+        if (getCaveRepositoryService().getRepository(name) != null) {
+            throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
+        }
+        caveRepositoryService.destroy(name);
+    }
+
+    public void installRepository(String name) throws Exception {
+        if (getCaveRepositoryService().getRepository(name) != null) {
+            throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
+        }
+        caveRepositoryService.install(name);
+    }
+
+    public void uninstallRepository(String name) throws Exception {
+        if (getCaveRepositoryService().getRepository(name) != null) {
+            throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
+        }
         caveRepositoryService.uninstall(name);
+    }
+
+    public void populateRepository(String name, String url, boolean generateObr, String filter) throws Exception {
+        if (getCaveRepositoryService().getRepository(name) != null) {
+            throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
+        }
+        CaveRepository repository = getCaveRepositoryService().getRepository(name);
+        repository.populate(new URL(url), filter, generateObr);
+        if (generateObr) {
+            getCaveRepositoryService().install(name);
+        }
+    }
+
+    public void proxyRepository(String name, String url, boolean generateObr, String filter) throws Exception {
+        if (getCaveRepositoryService().getRepository(name) != null) {
+            throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
+        }
+        CaveRepository repository = getCaveRepositoryService().getRepository(name);
+        repository.proxy(new URL(url), filter);
+        if (generateObr) {
+            getCaveRepositoryService().install(name);
+        }
+    }
+
+    public void updateRepository(String name) throws Exception {
+        if (getCaveRepositoryService().getRepository(name) != null) {
+            throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
+        }
+        CaveRepository caveRepository = getCaveRepositoryService().getRepository(name);
+        caveRepository.scan();
+    }
+
+    public void uploadArtifact(String repository, String artifactUrl, boolean generateObr) throws Exception {
+        if (getCaveRepositoryService().getRepository(repository) != null) {
+            throw new IllegalArgumentException("Cave repository " + repository + " doesn't exist");
+        }
+        CaveRepository caveRepository = getCaveRepositoryService().getRepository(repository);
+        caveRepository.upload(new URL(artifactUrl));
+        if (generateObr) {
+            getCaveRepositoryService().install(repository);
+        }
     }
 
 }
