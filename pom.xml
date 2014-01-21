@@ -221,7 +221,7 @@
                     <releaseProfiles>release,deploy</releaseProfiles>
                     <preparationGoals>clean install</preparationGoals>
                     <goals>deploy</goals>
-                    <arguments>-Prelease,deploy</arguments>
+                    <arguments>-Prelease,manual,deploy</arguments>
                 </configuration>
             </plugin>
         </plugins>
