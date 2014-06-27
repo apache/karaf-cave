@@ -40,8 +40,8 @@
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
         <httpclient.version>4.2.5</httpclient.version>
         <jsoup.version>1.7.2</jsoup.version>
-        <karaf.version>3.0.0</karaf.version>
-        <osgi.version>4.3.0</osgi.version>
+        <karaf.version>3.0.1</karaf.version>
+        <osgi.version>5.0.0</osgi.version>
         <wagon.version>1.0</wagon.version>
     </properties>
 
