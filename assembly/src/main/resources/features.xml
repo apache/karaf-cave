@@ -31,7 +31,7 @@
             mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/filesystem
         </configfile>
         <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
-        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/${httpclient.version}</bundle>
+        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.3.2</bundle>
         <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
         <bundle>mvn:org.jsoup/jsoup/${jsoup.version}</bundle>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.api/${project.version}</bundle>

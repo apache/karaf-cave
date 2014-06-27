@@ -53,14 +53,14 @@
                             org.apache.karaf.cave.server.management*;version=${project.version}
                         </Export-Package>
                         <Import-Package>
-                            !org.apache.karaf.cave.server.management*,
                             javax.management,
                             javax.management.loading,
                             javax.management.openmbean,
-                            org.apache.karaf.management*;version="[2,4)",
-                            org.apache.karaf.cave.server.api;version=${project.version},
-                            *
+                            org.apache.karaf.cave.server.api;version=${project.version}
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.cave.server.management.internal
+                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
