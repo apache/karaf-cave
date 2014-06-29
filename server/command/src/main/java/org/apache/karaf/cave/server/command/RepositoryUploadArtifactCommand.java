@@ -16,17 +16,17 @@
  */
 package org.apache.karaf.cave.server.command;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.felix.gogo.commands.Option;
 import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.commands.Option;
 
 import java.net.URL;
 
 /**
  * Upload an artifact into a Cave repository
  */
-@Command(scope = "cave", name = "repository-upload-artifact", description = "Upload an artifact in a Cave repository")
+@Command(scope = "cave", name = "repository-upload", description = "Upload an artifact in a Cave repository")
 public class RepositoryUploadArtifactCommand extends CaveRepositoryCommandSupport {
 
     @Argument(index = 0, name = "repository", description = "The name of the repository", required = true, multiValued = false)

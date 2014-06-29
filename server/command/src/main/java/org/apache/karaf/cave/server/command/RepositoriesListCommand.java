@@ -16,24 +16,28 @@
  */
 package org.apache.karaf.cave.server.command;
 
-import org.apache.felix.gogo.commands.Command;
 import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.shell.table.ShellTable;
 
 /**
  * Command to list all Cave repositories
  */
-@Command(scope = "cave", name = "repositories-list", description = "List all Cave repositories")
+@Command(scope = "cave", name = "repositories", description = "List all Cave repositories")
 public class RepositoriesListCommand extends CaveRepositoryCommandSupport {
-
-    private static final String OUTPUT_FORMAT = "%-20s %-20s";
 
     protected Object doExecute() throws Exception {
         CaveRepository[] repositories = getCaveRepositoryService().getRepositories();
 
-        System.out.println(String.format(OUTPUT_FORMAT, "Name", "Location"));
+        ShellTable table = new ShellTable();
+        table.column("Name");
+        table.column("Location");
+
         for (int i = 0; i < repositories.length; i++) {
-            System.out.println(String.format(OUTPUT_FORMAT, "[" + repositories[i].getName() + "]", "[" + repositories[i].getLocation() + "]"));
+            table.addRow().addContent(repositories[i].getName(), repositories[i].getLocation());
         }
+
+        table.print(System.out);
 
         return null;
     }

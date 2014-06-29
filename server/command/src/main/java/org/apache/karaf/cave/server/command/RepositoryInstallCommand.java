@@ -16,9 +16,8 @@
  */
 package org.apache.karaf.cave.server.command;
 
-import org.apache.felix.gogo.commands.Argument;
-import org.apache.felix.gogo.commands.Command;
-import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.shell.commands.Argument;
+import org.apache.karaf.shell.commands.Command;
 
 /**
  * Command to install a Cave repository into the OBR service.

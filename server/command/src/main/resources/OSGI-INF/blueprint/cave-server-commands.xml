@@ -21,18 +21,18 @@
 
     <reference id="caveRepositoryService" interface="org.apache.karaf.cave.server.api.CaveRepositoryService"/>
 
-    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.0.0">
-        <command name="cave/repositories-list">
+    <command-bundle xmlns="http://karaf.apache.org/xmlns/shell/v1.1.0">
+        <command>
             <action class="org.apache.karaf.cave.server.command.RepositoriesListCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
         </command>
-        <command name="cave/repository-create">
+        <command>
             <action class="org.apache.karaf.cave.server.command.RepositoryCreateCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
         </command>
-        <command name="cave/repository-destroy">
+        <command>
             <action class="org.apache.karaf.cave.server.command.RepositoryDestroyCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
@@ -41,7 +41,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="cave/repository-uninstall">
+        <command>
             <action class="org.apache.karaf.cave.server.command.RepositoryUninstallCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
@@ -50,7 +50,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="cave/repository-update">
+        <command>
             <action class="org.apache.karaf.cave.server.command.RepositoryUpdateCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
@@ -59,7 +59,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="cave/repository-proxy">
+        <command>
             <action class="org.apache.karaf.cave.server.command.RepositoryProxyCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
@@ -68,7 +68,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="cave/repository-populate">
+        <command>
             <action class="org.apache.karaf.cave.server.command.RepositoryPopulateCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
@@ -77,7 +77,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="cave/repository-install">
+        <command>
             <action class="org.apache.karaf.cave.server.command.RepositoryInstallCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
@@ -86,7 +86,7 @@
                 <null/>
             </completers>
         </command>
-        <command name="cave/repository-upload-artifact">
+        <command>
             <action class="org.apache.karaf.cave.server.command.RepositoryUploadArtifactCommand">
                 <property name="caveRepositoryService" ref="caveRepositoryService"/>
             </action>
