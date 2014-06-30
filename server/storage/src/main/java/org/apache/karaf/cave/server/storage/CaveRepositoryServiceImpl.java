@@ -242,7 +242,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
                 }
             }
         } catch (Exception e) {
-            LOGGER.warn("Unable to load Cave repositories");
+            LOGGER.debug("Unable to load Cave repositories");
             LOGGER.trace("Unable to load Cave repositories", e);
         }
     }
