@@ -16,14 +16,12 @@
  */
 package org.apache.karaf.cave.server.api;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.net.URL;
 
 /**
  * Cave repository is a storage area where to upload artifacts.
  * It's already the basement of the OBR repository.xml metadata.
  */
-@XmlRootElement(name = "cave-repository")
 public abstract class CaveRepository {
 
     private String name;
