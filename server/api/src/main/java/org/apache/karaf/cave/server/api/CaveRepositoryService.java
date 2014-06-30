@@ -16,12 +16,9 @@
  */
 package org.apache.karaf.cave.server.api;
 
-import javax.ws.rs.*;
-
 /**
  * Service to manipulate a Cave repository.
  */
-@Path("/")
 public interface CaveRepositoryService {
 
     /**
@@ -32,9 +29,6 @@ public interface CaveRepositoryService {
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
-    @POST
-    @Consumes("application/xml")
-    @Produces("application/xml")
     CaveRepository create(String name, boolean scan) throws Exception;
 
     /**
@@ -46,9 +40,6 @@ public interface CaveRepositoryService {
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
-    @POST
-    @Consumes("application/xml")
-    @Produces("application/xml")
     CaveRepository create(String name, String location, boolean scan) throws Exception;
 
     /**
@@ -81,8 +72,6 @@ public interface CaveRepositoryService {
      * @param name the name of the Cave repository.
      * @throws Exception in case of registration failure.
      */
-    @POST
-    @Consumes("text/plain")
     void install(String name) throws Exception;
 
     /**
@@ -90,9 +79,6 @@ public interface CaveRepositoryService {
      *
      * @return the Cave repositories.
      */
-    @GET
-    @Path("/repositories")
-    @Produces("application/xml")
     CaveRepository[] getRepositories();
 
     /**
@@ -101,9 +87,6 @@ public interface CaveRepositoryService {
      * @param name the name of the Cave repository.
      * @return the Cave repository
      */
-    @GET
-    @Path("/repositories/{name}")
-    @Produces("application/xml")
-    CaveRepository getRepository(@PathParam("name") String name);
+    CaveRepository getRepository(String name);
 
 }
