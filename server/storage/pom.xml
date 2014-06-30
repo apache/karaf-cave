@@ -71,7 +71,7 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
                             org.apache.karaf.cave.server.api;version="${project.version}",
-                            org.slf4j*;resolution:=optional,
+                            org.slf4j*;version="[1.6,2)";resolution:=optional,
                             org.apache.felix.bundlerepository*;version="[2,3)",
                             org.osgi.framework;version="[1,4)",
                             org.osgi.service.blueprint,
