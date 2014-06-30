@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.cave</groupId>
         <artifactId>org.apache.karaf.cave.server</artifactId>
-        <version>3.0.0-SNAPSHOT</version>
+        <version>3.0.0</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
