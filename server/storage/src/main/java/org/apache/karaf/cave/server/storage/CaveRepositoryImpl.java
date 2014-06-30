@@ -119,9 +119,14 @@ public class CaveRepositoryImpl extends CaveRepository {
         if (resource == null) {
             temp.delete();
             LOGGER.warn("The {} artifact source is not a valid OSGi bundle", url);
-            return;
+            throw new IllegalArgumentException("The " + url.toString() + " artifact source is not a valid OSGi bundle");
         }
         File destination = new File(new File(this.getLocation()), resource.getSymbolicName() + "-" + resource.getVersion() + ".jar");
+        if (destination.exists()) {
+            temp.delete();
+            LOGGER.warn("The {} artifact is already present in the Cave repository", url);
+            throw new IllegalArgumentException("The " + url.toString() + " artifact is already present in the Cave repository");
+        }
         FileUtils.moveFile(temp, destination);
         resource = (ResourceImpl) new DataModelHelperImpl().createResource(destination.toURI().toURL());
         this.addResource(resource);
@@ -181,7 +186,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     /**
      * Proxy an URL (by adding repository.xml OBR information) in the Cave repository.
      *
-     * @param url the URL to proxyFilesystem. the URL to proxyFilesystem.
+     * @param url    the URL to proxyFilesystem. the URL to proxyFilesystem.
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
      * @throws Exception
      */
@@ -211,7 +216,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     /**
      * Proxy a local filesystem (folder).
      *
-     * @param entry the filesystem to proxyFilesystem.
+     * @param entry  the filesystem to proxyFilesystem.
      * @param filter regex filter. Only the artifacts URL matching the filter will be considered.
      * @throws Exception in case of proxyFilesystem failure
      */
@@ -240,7 +245,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     /**
      * Proxy a HTTP URL locally.
      *
-     * @param url the HTTP URL to proxy.
+     * @param url    the HTTP URL to proxy.
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
      * @throws Exception in case of proxy failure.
      */
@@ -313,7 +318,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     /**
      * Populate an URL into the Cave repository, and eventually update the OBR information.
      *
-     * @param url the URL to copy.
+     * @param url    the URL to copy.
      * @param update if true the OBR information is updated, false else.
      * @throws Exception
      */
@@ -325,7 +330,7 @@ public class CaveRepositoryImpl extends CaveRepository {
      * Populate the Cave repository using a filesystem directory.
      *
      * @param filesystem the "source" directory.
-     * @param filter regex filter. Only artifacts URL matching the filter will be considered.
+     * @param filter     regex filter. Only artifacts URL matching the filter will be considered.
      * @param update     if true, the resources are added into the OBR metadata, false else.
      * @throws Exception in case of populate failure.
      */

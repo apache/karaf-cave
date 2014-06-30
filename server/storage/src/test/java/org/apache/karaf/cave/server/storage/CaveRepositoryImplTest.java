@@ -21,6 +21,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.net.URL;
 
 /**
@@ -44,7 +47,23 @@ public class CaveRepositoryImplTest {
 
     @Test
     public void testUploadNonBundleFromURL() throws Exception {
-        repository.upload(new URL("http://repo1.maven.org/maven2/commons-vfs/commons-vfs/1.0/commons-vfs-1.0.jar"));
+        try {
+            repository.upload(new URL("http://repo1.maven.org/maven2/commons-vfs/commons-vfs/1.0/commons-vfs-1.0.jar"));
+            fail("An exception should be raised that the artifact is not a bundle.");
+        } catch (IllegalArgumentException e) {
+            assertTrue("Wrong exception returned", e.getMessage().contains("artifact source is not a valid OSGi bundle"));
+        }
+    }
+
+    @Test
+    public void testAlreadyExistingBundle() throws Exception {
+        try {
+            repository.upload(new URL("http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.commons-beanutils/1.8.2_1/org.apache.servicemix.bundles.commons-beanutils-1.8.2_1.jar"));
+            repository.upload(new URL("http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.commons-beanutils/1.8.2_1/org.apache.servicemix.bundles.commons-beanutils-1.8.2_1.jar"));
+            fail("An exception should be raised that the artifact already exists in the Cave repository.");
+        } catch (IllegalArgumentException expected) {
+            assertTrue("Wrong exception returned.", expected.getMessage().contains("artifact is already present in the Cave repository"));
+        }
     }
 
 }
