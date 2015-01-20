@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache</groupId>
         <artifactId>apache</artifactId>
-        <version>14</version>
+        <version>15</version>
         <relativePath />
     </parent>
 
@@ -40,7 +40,7 @@
         <felix.bundlerepository.version>1.6.6</felix.bundlerepository.version>
         <httpclient.version>4.3.4</httpclient.version>
         <jsoup.version>1.7.3</jsoup.version>
-        <karaf.version>3.0.1</karaf.version>
+        <karaf.version>3.0.2</karaf.version>
         <osgi.version>5.0.0</osgi.version>
         <wagon.version>1.0</wagon.version>
     </properties>
