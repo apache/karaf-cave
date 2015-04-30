@@ -41,10 +41,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
-        </dependency>
-        <dependency>
             <groupId>org.apache.karaf.cave.server</groupId>
             <artifactId>org.apache.karaf.cave.server.api</artifactId>
             <version>${project.version}</version>

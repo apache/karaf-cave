@@ -44,8 +44,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.bundlerepository</artifactId>
+            <groupId>org.apache.karaf.features</groupId>
+            <artifactId>org.apache.karaf.features.core</artifactId>
         </dependency>
         <dependency>
             <groupId>org.jsoup</groupId>
@@ -58,6 +58,10 @@
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
         </dependency>
     </dependencies>
 
@@ -83,13 +87,17 @@
                             !org.apache.felix.shell,
                             !org.apache.felix.bundlerepository.impl.wrapper,
                             !org.osgi.service.obr,
-                            !javax.xml.stream
+                            org.osgi.resource*,
+                            org.osgi.service.repository*,
+                            javax.xml.stream*,
                         </Import-Package>
                         <Private-Package>
                             org.kxml2.io,
                             org.xmlpull.v1,
                             org.apache.felix.utils*,
-                            org.apache.felix.bundlerepository.impl*
+                            org.apache.felix.bundlerepository.impl*,
+                            org.apache.karaf.features.internal.repository,
+                            org.apache.karaf.features.internal.resolver
                         </Private-Package>
                     </instructions>
                 </configuration>

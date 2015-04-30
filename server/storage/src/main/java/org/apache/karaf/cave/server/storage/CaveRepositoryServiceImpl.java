@@ -16,7 +16,6 @@
  */
 package org.apache.karaf.cave.server.storage;
 
-import org.apache.felix.bundlerepository.RepositoryAdmin;
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.slf4j.Logger;
@@ -37,7 +36,6 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
     public static final String STORAGE_FILE = "repositories.properties";
 
     private File storageLocation;
-    private RepositoryAdmin repositoryAdmin;
 
     private Map<String, CaveRepository> repositories = new HashMap<String, CaveRepository>();
 
@@ -47,14 +45,6 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
 
     public void setStorageLocation(File storageLocation) {
         this.storageLocation = storageLocation;
-    }
-
-    public RepositoryAdmin getRepositoryAdmin() {
-        return this.repositoryAdmin;
-    }
-
-    public void setRepositoryAdmin(RepositoryAdmin repositoryAdmin) {
-        this.repositoryAdmin = repositoryAdmin;
     }
 
     /**
@@ -100,7 +90,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         if (repository == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
-        repositoryAdmin.removeRepository(repository.getRepositoryXml().toString());
+        // TODO: unregister Repository service
         save();
     }
 
@@ -145,7 +135,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         if (caveRepository == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
-        repositoryAdmin.addRepository(caveRepository.getRepositoryXml());
+        // TODO: register the Repository service
     }
 
     /**

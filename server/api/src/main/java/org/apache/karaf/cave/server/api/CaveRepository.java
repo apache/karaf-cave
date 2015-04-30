@@ -118,13 +118,13 @@ public abstract class CaveRepository {
     public abstract void populate(URL url, String filter, boolean update) throws Exception;
 
     /**
-     * Return the output stream of the resource at the given URI.
+     * Return an URL for the resource at the given URI.
      *
      * @param uri the resource URI.
-     * @return the output stream of the resource.
+     * @return the URL for the resource.
      * @throws Exception in case of read failure.
      */
-    //public abstract OutputStream getResourceByUri(String uri) throws Exception;
+    public abstract URL getResourceByUri(String uri) throws Exception;
 
     /**
      * Return the output stream of the resource identified by the given ID.

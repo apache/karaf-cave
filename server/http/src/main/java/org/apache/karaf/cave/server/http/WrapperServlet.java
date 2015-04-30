@@ -16,8 +16,6 @@
  */
 package org.apache.karaf.cave.server.http;
 
-import org.apache.felix.bundlerepository.RepositoryAdmin;
-import org.apache.felix.bundlerepository.Resource;
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.osgi.framework.BundleContext;
@@ -57,16 +55,23 @@ public class WrapperServlet extends HttpServlet {
 
     public void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
-        // lookup on the OBR RepositoryAdmin service
-        ServiceReference repositoryAdminReference = bundleContext.getServiceReference(RepositoryAdmin.class.getName());
-        if (repositoryAdminReference == null) {
-            throw new ServletException("OBR repository admin service is not available");
+        ServiceReference caveRepositoryServiceReference = bundleContext.getServiceReference(CaveRepositoryService.class.getName());
+        if (caveRepositoryServiceReference == null) {
+            throw new ServletException("CaveRepositoryService is not available");
         }
-        RepositoryAdmin repositoryAdmin = (RepositoryAdmin) bundleContext.getService(repositoryAdminReference);
-        if (repositoryAdmin == null) {
-            bundleContext.ungetService(repositoryAdminReference);
-            throw new ServletException("OBR repository admin service is not available");
+        CaveRepositoryService caveRepositoryService = (CaveRepositoryService) bundleContext.getService(caveRepositoryServiceReference);
+        if (caveRepositoryService == null) {
+            throw new ServletException("CaveRepositoryService is not available");
         }
+
+        try {
+            doIt2(caveRepositoryService, request, response);
+        } finally {
+            bundleContext.ungetService(caveRepositoryServiceReference);
+        }
+    }
+
+    private void doIt2(CaveRepositoryService caveRepositoryService, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String uri = request.getPathInfo();
 
@@ -75,21 +80,14 @@ public class WrapperServlet extends HttpServlet {
 
         // listing the repositories
         if (request.getParameter("repositories") != null) {
-            ServiceReference caveRepositoryServiceReference = bundleContext.getServiceReference(CaveRepositoryService.class.getName());
-            if (caveRepositoryServiceReference != null) {
-                CaveRepositoryService caveRepositoryService = (CaveRepositoryService) bundleContext.getService(caveRepositoryServiceReference);
-                if (caveRepositoryService != null) {
-                    CaveRepository[] caveRepositories = caveRepositoryService.getRepositories();
-                    response.setContentType("text/plain");
-                    PrintWriter writer = response.getWriter();
-                    for (CaveRepository caveRepository : caveRepositories) {
-                        writer.println(caveRepository.getName());
-                    }
-                    writer.flush();
-                    writer.close();
-                }
-                bundleContext.ungetService(caveRepositoryServiceReference);
+            CaveRepository[] caveRepositories = caveRepositoryService.getRepositories();
+            response.setContentType("text/plain");
+            PrintWriter writer = response.getWriter();
+            for (CaveRepository caveRepository : caveRepositories) {
+                writer.println(caveRepository.getName());
             }
+            writer.flush();
+            writer.close();
             return;
         }
 
@@ -103,52 +101,44 @@ public class WrapperServlet extends HttpServlet {
                 int index = uri.indexOf("-repository.xml");
                 String caveRepositoryName = uri.substring(0, index);
 
-                ServiceReference caveRepositoryServiceReference = bundleContext.getServiceReference(CaveRepositoryService.class.getName());
-                if (caveRepositoryServiceReference != null) {
-                    CaveRepositoryService caveRepositoryService = (CaveRepositoryService) bundleContext.getService(caveRepositoryServiceReference);
-                    if (caveRepositoryService != null) {
-                        CaveRepository caveRepository = caveRepositoryService.getRepository(caveRepositoryName);
-                        if (caveRepository != null) {
-                            url = caveRepository.getRepositoryXml();
-                            response.setContentType("text/xml");
+                CaveRepository caveRepository = caveRepositoryService.getRepository(caveRepositoryName);
+                if (caveRepository == null) {
+                    throw new ServletException("No repository found for name " + caveRepositoryName);
+                }
+                url = caveRepository.getRepositoryXml();
+                response.setContentType("text/xml");
+            } else {
+                for (CaveRepository repository : caveRepositoryService.getRepositories()) {
+                    URL resourceUrl = repository.getResourceByUri(uri);
+                    if (resourceUrl != null) {
+                        if (url != null) {
+                            throw new ServletException("Multiple resources found with URI " + uri);
+                        } else {
+                            url = resourceUrl;
                         }
                     }
-                    bundleContext.ungetService(caveRepositoryServiceReference);
                 }
-            } else {
-                Resource[] resources = repositoryAdmin.discoverResources("(uri=*" + uri + ")");
-                if (resources.length == 0) {
+                if (url == null) {
                     throw new ServletException("No resource found with URI " + uri);
                 }
-                if (resources.length > 1) {
-                    throw new ServletException("Multiple resources found with URI " + uri);
-                }
-                // I have exactly one resource associated to the URI
-                url = new URL(resources[0].getURI());
                 response.setContentType("application/java-archive");
             }
 
-            if (url != null) {
-                // send the resource content to the HTTP response
-                InputStream inputStream = url.openStream();
-                OutputStream outputStream = response.getOutputStream();
-                int c;
-                while ((c = inputStream.read()) >= 0) {
-                    outputStream.write(c);
-                }
-                inputStream.close();
-                outputStream.flush();
-                outputStream.close();
-            } else {
-                throw new ServletException("No resource look-up provided");
+            // send the resource content to the HTTP response
+            InputStream inputStream = url.openStream();
+            OutputStream outputStream = response.getOutputStream();
+            int c;
+            while ((c = inputStream.read()) >= 0) {
+                outputStream.write(c);
             }
+            inputStream.close();
+            outputStream.flush();
+            outputStream.close();
 
         } catch (ServletException servletException) {
             throw servletException;
         } catch (Exception e) {
             throw new ServletException(e);
-        } finally {
-            bundleContext.ungetService(repositoryAdminReference);
         }
     }
 

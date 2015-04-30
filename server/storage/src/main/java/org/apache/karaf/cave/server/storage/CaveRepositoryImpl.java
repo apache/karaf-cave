@@ -16,29 +16,44 @@
  */
 package org.apache.karaf.cave.server.storage;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+
 import org.apache.commons.io.FileUtils;
-import org.apache.felix.bundlerepository.Resource;
-import org.apache.felix.bundlerepository.impl.DataModelHelperImpl;
-import org.apache.felix.bundlerepository.impl.RepositoryImpl;
-import org.apache.felix.bundlerepository.impl.ResourceImpl;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.features.internal.resolver.ResolverUtil;
+import org.apache.karaf.features.internal.resolver.ResourceBuilder;
+import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.jsoup.Jsoup;
 import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.osgi.framework.BundleException;
+import org.osgi.framework.Constants;
+import org.osgi.resource.Capability;
+import org.osgi.resource.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import java.net.URL;
+import static java.util.jar.JarFile.MANIFEST_NAME;
+import static org.osgi.service.repository.ContentNamespace.CAPABILITY_URL_ATTRIBUTE;
+import static org.osgi.service.repository.ContentNamespace.CONTENT_NAMESPACE;
 
 /**
  * Default implementation of a Cave repository.
@@ -47,7 +62,7 @@ public class CaveRepositoryImpl extends CaveRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CaveRepositoryImpl.class);
 
-    private RepositoryImpl obrRepository;
+    private OsgiRepository repository;
 
     public CaveRepositoryImpl(String name, String location, boolean scan) throws Exception {
         super();
@@ -72,8 +87,8 @@ public class CaveRepositoryImpl extends CaveRepository {
             LOGGER.debug("Cave repository {} location has been created.", this.getName());
             LOGGER.debug(locationFile.getAbsolutePath());
         }
-        obrRepository = new RepositoryImpl();
-        obrRepository.setName(this.getName());
+        repository = new OsgiRepository();
+        repository.setName(this.getName());
     }
 
     /**
@@ -84,7 +99,7 @@ public class CaveRepositoryImpl extends CaveRepository {
     private void generateRepositoryXml() throws Exception {
         File repositoryXml = this.getRepositoryXmlFile();
         OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(repositoryXml));
-        new DataModelHelperImpl().writeRepository(obrRepository, writer);
+        repository.writeRepository(writer);
         writer.flush();
         writer.close();
     }
@@ -97,9 +112,9 @@ public class CaveRepositoryImpl extends CaveRepository {
      */
     private void addResource(ResourceImpl resource) throws Exception {
         if (resource != null) {
-            this.useResourceRelativeUri(resource);
-            obrRepository.addResource(resource);
-            obrRepository.setLastModified(System.currentTimeMillis());
+            useResourceRelativeUri(resource);
+            repository.addResource(resource);
+            repository.setIncrement(System.currentTimeMillis());
         }
     }
 
@@ -111,26 +126,27 @@ public class CaveRepositoryImpl extends CaveRepository {
      */
     public void upload(URL url) throws Exception {
         LOGGER.debug("Upload new artifact from {}", url);
+        // TODO: this is problematic if receiving multiple requests at the same time
         String artifactName = "artifact-" + System.currentTimeMillis();
         File temp = new File(new File(this.getLocation()), artifactName);
         FileUtils.copyURLToFile(url, temp);
         // update the repository.xml
-        ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(temp.toURI().toURL());
+        ResourceImpl resource = createResource(temp.toURI().toURL());
         if (resource == null) {
             temp.delete();
             LOGGER.warn("The {} artifact source is not a valid OSGi bundle", url);
             throw new IllegalArgumentException("The " + url.toString() + " artifact source is not a valid OSGi bundle");
         }
-        File destination = new File(new File(this.getLocation()), resource.getSymbolicName() + "-" + resource.getVersion() + ".jar");
+        File destination = new File(new File(getLocation()), ResolverUtil.getSymbolicName(resource) + "-" + ResolverUtil.getVersion(resource) + ".jar");
         if (destination.exists()) {
             temp.delete();
             LOGGER.warn("The {} artifact is already present in the Cave repository", url);
             throw new IllegalArgumentException("The " + url.toString() + " artifact is already present in the Cave repository");
         }
         FileUtils.moveFile(temp, destination);
-        resource = (ResourceImpl) new DataModelHelperImpl().createResource(destination.toURI().toURL());
-        this.addResource(resource);
-        this.generateRepositoryXml();
+        resource = createResource(destination.toURI().toURL());
+        addResource(resource);
+        generateRepositoryXml();
     }
 
     /**
@@ -139,8 +155,8 @@ public class CaveRepositoryImpl extends CaveRepository {
      * @throws Exception in case of scan failure.
      */
     public void scan() throws Exception {
-        obrRepository = new RepositoryImpl();
-        obrRepository.setName(this.getName());
+        repository = new OsgiRepository();
+        repository.setName(this.getName());
         this.scan(new File(this.getLocation()));
         this.generateRepositoryXml();
     }
@@ -162,8 +178,8 @@ public class CaveRepositoryImpl extends CaveRepository {
             try {
                 URL bundleUrl = entry.toURI().toURL();
                 if (isPotentialBundle(bundleUrl.toString())) {
-                    ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(bundleUrl);
-                    this.addResource(resource);
+                    ResourceImpl resource = createResource(bundleUrl);
+                    addResource(resource);
                 }
             } catch (IllegalArgumentException e) {
                 LOGGER.warn(e.getMessage());
@@ -230,16 +246,50 @@ public class CaveRepositoryImpl extends CaveRepository {
         } else {
             try {
                 if ((filter == null) || (entry.toURI().toURL().toString().matches(filter))) {
-                    Resource resource = new DataModelHelperImpl().createResource(entry.toURI().toURL());
+                    Resource resource = createResource(entry.toURI().toURL());
                     if (resource != null) {
-                        obrRepository.addResource(resource);
-                        obrRepository.setLastModified(System.currentTimeMillis());
+                        repository.addResource(resource);
+                        repository.setIncrement(System.currentTimeMillis());
                     }
                 }
             } catch (IllegalArgumentException e) {
                 LOGGER.warn(e.getMessage());
             }
         }
+    }
+
+    private ResourceImpl createResource(URL url) throws BundleException, IOException {
+        return createResource(url, url.toExternalForm());
+    }
+
+    private ResourceImpl createResource(URL url, String uri) throws BundleException, IOException {
+        Map<String, String> headers = getHeaders(url);
+        if (headers.get(Constants.BUNDLE_MANIFESTVERSION) == null) {
+            LOGGER.warn("The {} artifact source is not a valid OSGi bundle", url);
+            throw new IllegalArgumentException("The " + url.toString() + " artifact source is not a valid OSGi bundle");
+        }
+        return ResourceBuilder.build(uri, headers);
+    }
+
+    Map<String, String> getHeaders(URL url) throws IOException {
+        InputStream is = url.openStream();
+        try {
+            ZipInputStream zis = new ZipInputStream(is);
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (MANIFEST_NAME.equals(entry.getName())) {
+                    Attributes attributes = new Manifest(zis).getMainAttributes();
+                    Map<String, String> headers = new HashMap<String, String>();
+                    for (Map.Entry attr : attributes.entrySet()) {
+                        headers.put(attr.getKey().toString(), attr.getValue().toString());
+                    }
+                    return headers;
+                }
+            }
+        } finally {
+            is.close();
+        }
+        throw new IllegalArgumentException("Resource " + url + " does not contain a manifest");
     }
 
     /**
@@ -263,10 +313,10 @@ public class CaveRepositoryImpl extends CaveRepository {
                 // I have a jar/binary, potentially a resource
                 try {
                     if ((filter == null) || (url.matches(filter))) {
-                        Resource resource = new DataModelHelperImpl().createResource(new URL(url));
+                        Resource resource = createResource(new URL(url));
                         if (resource != null) {
-                            obrRepository.addResource(resource);
-                            obrRepository.setLastModified(System.currentTimeMillis());
+                            repository.addResource(resource);
+                            repository.setIncrement(System.currentTimeMillis());
                         }
                     }
                 } catch (IllegalArgumentException e) {
@@ -344,16 +394,16 @@ public class CaveRepositoryImpl extends CaveRepository {
         } else {
             try {
                 if ((filter == null) || (filesystem.toURI().toURL().toString().matches(filter))) {
-                    ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(filesystem.toURI().toURL());
+                    ResourceImpl resource = createResource(filesystem.toURI().toURL());
                     if (resource != null) {
                         // copy the resource
                         File destination = new File(new File(this.getLocation()), filesystem.getName());
                         LOGGER.debug("Copy from {} to {}", filesystem.getAbsolutePath(), destination.getAbsolutePath());
                         FileUtils.copyFile(filesystem, destination);
                         if (update) {
-                            resource = (ResourceImpl) new DataModelHelperImpl().createResource(destination.toURI().toURL());
-                            LOGGER.debug("Update the OBR metadata with {}", resource.getId());
-                            this.addResource(resource);
+                            resource = createResource(destination.toURI().toURL());
+                            LOGGER.debug("Update the OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
+                            addResource(resource);
                         }
                     }
                 }
@@ -385,21 +435,21 @@ public class CaveRepositoryImpl extends CaveRepository {
                 // I have a jar/binary, potentially a resource
                 try {
                     if ((filter == null) || (url.matches(filter))) {
-                        ResourceImpl resource = (ResourceImpl) new DataModelHelperImpl().createResource(new URL(url));
+                        ResourceImpl resource = createResource(new URL(url));
                         if (resource != null) {
                             LOGGER.debug("Copy {} into the Cave repository storage", url);
                             int index = url.lastIndexOf("/");
                             if (index > 0) {
                                 url = url.substring(index);
                             }
-                            File destination = new File(new File(this.getLocation()), url);
+                            File destination = new File(new File(getLocation()), url);
                             FileOutputStream outputStream = new FileOutputStream(destination);
                             entity.writeTo(outputStream);
                             outputStream.flush();
                             outputStream.close();
                             if (update) {
-                                resource = (ResourceImpl) new DataModelHelperImpl().createResource(destination.toURI().toURL());
-                                LOGGER.debug("Update OBR metadata with {}", resource.getId());
+                                resource = createResource(destination.toURI().toURL());
+                                LOGGER.debug("Update OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
                                 this.addResource(resource);
                             }
                         }
@@ -416,7 +466,7 @@ public class CaveRepositoryImpl extends CaveRepository {
                     for (int i = 1; i < links.size(); i++) {
                         Element link = links.get(i);
                         String absoluteHref = link.attr("abs:href");
-                        this.populateFromHttp(absoluteHref, filter, update);
+                        populateFromHttp(absoluteHref, filter, update);
                     }
                 }
             }
@@ -430,15 +480,20 @@ public class CaveRepositoryImpl extends CaveRepository {
      * @throws Exception in cave of URI conversion failure.
      */
     private void useResourceRelativeUri(ResourceImpl resource) throws Exception {
-        String resourceURI = resource.getURI();
-        String locationURI = "file:" + this.getLocation();
-        LOGGER.debug("Converting resource URI {} relatively to repository URI {}", resourceURI, locationURI);
-        if (resourceURI.startsWith(locationURI)) {
-            resourceURI = resourceURI.substring(locationURI.length() + 1);
-            LOGGER.debug("Resource URI converted to " + resourceURI);
-            resource.put(Resource.URI, resourceURI);
+        for (Capability cap : resource.getCapabilities(null)) {
+            if (cap.getNamespace().equals(CONTENT_NAMESPACE)) {
+                String resourceURI = cap.getAttributes().get(CAPABILITY_URL_ATTRIBUTE).toString();
+                String locationURI = "file:" + getLocation();
+                LOGGER.debug("Converting resource URI {} relatively to repository URI {}", resourceURI, locationURI);
+                if (resourceURI.startsWith(locationURI)) {
+                    resourceURI = resourceURI.substring(locationURI.length() + 1);
+                    LOGGER.debug("Resource URI converted to " + resourceURI);
+                    // This is a bit hacky, but the map is not read only
+                    cap.getAttributes().put(CAPABILITY_URL_ATTRIBUTE, resourceURI);
+                }
+                break;
+            }
         }
-
     }
 
     /**
@@ -451,9 +506,10 @@ public class CaveRepositoryImpl extends CaveRepository {
         return new File(new File(this.getLocation()), "repository.xml");
     }
 
-    public void getResourceByUri(String uri) {
+    public URL getResourceByUri(String uri) {
         // construct the file starting from the repository URI
-
+        // TODO
+        throw new RuntimeException("Not implemented yet");
     }
 
     /**
