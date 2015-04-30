@@ -18,11 +18,16 @@ package org.apache.karaf.cave.server.storage;
 
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.repository.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
 
@@ -35,9 +40,13 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
 
     public static final String STORAGE_FILE = "repositories.properties";
 
+    private BundleContext bundleContext;
+
     private File storageLocation;
 
-    private Map<String, CaveRepository> repositories = new HashMap<String, CaveRepository>();
+    private final Map<String, CaveRepositoryImpl> repositories = new HashMap<>();
+
+    private final Map<String, ServiceRegistration<Repository>> services = new HashMap<>();
 
     public File getStorageLocation() {
         return this.storageLocation;
@@ -45,6 +54,14 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
 
     public void setStorageLocation(File storageLocation) {
         this.storageLocation = storageLocation;
+    }
+
+    public BundleContext getBundleContext() {
+        return bundleContext;
+    }
+
+    public void setBundleContext(BundleContext bundleContext) {
+        this.bundleContext = bundleContext;
     }
 
     /**
@@ -57,7 +74,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      */
     public synchronized CaveRepository create(String name, boolean scan) throws Exception {
         File location = new File(storageLocation, name);
-        return this.create(name, location.getAbsolutePath(), scan);
+        return create(name, location.getAbsolutePath(), scan);
     }
 
     /**
@@ -73,7 +90,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         if (repositories.get(name) != null) {
             throw new IllegalArgumentException("Cave repository " + name + " already exists");
         }
-        CaveRepository repository = new CaveRepositoryImpl(name, location, scan);
+        CaveRepositoryImpl repository = new CaveRepositoryImpl(name, location, scan);
         repositories.put(name, repository);
         save();
         return repository;
@@ -86,11 +103,14 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      * @throws Exception in case of remove failure.
      */
     public synchronized void uninstall(String name) throws Exception {
-        CaveRepository repository = this.getRepository(name);
+        CaveRepository repository = getRepository(name);
         if (repository == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
-        // TODO: unregister Repository service
+        ServiceRegistration<Repository> registration = services.remove(name);
+        if (registration != null) {
+            registration.unregister();
+        }
         save();
     }
 
@@ -100,11 +120,12 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      * @throws Exception
      */
     public synchronized void remove(String name) throws Exception {
-        CaveRepository repository = this.getRepository(name);
+        CaveRepository repository = getRepository(name);
         if (repository == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         repositories.remove(name);
+        save();
     }
 
     /**
@@ -115,12 +136,13 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      * @throws Exception
      */
     public synchronized void destroy(String name) throws Exception {
-        CaveRepository repository = this.getRepository(name);
+        CaveRepository repository = getRepository(name);
         if (repository == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         repositories.remove(name);
         repository.cleanup();
+        save();
     }
 
     /**
@@ -131,11 +153,19 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      * @throws Exception in case of registration failure.
      */
     public synchronized void install(String name) throws Exception {
-        CaveRepository caveRepository = this.getRepository(name);
+        CaveRepositoryImpl caveRepository = getRepository(name);
         if (caveRepository == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
-        // TODO: register the Repository service
+        ServiceRegistration<Repository> registration = services.get(name);
+        if (registration == null) {
+            Hashtable<String, String> props = new Hashtable<>();
+            props.put(Constants.SERVICE_DESCRIPTION, name);
+            props.put(Repository.URL, caveRepository.getLocation());
+            registration = bundleContext.registerService(Repository.class, caveRepository.getRepository(), props);
+            services.put(name, registration);
+        }
+        save();
     }
 
     /**
@@ -144,7 +174,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      * @return the list of all Cave repositories.
      */
     public synchronized CaveRepository[] getRepositories() {
-        return repositories.values().toArray(new CaveRepository[0]);
+        return repositories.values().toArray(new CaveRepository[repositories.size()]);
     }
 
     /**
@@ -153,7 +183,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      * @param name the name of the Cave repository to look for.
      * @return the corresponding Cave repository.
      */
-    public synchronized CaveRepository getRepository(String name) {
+    public synchronized CaveRepositoryImpl getRepository(String name) {
         return repositories.get(name);
     }
 
@@ -167,6 +197,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         for (int i = 0; i < repositories.length; i++) {
             storage.setProperty("item." + i + ".name", repositories[i].getName());
             storage.setProperty("item." + i + ".location", repositories[i].getLocation());
+            storage.setProperty("item." + i + ".installed", Boolean.toString(services.containsKey(repositories[i].getName())));
         }
         saveStorage(storage, new File(storageLocation, STORAGE_FILE), "Cave Service storage");
     }
@@ -226,9 +257,13 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
             for (int i = 0; i < count; i++) {
                 String name = storage.getProperty("item." + i + ".name");
                 String location = storage.getProperty("item." + i + ".location");
+                boolean installed = Boolean.parseBoolean(storage.getProperty("item." + i + ".installed"));
                 if (name != null) {
-                    CaveRepository repository = new CaveRepositoryImpl(name, location, false);
+                    CaveRepositoryImpl repository = new CaveRepositoryImpl(name, location, false);
                     repositories.put(name, repository);
+                    if (installed) {
+                        install(name);
+                    }
                 }
             }
         } catch (Exception e) {

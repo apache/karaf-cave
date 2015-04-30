@@ -76,6 +76,10 @@ public class CaveRepositoryImpl extends CaveRepository {
         }
     }
 
+    public OsgiRepository getRepository() {
+        return repository;
+    }
+
     /**
      * Check if the repository folder exists and create it if not.
      */

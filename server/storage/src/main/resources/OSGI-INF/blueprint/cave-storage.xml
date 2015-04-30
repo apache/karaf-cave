@@ -31,6 +31,7 @@
 
     <bean id="caveRepositoryService" class="org.apache.karaf.cave.server.storage.CaveRepositoryServiceImpl" init-method="init">
         <property name="storageLocation" value="${storage.location}"/>
+        <property name="bundleContext" ref="blueprintBundleContext"/>
     </bean>
 
     <service ref="caveRepositoryService" interface="org.apache.karaf.cave.server.api.CaveRepositoryService"/>
