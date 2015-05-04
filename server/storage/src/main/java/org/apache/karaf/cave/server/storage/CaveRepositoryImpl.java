@@ -21,6 +21,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,7 +73,9 @@ public class CaveRepositoryImpl extends CaveRepository {
 
         this.createRepositoryDirectory();
         if (scan) {
-            this.scan();
+            scan();
+        } else if (!getRepositoryXmlFile().exists()) {
+            generateRepositoryXml();
         }
     }
 
@@ -91,8 +94,7 @@ public class CaveRepositoryImpl extends CaveRepository {
             LOGGER.debug("Cave repository {} location has been created.", this.getName());
             LOGGER.debug(locationFile.getAbsolutePath());
         }
-        repository = new OsgiRepository();
-        repository.setName(this.getName());
+        repository = new OsgiRepository(getRepositoryXmlFile().toURI().toString(), getName());
     }
 
     /**
@@ -159,10 +161,9 @@ public class CaveRepositoryImpl extends CaveRepository {
      * @throws Exception in case of scan failure.
      */
     public void scan() throws Exception {
-        repository = new OsgiRepository();
-        repository.setName(this.getName());
-        this.scan(new File(this.getLocation()));
-        this.generateRepositoryXml();
+        repository = new OsgiRepository(getRepositoryXml().toString(), getName());
+        scan(new File(getLocation()));
+        generateRepositoryXml();
     }
 
     /**
@@ -174,8 +175,10 @@ public class CaveRepositoryImpl extends CaveRepository {
     private void scan(File entry) throws Exception {
         if (entry.isDirectory()) {
             File[] children = entry.listFiles();
-            for (int i = 0; i < children.length; i++) {
-                scan(children[i]);
+            if (children != null) {
+                for (int i = 0; i < children.length; i++) {
+                    scan(children[i]);
+                }
             }
         } else {
             // populate the repository
@@ -454,7 +457,7 @@ public class CaveRepositoryImpl extends CaveRepository {
                             if (update) {
                                 resource = createResource(destination.toURI().toURL());
                                 LOGGER.debug("Update OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
-                                this.addResource(resource);
+                                addResource(resource);
                             }
                         }
                     }
@@ -511,9 +514,21 @@ public class CaveRepositoryImpl extends CaveRepository {
     }
 
     public URL getResourceByUri(String uri) {
-        // construct the file starting from the repository URI
-        // TODO
-        throw new RuntimeException("Not implemented yet");
+        try {
+            for (Resource resource : repository.getResources()) {
+                for (Capability cap : resource.getCapabilities(null)) {
+                    if (CONTENT_NAMESPACE.equals(cap.getNamespace())) {
+                        Object url = cap.getAttributes().get(CAPABILITY_URL_ATTRIBUTE);
+                        if (uri.equals(url)) {
+                            return new File(getLocation(), uri).toURI().toURL();
+                        }
+                    }
+                }
+            }
+            return null;
+        } catch (MalformedURLException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**

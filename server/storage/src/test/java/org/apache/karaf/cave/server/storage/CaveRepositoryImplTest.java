@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.cave.server.storage;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -24,6 +25,7 @@ import org.junit.runners.JUnit4;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.net.URL;
 
 /**
@@ -36,6 +38,7 @@ public class CaveRepositoryImplTest {
 
     @Before
     public void setUp() throws Exception {
+        FileUtils.deleteDirectory(new File("target/test-repository"));
         repository = new CaveRepositoryImpl("test", "target/test-repository", false);
     }
 

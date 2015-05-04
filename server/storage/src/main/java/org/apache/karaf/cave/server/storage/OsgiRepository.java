@@ -13,10 +13,10 @@ public class OsgiRepository extends XmlRepository {
 
     StaxParser.XmlRepository repository;
 
-    public OsgiRepository() {
-        this(UUID.randomUUID().toString());
+    public OsgiRepository(String url, String name) {
+        this(url);
         repository = new StaxParser.XmlRepository();
-        String url = getUrl();
+        repository.name = name;
         getLoaders().put(url, new XmlLoader(url, repository));
     }
 
@@ -25,27 +25,28 @@ public class OsgiRepository extends XmlRepository {
     }
 
     public void addResource(Resource resource) {
+        load();
         repository.resources.add(resource);
         super.addResource(resource);
     }
 
-    public String getName() {
-        return repository.name;
-    }
-
-    public void setName(String name) {
-        repository.name = name;
-    }
-
     public long getIncrement() {
+        load();
         return repository.increment;
     }
 
     public void setIncrement(long increment) {
+        load();
         repository.increment = increment;
     }
 
     public void writeRepository(OutputStreamWriter writer) throws XMLStreamException {
         StaxParser.write(repository, writer);
     }
+
+    private void load() {
+        // Force repository load
+        getResources();
+    }
+
 }
