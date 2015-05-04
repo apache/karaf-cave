@@ -16,10 +16,13 @@
  */
 package org.apache.karaf.cave.server.http;
 
-import org.apache.karaf.cave.server.api.CaveRepository;
-import org.apache.karaf.cave.server.api.CaveRepositoryService;
-import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URL;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -27,11 +30,21 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.net.URL;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.cave.server.api.CaveRepositoryService;
+import org.apache.karaf.util.XmlUtils;
+import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
 
 /**
  * Wrapper servlet which "exposes" Karaf Cave repository resources in HTTP.
@@ -107,6 +120,10 @@ public class WrapperServlet extends HttpServlet {
                 }
                 url = caveRepository.getRepositoryXml();
                 response.setContentType("text/xml");
+                String repository = resolveRelativeUrls(url, request.getRequestURL().toString());
+                response.getOutputStream().print(repository);
+                response.getOutputStream().flush();
+                response.getOutputStream().close();
             } else {
                 for (CaveRepository repository : caveRepositoryService.getRepositories()) {
                     URL resourceUrl = repository.getResourceByUri(uri);
@@ -122,23 +139,55 @@ public class WrapperServlet extends HttpServlet {
                     throw new ServletException("No resource found with URI " + uri);
                 }
                 response.setContentType("application/java-archive");
-            }
 
-            // send the resource content to the HTTP response
-            InputStream inputStream = url.openStream();
-            OutputStream outputStream = response.getOutputStream();
-            int c;
-            while ((c = inputStream.read()) >= 0) {
-                outputStream.write(c);
+                // send the resource content to the HTTP response
+                InputStream inputStream = url.openStream();
+                OutputStream outputStream = response.getOutputStream();
+                int c;
+                while ((c = inputStream.read()) >= 0) {
+                    outputStream.write(c);
+                }
+                inputStream.close();
+                outputStream.flush();
+                outputStream.close();
             }
-            inputStream.close();
-            outputStream.flush();
-            outputStream.close();
 
         } catch (ServletException servletException) {
             throw servletException;
         } catch (Exception e) {
             throw new ServletException(e);
+        }
+    }
+
+    private String resolveRelativeUrls(URL url, String baseUri) throws IOException, XMLStreamException, SAXException, ParserConfigurationException, TransformerException {
+        // Read
+        Document doc = XmlUtils.parse(url.toExternalForm());
+        // Transform
+        resolveUrls(doc, baseUri);
+        // Output
+        DOMSource src = new DOMSource(doc);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        StreamResult res = new StreamResult(baos);
+        XmlUtils.transform(src, res);
+        return baos.toString();
+    }
+
+    private void resolveUrls(Node node, String baseUri) {
+        if (node != null) {
+            if (node instanceof Element &&
+                    node.getNodeName().equals("attribute")) {
+                String name = ((Element) node).getAttribute("name");
+                if ("url".equals(name)) {
+                    String value = ((Element) node).getAttribute("value");
+                    URI uri = URI.create(value);
+                    if (!uri.isAbsolute()) {
+                        uri = URI.create(baseUri).resolve(uri);
+                        ((Element) node).setAttribute("value", uri.toASCIIString());
+                    }
+                }
+            }
+            resolveUrls(node.getFirstChild(), baseUri);
+            resolveUrls(node.getNextSibling(), baseUri);
         }
     }
 

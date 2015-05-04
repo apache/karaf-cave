@@ -49,6 +49,11 @@
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <version>${karaf.version}</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -67,6 +72,9 @@
                             org.osgi.framework;version="[1,4)",
                             *
                         </Import-Package>
+                        <Private-Package>
+                            org.apache.karaf.util
+                        </Private-Package>
                         <Webapp-Context>/cave</Webapp-Context>
                         <Web-ContextPath>/cave</Web-ContextPath>
                     </instructions>
