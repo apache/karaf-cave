@@ -16,7 +16,7 @@ package org.apache.karaf.cave.server.management;
 import javax.management.openmbean.TabularData;
 
 /**
- * Cave repository MBean to management Cave repositories.
+ * Cave repository MBean to manage Cave repositories.
  */
 public interface CaveRepositoryMBean {
 

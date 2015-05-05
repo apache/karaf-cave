@@ -16,13 +16,13 @@
  */
 package org.apache.karaf.cave.server.http;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URL;
+import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
@@ -40,7 +40,7 @@ import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.apache.karaf.util.XmlUtils;
 import org.osgi.framework.BundleContext;
-import org.osgi.framework.ServiceReference;
+import org.osgi.util.tracker.ServiceTracker;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -51,11 +51,23 @@ import org.xml.sax.SAXException;
  */
 public class WrapperServlet extends HttpServlet {
 
+    public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
+    public static final String GZIP = "gzip";
+
     private BundleContext bundleContext;
+    private ServiceTracker<CaveRepositoryService, CaveRepositoryService> tracker;
 
     public void init(ServletConfig servletConfig) throws ServletException {
         ServletContext context = servletConfig.getServletContext();
         bundleContext = (BundleContext) context.getAttribute("osgi-bundlecontext");
+        tracker = new ServiceTracker<CaveRepositoryService, CaveRepositoryService>(bundleContext, CaveRepositoryService.class, null);
+        tracker.open();
+    }
+
+    @Override
+    public void destroy() {
+        tracker.close();
+        super.destroy();
     }
 
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -66,22 +78,33 @@ public class WrapperServlet extends HttpServlet {
         doIt(request, response);
     }
 
-    public void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-
-        ServiceReference caveRepositoryServiceReference = bundleContext.getServiceReference(CaveRepositoryService.class.getName());
-        if (caveRepositoryServiceReference == null) {
-            throw new ServletException("CaveRepositoryService is not available");
+    @Override
+    protected long getLastModified(HttpServletRequest request) {
+        String uri = request.getPathInfo();
+        // remove the starting /
+        uri = uri.substring(1);
+        if (request.getPathInfo().endsWith("-repository.xml")) {
+            // the user wants to get the Cave repository repository.xml
+            // the expected format is {cave-repo-name}-repository.xml
+            int index = uri.indexOf("-repository.xml");
+            String caveRepositoryName = uri.substring(0, index);
+            CaveRepositoryService caveRepositoryService = tracker.getService();
+            if (caveRepositoryService != null) {
+                CaveRepository caveRepository = caveRepositoryService.getRepository(caveRepositoryName);
+                if (caveRepository != null) {
+                    return caveRepository.getIncrement();
+                }
+            }
         }
-        CaveRepositoryService caveRepositoryService = (CaveRepositoryService) bundleContext.getService(caveRepositoryServiceReference);
+        return -1;
+    }
+
+    public void doIt(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        CaveRepositoryService caveRepositoryService = tracker.getService();
         if (caveRepositoryService == null) {
             throw new ServletException("CaveRepositoryService is not available");
         }
-
-        try {
-            doIt2(caveRepositoryService, request, response);
-        } finally {
-            bundleContext.ungetService(caveRepositoryServiceReference);
-        }
+        doIt2(caveRepositoryService, request, response);
     }
 
     private void doIt2(CaveRepositoryService caveRepositoryService, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -120,10 +143,15 @@ public class WrapperServlet extends HttpServlet {
                 }
                 url = caveRepository.getRepositoryXml();
                 response.setContentType("text/xml");
-                String repository = resolveRelativeUrls(url, request.getRequestURL().toString());
-                response.getOutputStream().print(repository);
-                response.getOutputStream().flush();
-                response.getOutputStream().close();
+
+                OutputStream os = response.getOutputStream();
+                if (acceptsGZipEncoding(request)) {
+                    os = new GZIPOutputStream(os);
+                    response.addHeader("Content-Encoding", "gzip");
+                }
+                resolveRelativeUrls(url, request.getRequestURL().toString(), os);
+                os.flush();
+                os.close();
             } else {
                 for (CaveRepository repository : caveRepositoryService.getRepositories()) {
                     URL resourceUrl = repository.getResourceByUri(uri);
@@ -159,17 +187,20 @@ public class WrapperServlet extends HttpServlet {
         }
     }
 
-    private String resolveRelativeUrls(URL url, String baseUri) throws IOException, XMLStreamException, SAXException, ParserConfigurationException, TransformerException {
+    private boolean acceptsGZipEncoding(HttpServletRequest httpRequest) {
+        String acceptEncoding = httpRequest.getHeader("Accept-Encoding");
+        return acceptEncoding != null && acceptEncoding.contains("gzip");
+    }
+
+    private void resolveRelativeUrls(URL url, String baseUri, OutputStream os) throws IOException, XMLStreamException, SAXException, ParserConfigurationException, TransformerException {
         // Read
         Document doc = XmlUtils.parse(url.toExternalForm());
         // Transform
         resolveUrls(doc, baseUri);
         // Output
         DOMSource src = new DOMSource(doc);
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        StreamResult res = new StreamResult(baos);
+        StreamResult res = new StreamResult(os);
         XmlUtils.transform(src, res);
-        return baos.toString();
     }
 
     private void resolveUrls(Node node, String baseUri) {

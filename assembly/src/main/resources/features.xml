@@ -21,24 +21,44 @@
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
 
     <feature name="cave-server" version="${project.version}">
+        <feature>cave-storage</feature>
+        <feature>cave-http</feature>
+        <feature>cave-rest</feature>
+    </feature>
+
+    <feature name="cave-storage" version="${project.version}">
+        <configfile finalname="/etc/org.apache.karaf.cave.server.storage.cfg">
+            mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/filesystem
+        </configfile>
+        <feature>shell-compat</feature>
+        <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
+        <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr339-api-2.0/2.4.0</bundle>
+        <bundle>mvn:org.jsoup/jsoup/${jsoup.version}</bundle>
+        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.api/${project.version}</bundle>
+        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.storage/${project.version}</bundle>
+        <conditional>
+            <condition>management</condition>
+            <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.management/${project.version}</bundle>
+        </conditional>
+        <conditional>
+            <condition>shell</condition>
+            <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.command/${project.version}</bundle>
+        </conditional>
+    </feature>
+
+    <feature name="cave-http" version="${project.version}">
+        <feature>war</feature>
+        <feature>cave-server</feature>
+        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.http/${project.version}</bundle>
+    </feature>
+
+    <feature name="cave-rest" version="${project.version}">
         <configfile finalname="/etc/org.apache.cxf.osgi.cfg">
             mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/cxf
         </configfile>
         <feature version="[3,4)">cxf</feature>
-        <feature>obr</feature>
-        <feature>war</feature>
-        <configfile finalname="/etc/org.apache.karaf.cave.server.storage.cfg">
-            mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/filesystem
-        </configfile>
-        <bundle>mvn:commons-io/commons-io/${commons-io.version}</bundle>
-        <bundle>mvn:org.apache.httpcomponents/httpcore-osgi/4.3.2</bundle>
-        <bundle>mvn:org.apache.httpcomponents/httpclient-osgi/${httpclient.version}</bundle>
-        <bundle>mvn:org.jsoup/jsoup/${jsoup.version}</bundle>
-        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.api/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.storage/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.management/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.command/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.http/${project.version}</bundle>
+        <feature>cave-server</feature>
+        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.rest/${project.version}</bundle>
     </feature>
 
 </features>

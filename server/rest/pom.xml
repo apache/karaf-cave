@@ -29,31 +29,19 @@
     </parent>
 
     <groupId>org.apache.karaf.cave.server</groupId>
-    <artifactId>org.apache.karaf.cave.server.storage</artifactId>
-    <name>Apache Karaf :: Cave :: Server :: Storage</name>
+    <artifactId>org.apache.karaf.cave.server.rest</artifactId>
+    <name>Apache Karaf :: Cave :: Server :: Rest</name>
     <packaging>bundle</packaging>
 
     <dependencies>
         <dependency>
             <groupId>org.apache.karaf.cave.server</groupId>
-            <artifactId>org.apache.karaf.cave.server.api</artifactId>
+            <artifactId>org.apache.karaf.cave.server.storage</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>org.apache.karaf.features.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
             <artifactId>cxf-rt-frontend-jaxrs</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
         </dependency>
     </dependencies>
 
@@ -65,15 +53,6 @@
                 <configuration>
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
-                        <Import-Package>
-                            !org.apache.karaf.features.internal.*,
-                            *
-                        </Import-Package>
-                        <Private-Package>
-                            org.apache.felix.utils*,
-                            org.apache.karaf.features.internal.resolver,
-                            org.apache.karaf.features.internal.repository,
-                        </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>

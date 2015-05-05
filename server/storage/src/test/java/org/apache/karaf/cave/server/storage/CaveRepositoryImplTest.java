@@ -16,17 +16,17 @@
  */
 package org.apache.karaf.cave.server.storage;
 
-import org.apache.commons.io.FileUtils;
+import java.net.URL;
+import java.nio.file.Paths;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
+import static org.apache.karaf.cave.server.storage.Utils.deleteRecursive;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import java.io.File;
-import java.net.URL;
 
 /**
  * Unit test of the Cave Repository Implementation.
@@ -38,7 +38,7 @@ public class CaveRepositoryImplTest {
 
     @Before
     public void setUp() throws Exception {
-        FileUtils.deleteDirectory(new File("target/test-repository"));
+        deleteRecursive(Paths.get("target/test-repository"));
         repository = new CaveRepositoryImpl("test", "target/test-repository", false);
     }
 

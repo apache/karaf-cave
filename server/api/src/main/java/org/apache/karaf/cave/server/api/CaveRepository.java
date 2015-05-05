@@ -66,6 +66,13 @@ public abstract class CaveRepository {
     }
 
     /**
+     * Get the last modification date of this repository.
+     *
+     * @return the last modification date.
+     */
+    public abstract long getIncrement();
+
+    /**
      * Upload an artifact from the given URL into the repository.
      *
      * @param url the URL of the artifact.
