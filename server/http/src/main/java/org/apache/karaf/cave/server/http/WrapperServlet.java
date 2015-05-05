@@ -60,7 +60,7 @@ public class WrapperServlet extends HttpServlet {
     public void init(ServletConfig servletConfig) throws ServletException {
         ServletContext context = servletConfig.getServletContext();
         bundleContext = (BundleContext) context.getAttribute("osgi-bundlecontext");
-        tracker = new ServiceTracker<CaveRepositoryService, CaveRepositoryService>(bundleContext, CaveRepositoryService.class, null);
+        tracker = new ServiceTracker<>(bundleContext, CaveRepositoryService.class, null);
         tracker.open();
     }
 
@@ -188,8 +188,8 @@ public class WrapperServlet extends HttpServlet {
     }
 
     private boolean acceptsGZipEncoding(HttpServletRequest httpRequest) {
-        String acceptEncoding = httpRequest.getHeader("Accept-Encoding");
-        return acceptEncoding != null && acceptEncoding.contains("gzip");
+        String acceptEncoding = httpRequest.getHeader(HEADER_ACCEPT_ENCODING);
+        return acceptEncoding != null && acceptEncoding.contains(GZIP);
     }
 
     private void resolveRelativeUrls(URL url, String baseUri, OutputStream os) throws IOException, XMLStreamException, SAXException, ParserConfigurationException, TransformerException {

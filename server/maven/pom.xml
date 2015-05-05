@@ -29,36 +29,10 @@
     </parent>
 
     <groupId>org.apache.karaf.cave.server</groupId>
-    <artifactId>org.apache.karaf.cave.server.storage</artifactId>
-    <name>Apache Karaf :: Cave :: Server :: Storage</name>
+    <artifactId>org.apache.karaf.cave.server.maven</artifactId>
     <packaging>bundle</packaging>
-
-    <dependencies>
-        <dependency>
-            <groupId>org.apache.karaf.cave.server</groupId>
-            <artifactId>org.apache.karaf.cave.server.api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf.features</groupId>
-            <artifactId>org.apache.karaf.features.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.jsoup</groupId>
-            <artifactId>jsoup</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.karaf</groupId>
-            <artifactId>org.apache.karaf.util</artifactId>
-        </dependency>
-    </dependencies>
+    <name>Apache Karaf :: Cave :: Server :: Maven Proxy</name>
+    <description>Maven Proxy Service</description>
 
     <build>
         <plugins>
@@ -71,21 +45,66 @@
                 <artifactId>maven-bundle-plugin</artifactId>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
-                            !org.apache.karaf.features.internal.*,
+                            javax.servlet.*;version="[3.0,4)",
+                            !shaded.*,
                             *
                         </Import-Package>
+                        <Export-Package>
+                            !*
+                        </Export-Package>
                         <Private-Package>
-                            org.apache.felix.utils*,
-                            org.apache.karaf.features.internal.resolver,
-                            org.apache.karaf.features.internal.repository,
-                            org.apache.karaf.util.tracker*
+                            org.apache.karaf.cave.server.maven,
+                            org.apache.karaf.util,
+                            org.apache.karaf.util.base64
                         </Private-Package>
                     </instructions>
                 </configuration>
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <dependency>
+            <groupId>${servlet.spec.groupId}</groupId>
+            <artifactId>${servlet.spec.artifactId}</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.compendium</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.ops4j.pax.url</groupId>
+            <artifactId>pax-url-aether</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+        </dependency>
+
+        <!-- Test Dependencies -->
+        <dependency>
+            <groupId>org.ops4j.pax.web</groupId>
+            <artifactId>pax-web-jetty-bundle</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.easymock</groupId>
+            <artifactId>easymock</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
 
 </project>

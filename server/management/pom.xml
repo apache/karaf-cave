@@ -37,12 +37,10 @@
         <dependency>
             <groupId>org.apache.karaf.cave.server</groupId>
             <artifactId>org.apache.karaf.cave.server.api</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.karaf</groupId>
             <artifactId>org.apache.karaf.util</artifactId>
-            <version>${karaf.version}</version>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>

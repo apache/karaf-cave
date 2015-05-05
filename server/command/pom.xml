@@ -45,7 +45,6 @@
         <dependency>
             <groupId>org.apache.karaf.cave.server</groupId>
             <artifactId>org.apache.karaf.cave.server.api</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
 

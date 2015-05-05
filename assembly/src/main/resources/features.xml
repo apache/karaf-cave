@@ -46,8 +46,8 @@
     </feature>
 
     <feature name="cave-http" version="${project.version}">
-        <feature>war</feature>
-        <feature>cave-server</feature>
+        <feature>http</feature>
+        <feature>cave-storage</feature>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.http/${project.version}</bundle>
     </feature>
 
@@ -59,6 +59,11 @@
         <feature>aries-blueprint</feature>
         <feature>cave-storage</feature>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.rest/${project.version}</bundle>
+    </feature>
+
+    <feature name="cave-maven" version="${project.version}">
+        <feature>http</feature>
+        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.maven/${project.version}</bundle>
     </feature>
 
 </features>

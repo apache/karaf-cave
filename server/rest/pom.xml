@@ -37,7 +37,6 @@
         <dependency>
             <groupId>org.apache.karaf.cave.server</groupId>
             <artifactId>org.apache.karaf.cave.server.storage</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
