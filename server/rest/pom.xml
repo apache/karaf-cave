@@ -35,6 +35,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>${servlet.spec.groupId}</groupId>
+            <artifactId>${servlet.spec.artifactId}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>org.apache.karaf.cave.server</groupId>
             <artifactId>org.apache.karaf.cave.server.storage</artifactId>
         </dependency>

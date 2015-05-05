@@ -16,39 +16,61 @@
  */
 package org.apache.karaf.cave.server.rest;
 
-import org.apache.cxf.endpoint.Server;
-import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
-import org.apache.cxf.jaxrs.lifecycle.SingletonResourceProvider;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
+import org.apache.cxf.jaxrs.servlet.CXFNonSpringJaxrsServlet;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.osgi.service.http.HttpService;
 
 
 @Services(
-        requires = { @RequireService(CaveRepositoryService.class) }
+        requires = { @RequireService(CaveRepositoryService.class),
+                     @RequireService(HttpService.class) }
 )
+@Managed("org.apache.karaf.cave.rest")
 public class Activator extends BaseActivator {
 
-    private Server server;
+    private HttpService httpService;
+    private String alias;
+    private CXFNonSpringJaxrsServlet servlet;
 
     @Override
     protected void doStart() throws Exception {
+        httpService = getTrackedService(HttpService.class);
+        if (httpService == null) {
+            return;
+        }
+
         Service service = new Service(getTrackedService(CaveRepositoryService.class));
-        JAXRSServerFactoryBean sf = new JAXRSServerFactoryBean();
-        sf.setResourceClasses(Service.class, Repository.class);
-        sf.setResourceProvider(Service.class, new SingletonResourceProvider(service));
-        sf.setAddress("/cave/rest");
-        server = sf.create();
+
+        String alias = getString("cave.rest.alias", "/cave/rest");
+        Hashtable<String, String> config = new Hashtable<>();
+        if (getConfiguration() != null) {
+            for (Enumeration<String> e = getConfiguration().keys(); e.hasMoreElements();) {
+                String key = e.nextElement();
+                String val = getConfiguration().get(key).toString();
+                config.put(key, val);
+            }
+        }
+        this.alias = alias;
+        this.servlet = new CXFNonSpringJaxrsServlet(service);
+        this.httpService.registerServlet(this.alias, this.servlet, config, null);
     }
 
     @Override
     protected void doStop() {
-        if (server != null) {
-            server.destroy();
-            server = null;
-        }
         super.doStop();
+        if (httpService != null) {
+            httpService.unregister(alias);
+        }
+        if (this.servlet != null) {
+            this.servlet.destroy();
+        }
     }
 
 }
