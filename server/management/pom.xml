@@ -39,10 +39,23 @@
             <artifactId>org.apache.karaf.cave.server.api</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.karaf</groupId>
+            <artifactId>org.apache.karaf.util</artifactId>
+            <version>${karaf.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.osgi</groupId>
+            <artifactId>org.osgi.core</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.karaf.tooling</groupId>
+                <artifactId>karaf-services-maven-plugin</artifactId>
+            </plugin>
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
@@ -50,16 +63,11 @@
                     <instructions>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Export-Package>
-                            org.apache.karaf.cave.server.management*;version=${project.version}
+                            org.apache.karaf.cave.server.management
                         </Export-Package>
-                        <Import-Package>
-                            javax.management,
-                            javax.management.loading,
-                            javax.management.openmbean,
-                            org.apache.karaf.cave.server.api;version=${project.version}
-                        </Import-Package>
                         <Private-Package>
-                            org.apache.karaf.cave.server.management.internal
+                            org.apache.karaf.cave.server.management.internal,
+                            org.apache.karaf.util.tracker*
                         </Private-Package>
                     </instructions>
                 </configuration>

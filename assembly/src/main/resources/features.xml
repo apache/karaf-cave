@@ -30,7 +30,6 @@
         <configfile finalname="/etc/org.apache.karaf.cave.server.storage.cfg">
             mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/filesystem
         </configfile>
-        <feature>shell-compat</feature>
         <bundle dependency="true">mvn:javax.annotation/javax.annotation-api/1.2</bundle>
         <bundle dependency="true">mvn:org.apache.servicemix.specs/org.apache.servicemix.specs.jsr339-api-2.0/2.4.0</bundle>
         <bundle>mvn:org.jsoup/jsoup/${jsoup.version}</bundle>
@@ -57,7 +56,8 @@
             mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/cxf
         </configfile>
         <feature version="[3,4)">cxf</feature>
-        <feature>cave-server</feature>
+        <feature>aries-blueprint</feature>
+        <feature>cave-storage</feature>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.rest/${project.version}</bundle>
     </feature>
 

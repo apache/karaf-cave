@@ -16,16 +16,21 @@
  */
 package org.apache.karaf.cave.server.command;
 
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
+import org.apache.karaf.cave.server.command.completers.RepositoryCompleter;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * Uninstall a Cave repository from the repositories registry
  */
 @Command(scope = "cave", name = "repository-uninstall", description = "Uninstall a Cave repository from the repositories registry")
+@Service
 public class RepositoryUninstallCommand extends CaveRepositoryCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
+    @Completion(RepositoryCompleter.class)
     String name = null;
 
     protected Object doExecute() throws Exception {

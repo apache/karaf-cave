@@ -17,14 +17,16 @@
 package org.apache.karaf.cave.server.command;
 
 import org.apache.karaf.cave.server.api.CaveRepository;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * Create a Cave repository.
  */
 @Command(scope = "cave", name = "repository-create", description = "Create a Cave repository")
+@Service
 public class RepositoryCreateCommand extends CaveRepositoryCommandSupport {
 
     @Option(name = "-l", aliases = {"--location"}, description = "Location of the repository on the file system", required = false, multiValued = false)

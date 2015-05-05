@@ -16,16 +16,20 @@
  */
 package org.apache.karaf.cave.server.command.completers;
 
+import java.util.List;
+
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
-import org.apache.karaf.shell.console.Completer;
-import org.apache.karaf.shell.console.completer.StringsCompleter;
-
-import java.util.List;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
+import org.apache.karaf.shell.api.console.CommandLine;
+import org.apache.karaf.shell.api.console.Completer;
+import org.apache.karaf.shell.api.console.Session;
+import org.apache.karaf.shell.support.completers.StringsCompleter;
 
 /**
  * Completer of the Karaf Cave repositories.
  */
+@Service
 public class RepositoryCompleter implements Completer {
 
     private CaveRepositoryService caveRepositoryService;
@@ -38,11 +42,13 @@ public class RepositoryCompleter implements Completer {
         return this.caveRepositoryService;
     }
 
-    public int complete(String buffer, int cursor, List candidates) {
+    @Override
+    public int complete(Session session, CommandLine commandLine, List<String> list) {
         StringsCompleter delegate = new StringsCompleter();
         for (CaveRepository caveRepository : caveRepositoryService.getRepositories()) {
             delegate.getStrings().add(caveRepository.getName());
         }
-        return delegate.complete(buffer, cursor, candidates);
+        return delegate.complete(session, commandLine, list);
     }
+
 }

@@ -17,21 +17,26 @@
 package org.apache.karaf.cave.server.command;
 
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
-import org.apache.karaf.shell.console.OsgiCommandSupport;
+import org.apache.karaf.shell.api.action.Action;
+import org.apache.karaf.shell.api.action.lifecycle.Reference;
 
 /**
  * Abstract command describing the default behavior of Karaf Cave commands.
  */
-public abstract class CaveRepositoryCommandSupport extends OsgiCommandSupport {
+public abstract class CaveRepositoryCommandSupport implements Action {
 
+    @Reference
     private CaveRepositoryService caveRepositoryService;
 
     public CaveRepositoryService getCaveRepositoryService() {
         return this.caveRepositoryService;
     }
 
-    public void setCaveRepositoryService(CaveRepositoryService caveRepositoryService) {
-        this.caveRepositoryService = caveRepositoryService;
+    @Override
+    public Object execute() throws Exception {
+        return doExecute();
     }
+
+    protected abstract Object doExecute() throws Exception;
 
 }

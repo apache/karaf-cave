@@ -16,17 +16,21 @@
  */
 package org.apache.karaf.cave.server.command;
 
-import org.apache.karaf.cave.server.api.CaveRepository;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-
 import java.net.URL;
+
+import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.cave.server.command.completers.RepositoryCompleter;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * Populate a Cave repository from a given URL
  */
 @Command(scope = "cave", name = "repository-populate", description = "Populate a Cave repository with the artifacts available at a given URL")
+@Service
 public class RepositoryPopulateCommand extends CaveRepositoryCommandSupport {
 
     @Option(name = "-no", aliases = { "--no-obr-generate" }, description = "Do not generate the OBR metadata", required = false, multiValued = false)
@@ -36,6 +40,7 @@ public class RepositoryPopulateCommand extends CaveRepositoryCommandSupport {
     String filter;
 
     @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
+    @Completion(RepositoryCompleter.class)
     String name = null;
 
     @Argument(index = 1, name = "url", description = "The source URL to use", required = true, multiValued = false)

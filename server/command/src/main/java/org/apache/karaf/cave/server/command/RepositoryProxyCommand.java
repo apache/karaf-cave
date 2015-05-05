@@ -16,20 +16,25 @@
  */
 package org.apache.karaf.cave.server.command;
 
-import org.apache.karaf.cave.server.api.CaveRepository;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-
 import java.net.URL;
+
+import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.cave.server.command.completers.RepositoryCompleter;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * Add an URL to proxy in the Cave repository.
  */
 @Command(scope = "cave", name = "repository-proxy", description = "Proxy a given URL in the Karaf Cave repository")
+@Service
 public class RepositoryProxyCommand extends CaveRepositoryCommandSupport {
 
     @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
+    @Completion(RepositoryCompleter.class)
     String name = null;
 
     @Argument(index = 1, name = "URL", description = "The URL to proxy", required = true, multiValued = false)

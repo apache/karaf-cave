@@ -16,20 +16,25 @@
  */
 package org.apache.karaf.cave.server.command;
 
-import org.apache.karaf.cave.server.api.CaveRepository;
-import org.apache.karaf.shell.commands.Argument;
-import org.apache.karaf.shell.commands.Command;
-import org.apache.karaf.shell.commands.Option;
-
 import java.net.URL;
+
+import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.cave.server.command.completers.RepositoryCompleter;
+import org.apache.karaf.shell.api.action.Argument;
+import org.apache.karaf.shell.api.action.Command;
+import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
+import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
  * Upload an artifact into a Cave repository
  */
 @Command(scope = "cave", name = "repository-upload", description = "Upload an artifact in a Cave repository")
+@Service
 public class RepositoryUploadArtifactCommand extends CaveRepositoryCommandSupport {
 
     @Argument(index = 0, name = "repository", description = "The name of the repository", required = true, multiValued = false)
+    @Completion(RepositoryCompleter.class)
     String name = null;
 
     @Argument(index = 1, name = "artifact", description = "The URL of the artifact to upload", required = true, multiValued = false)
