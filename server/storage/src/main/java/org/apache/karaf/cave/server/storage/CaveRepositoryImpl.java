@@ -56,17 +56,19 @@ import static org.osgi.service.repository.ContentNamespace.CONTENT_NAMESPACE;
 /**
  * Default implementation of a Cave repository.
  */
-public class CaveRepositoryImpl extends CaveRepository {
+public class CaveRepositoryImpl implements CaveRepository {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(CaveRepositoryImpl.class);
 
+    private String name;
+    private String location;
     private OsgiRepository repository;
 
     public CaveRepositoryImpl(String name, String location, boolean scan) throws Exception {
         super();
 
-        setName(name);
-        setLocation(location);
+        this.name = name;
+        this.location = location;
 
         createRepositoryDirectory();
         if (scan) {
@@ -74,6 +76,24 @@ public class CaveRepositoryImpl extends CaveRepository {
         } else if (!Files.exists(getRepositoryXmlFile())) {
             generateRepositoryXml();
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    @Override
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
     }
 
     @Override

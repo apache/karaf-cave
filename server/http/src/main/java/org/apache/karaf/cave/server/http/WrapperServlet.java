@@ -66,7 +66,10 @@ public class WrapperServlet extends HttpServlet {
 
     @Override
     public void destroy() {
-        tracker.close();
+        if (tracker != null) {
+            tracker.close();
+            tracker = null;
+        }
         super.destroy();
     }
 

@@ -14,12 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cave.server.api;
+package org.apache.karaf.cave.server.rest;
+
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+
+import org.apache.karaf.cave.server.api.CaveRepository;
+import org.apache.karaf.cave.server.api.CaveRepositoryService;
 
 /**
  * Service to manipulate a Cave repository.
  */
-public interface CaveRepositoryService {
+@Path("/")
+public class Service {
+
+    private final CaveRepositoryService service;
+
+    public Service(CaveRepositoryService service) {
+        this.service = service;
+    }
 
     /**
      * Create a Cave repository.
@@ -29,7 +46,12 @@ public interface CaveRepositoryService {
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
-    CaveRepository create(String name, boolean scan) throws Exception;
+    @POST
+    @Consumes("application/xml")
+    @Produces("application/xml")
+    public Repository create(String name, boolean scan) throws Exception {
+        return new Repository(service.create(name, scan));
+    }
 
     /**
      * Create a Cave repository.
@@ -40,7 +62,12 @@ public interface CaveRepositoryService {
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
-    CaveRepository create(String name, String location, boolean scan) throws Exception;
+    @POST
+    @Consumes("application/xml")
+    @Produces("application/xml")
+    public Repository create(String name, String location, boolean scan) throws Exception {
+        return new Repository(service.create(name, location, scan));
+    }
 
     /**
      * Uninstall a Cave repository from the OBR service.
@@ -48,7 +75,9 @@ public interface CaveRepositoryService {
      * @param name the name of the repository.
      * @throws Exception in case of uninstall failure.
      */
-    void uninstall(String name) throws Exception;
+    public void uninstall(String name) throws Exception {
+        service.uninstall(name);
+    }
 
     /**
      * Remove a Cave repository from the repositories registry.
@@ -56,7 +85,9 @@ public interface CaveRepositoryService {
      * @param name the name of the repository.
      * @throws Exception in case of remove failure.
      */
-    void remove(String name) throws Exception;
+    public void remove(String name) throws Exception {
+        service.remove(name);
+    }
 
     /**
      * Destroy a Cave repository, including the storage.
@@ -64,7 +95,9 @@ public interface CaveRepositoryService {
      * @param name the name of the repository.
      * @throws Exception incase of remove failure.
      */
-    void destroy(String name) throws Exception;
+    public void destroy(String name) throws Exception {
+        service.destroy(name);
+    }
 
     /**
      * Install a Cave repository into the OBR service.
@@ -72,14 +105,28 @@ public interface CaveRepositoryService {
      * @param name the name of the Cave repository.
      * @throws Exception in case of registration failure.
      */
-    void install(String name) throws Exception;
+    @POST
+    @Consumes("text/plain")
+    public void install(String name) throws Exception {
+        service.install(name);
+    }
 
     /**
      * Get the list of all Cave repositories.
      *
      * @return the Cave repositories.
      */
-    CaveRepository[] getRepositories();
+    @GET
+    @Path("/repositories")
+    @Produces("application/xml")
+    public Repository[] getRepositories() {
+        CaveRepository[] repositories = service.getRepositories();
+        Repository[] repos = new Repository[repositories.length];
+        for (int i = 0; i < repositories.length; i++) {
+            repos[i] = new Repository(repositories[i]);
+        }
+        return repos;
+    }
 
     /**
      * Get a Cave repository identified by the given name.
@@ -87,6 +134,16 @@ public interface CaveRepositoryService {
      * @param name the name of the Cave repository.
      * @return the Cave repository
      */
-    CaveRepository getRepository(String name);
+    @GET
+    @Path("/repositories/{name}")
+    @Produces("application/xml")
+    public Repository getRepository(@PathParam("name") String name) {
+        CaveRepository repository = service.getRepository(name);
+        if (repository != null) {
+            return new Repository(repository);
+        } else {
+            return null;
+        }
+    }
 
 }
