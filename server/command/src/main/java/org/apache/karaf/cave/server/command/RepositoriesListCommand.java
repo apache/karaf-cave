@@ -19,7 +19,7 @@ package org.apache.karaf.cave.server.command;
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
-import org.apache.karaf.shell.table.ShellTable;
+import org.apache.karaf.shell.support.table.ShellTable;
 
 /**
  * Command to list all Cave repositories

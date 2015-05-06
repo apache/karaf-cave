@@ -24,6 +24,7 @@
         <feature>cave-storage</feature>
         <feature>cave-http</feature>
         <feature>cave-rest</feature>
+        <feature>cave-maven</feature>
     </feature>
 
     <feature name="cave-storage" version="${project.version}">
@@ -50,9 +51,6 @@
     </feature>
 
     <feature name="cave-rest" version="${project.version}">
-        <configfile finalname="/etc/org.apache.cxf.osgi.cfg">
-            mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/cxf
-        </configfile>
         <feature>http</feature>
         <feature version="[3,4)">cxf-jaxrs</feature>
         <feature>cave-storage</feature>

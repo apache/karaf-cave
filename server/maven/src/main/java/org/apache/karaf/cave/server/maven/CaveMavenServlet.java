@@ -67,9 +67,9 @@ import org.osgi.service.http.HttpContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MavenProxyServlet extends HttpServlet {
+public class CaveMavenServlet extends HttpServlet {
 
-    public static Logger LOGGER = LoggerFactory.getLogger(MavenProxyServlet.class);
+    public static Logger LOGGER = LoggerFactory.getLogger(CaveMavenServlet.class);
 
     public static final Pattern REPOSITORY_ID_REGEX = Pattern.compile("[^ ]*(@id=([^@ ]+))+[^ ]*");
 
@@ -109,7 +109,7 @@ public class MavenProxyServlet extends HttpServlet {
 
     final MavenResolver resolver;
 
-    public MavenProxyServlet(MavenResolver resolver, int threadMaximumPoolSize, String realm, String downloadRole, String uploadRole) {
+    public CaveMavenServlet(MavenResolver resolver, int threadMaximumPoolSize, String realm, String downloadRole, String uploadRole) {
         this.resolver = resolver;
         this.threadMaximumPoolSize = threadMaximumPoolSize;
         this.realm = realm;
@@ -493,6 +493,7 @@ public class MavenProxyServlet extends HttpServlet {
                 MavenCoord coord = convertMetadataPathToCoord(path);
                 resolver.uploadMetadata(coord.groupId, coord.artifactId, coord.type, coord.version, file);
                 LOGGER.info("Maven metadata installed: {}", coord.toString());
+                return true;
             } catch (Exception e) {
                 LOGGER.warn(String.format("Failed to upload metadata: %s due to %s", path, e.getMessage()), e);
                 return false;
@@ -504,6 +505,7 @@ public class MavenProxyServlet extends HttpServlet {
                 MavenCoord coord = convertArtifactPathToCoord(path);
                 resolver.upload(coord.groupId, coord.artifactId, coord.classifier, coord.type, coord.version, file);
                 LOGGER.info("Artifact installed: {}", coord.toString());
+                return true;
             } catch (Exception e) {
                 LOGGER.warn(String.format("Failed to upload artifact : %s due to %s", path, e.getMessage()), e);
                 return false;
@@ -652,24 +654,6 @@ public class MavenProxyServlet extends HttpServlet {
             sb.append(version);
             return sb.toString();
         }
-    }
-
-    /**
-     * Reads a {@link java.io.File} from the {@link java.io.InputStream} then saves it under a temp location and returns the file.
-     *
-     * @param is           The source input stream.
-     * @param tempLocation The temporary location to save the content of the stream.
-     * @param name         The name of the file.
-     * @return
-     * @throws java.io.FileNotFoundException
-     */
-    protected File copyFile(InputStream is, File tempLocation, String name) throws IOException {
-        Path tmpFile = tempLocation.toPath().resolve(name);
-        Files.deleteIfExists(tmpFile);
-        try (OutputStream os = Files.newOutputStream(tmpFile)) {
-            StreamUtils.copy(is, os);
-        }
-        return tmpFile.toFile();
     }
 
 }

@@ -49,7 +49,7 @@ import org.xml.sax.SAXException;
 /**
  * Wrapper servlet which "exposes" Karaf Cave repository resources in HTTP.
  */
-public class WrapperServlet extends HttpServlet {
+public class CaveHttpServlet extends HttpServlet {
 
     public static final String HEADER_ACCEPT_ENCODING = "Accept-Encoding";
     public static final String GZIP = "gzip";

@@ -25,6 +25,7 @@ import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
 
 
@@ -32,8 +33,8 @@ import org.osgi.service.http.HttpService;
         requires = { @RequireService(CaveRepositoryService.class),
                      @RequireService(HttpService.class) }
 )
-@Managed("org.apache.karaf.cave.rest")
-public class Activator extends BaseActivator {
+@Managed("org.apache.karaf.cave.server.rest")
+public class Activator extends BaseActivator implements ManagedService {
 
     private HttpService httpService;
     private String alias;
@@ -58,7 +59,7 @@ public class Activator extends BaseActivator {
             }
         }
         this.alias = alias;
-        this.servlet = new CXFNonSpringJaxrsServlet(service);
+        this.servlet = new CaveRestServlet(service);
         this.httpService.registerServlet(this.alias, this.servlet, config, null);
     }
 

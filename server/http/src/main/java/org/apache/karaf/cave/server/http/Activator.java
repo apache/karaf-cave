@@ -29,12 +29,12 @@ import org.osgi.service.http.HttpService;
 @Services(
         requires = @RequireService(HttpService.class)
 )
-@Managed("org.apache.karaf.cave.http")
+@Managed("org.apache.karaf.cave.server.http")
 public class Activator extends BaseActivator implements ManagedService {
 
     private HttpService httpService;
     private String alias;
-    private WrapperServlet servlet;
+    private CaveHttpServlet servlet;
 
     @Override
     protected void doStart() throws Exception {
@@ -53,7 +53,7 @@ public class Activator extends BaseActivator implements ManagedService {
             }
         }
         this.alias = alias;
-        this.servlet = new WrapperServlet();
+        this.servlet = new CaveHttpServlet();
         this.httpService.registerServlet(this.alias, this.servlet, config, null);
     }
 

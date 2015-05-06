@@ -32,13 +32,13 @@ import org.osgi.service.http.HttpService;
 @Services(
         requires = @RequireService(HttpService.class)
 )
-@Managed("org.apache.karaf.cave.maven")
+@Managed("org.apache.karaf.cave.server.maven")
 public class Activator extends BaseActivator implements ManagedService {
 
     private HttpService httpService;
     private String alias;
     private MavenResolver resolver;
-    private MavenProxyServlet servlet;
+    private CaveMavenServlet servlet;
 
     @Override
     protected void doStart() throws Exception {
@@ -63,7 +63,7 @@ public class Activator extends BaseActivator implements ManagedService {
         }
         this.resolver = MavenResolvers.createMavenResolver(null, config, pid);
         this.alias = alias;
-        this.servlet = new MavenProxyServlet(this.resolver, poolSize, realm, downloadRole, uploadRole);
+        this.servlet = new CaveMavenServlet(this.resolver, poolSize, realm, downloadRole, uploadRole);
         this.httpService.registerServlet(this.alias, this.servlet, config, null);
     }
 
