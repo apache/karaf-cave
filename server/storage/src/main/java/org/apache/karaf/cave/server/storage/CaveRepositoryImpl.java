@@ -163,11 +163,6 @@ public class CaveRepositoryImpl implements CaveRepository {
         }
         // update the repository.xml
         ResourceImpl resource = createResource(temp.toUri().toURL());
-        if (resource == null) {
-            Files.delete(temp);
-            LOGGER.warn("The {} artifact source is not a valid OSGi bundle", url);
-            throw new IllegalArgumentException("The " + url.toString() + " artifact source is not a valid OSGi bundle");
-        }
         Path destination = getLocationPath().resolve(ResolverUtil.getSymbolicName(resource) + "-" + ResolverUtil.getVersion(resource) + ".jar");
         if (Files.exists(destination)) {
             Files.delete(temp);
@@ -213,7 +208,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                     ResourceImpl resource = createResource(bundleUrl);
                     addResource(resource);
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (BundleException e) {
                 LOGGER.warn(e.getMessage());
             }
         }
@@ -281,12 +276,10 @@ public class CaveRepositoryImpl implements CaveRepository {
             try {
                 if ((filter == null) || (entry.toURI().toURL().toString().matches(filter))) {
                     Resource resource = createResource(entry.toURI().toURL());
-                    if (resource != null) {
-                        repository.addResource(resource);
-                        repository.setIncrement(System.currentTimeMillis());
-                    }
+                    repository.addResource(resource);
+                    repository.setIncrement(System.currentTimeMillis());
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (BundleException e) {
                 LOGGER.warn(e.getMessage());
             }
         }
@@ -298,11 +291,11 @@ public class CaveRepositoryImpl implements CaveRepository {
 
     private ResourceImpl createResource(URL url, String uri) throws BundleException, IOException {
         Map<String, String> headers = getHeaders(url);
-        if (headers.get(Constants.BUNDLE_MANIFESTVERSION) == null) {
-            LOGGER.warn("The {} artifact source is not a valid OSGi bundle", url);
-            throw new IllegalArgumentException("The " + url.toString() + " artifact source is not a valid OSGi bundle");
+        try {
+            return ResourceBuilder.build(uri, headers);
+        } catch (BundleException e) {
+            throw new BundleException("Unable to create resource from " + uri + ": " + e.getMessage(), e);
         }
-        return ResourceBuilder.build(uri, headers);
     }
 
     Map<String, String> getHeaders(URL url) throws IOException {
@@ -341,12 +334,10 @@ public class CaveRepositoryImpl implements CaveRepository {
                 try {
                     if ((filter == null) || (url.matches(filter))) {
                         Resource resource = createResource(new URL(url));
-                        if (resource != null) {
-                            repository.addResource(resource);
-                            repository.setIncrement(System.currentTimeMillis());
-                        }
+                        repository.addResource(resource);
+                        repository.setIncrement(System.currentTimeMillis());
                     }
-                } catch (IllegalArgumentException e) {
+                } catch (BundleException e) {
                     LOGGER.warn(e.getMessage());
                 }
             } else {
@@ -421,19 +412,17 @@ public class CaveRepositoryImpl implements CaveRepository {
             try {
                 if ((filter == null) || (filesystem.toURI().toURL().toString().matches(filter))) {
                     ResourceImpl resource = createResource(filesystem.toURI().toURL());
-                    if (resource != null) {
-                        // copy the resource
-                        Path destination = getLocationPath().resolve(filesystem.getName());
-                        LOGGER.debug("Copy from {} to {}", filesystem.getAbsolutePath(), destination.toAbsolutePath().toString());
-                        Files.copy(filesystem.toPath(), destination);
-                        if (update) {
-                            resource = createResource(destination.toUri().toURL());
-                            LOGGER.debug("Update the OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
-                            addResource(resource);
-                        }
+                    // copy the resource
+                    Path destination = getLocationPath().resolve(filesystem.getName());
+                    LOGGER.debug("Copy from {} to {}", filesystem.getAbsolutePath(), destination.toAbsolutePath().toString());
+                    Files.copy(filesystem.toPath(), destination);
+                    if (update) {
+                        resource = createResource(destination.toUri().toURL());
+                        LOGGER.debug("Update the OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
+                        addResource(resource);
                     }
                 }
-            } catch (IllegalArgumentException e) {
+            } catch (BundleException e) {
                 LOGGER.warn(e.getMessage());
             }
         }
@@ -457,22 +446,20 @@ public class CaveRepositoryImpl implements CaveRepository {
                 try {
                     if ((filter == null) || (url.matches(filter))) {
                         ResourceImpl resource = createResource(new URL(url));
-                        if (resource != null) {
-                            LOGGER.debug("Copy {} into the Cave repository storage", url);
-                            int index = url.lastIndexOf("/");
-                            if (index > 0) {
-                                url = url.substring(index + 1);
-                            }
-                            Path destination = getLocationPath().resolve(url);
-                            Files.copy(is, destination);
-                            if (update) {
-                                resource = createResource(destination.toUri().toURL());
-                                LOGGER.debug("Update OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
-                                addResource(resource);
-                            }
+                        LOGGER.debug("Copy {} into the Cave repository storage", url);
+                        int index = url.lastIndexOf("/");
+                        if (index > 0) {
+                            url = url.substring(index + 1);
+                        }
+                        Path destination = getLocationPath().resolve(url);
+                        Files.copy(is, destination);
+                        if (update) {
+                            resource = createResource(destination.toUri().toURL());
+                            LOGGER.debug("Update OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
+                            addResource(resource);
                         }
                     }
-                } catch (IllegalArgumentException e) {
+                } catch (BundleException e) {
                     LOGGER.warn(e.getMessage());
                 }
             } else {

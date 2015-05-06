@@ -23,6 +23,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.osgi.framework.BundleException;
 
 import static org.apache.karaf.cave.server.storage.Utils.deleteRecursive;
 import static org.junit.Assert.assertTrue;
@@ -53,8 +54,8 @@ public class CaveRepositoryImplTest {
         try {
             repository.upload(new URL("http://repo1.maven.org/maven2/commons-vfs/commons-vfs/1.0/commons-vfs-1.0.jar"));
             fail("An exception should be raised that the artifact is not a bundle.");
-        } catch (IllegalArgumentException e) {
-            assertTrue("Wrong exception returned", e.getMessage().contains("artifact source is not a valid OSGi bundle"));
+        } catch (BundleException e) {
+            assertTrue("Wrong exception returned", e.getMessage().contains("Unsupported 'Bundle-ManifestVersion'"));
         }
     }
 
