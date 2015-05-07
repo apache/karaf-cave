@@ -16,7 +16,13 @@
  */
 package org.apache.karaf.cave.server.storage;
 
+import java.io.IOException;
 import java.io.Writer;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
 import javax.xml.stream.XMLStreamException;
 
@@ -40,26 +46,9 @@ public class OsgiRepository extends XmlRepository {
         super(url);
     }
 
-    public void addResource(Resource resource) {
-        load();
-        lock.writeLock().lock();
-        try {
-            loader.getXml().resources.add(resource);
-            super.addResource(resource);
-            loader.getXml().increment = System.currentTimeMillis();
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
     public long getIncrement() {
         load();
         return loader.getXml().increment;
-    }
-
-    public void setIncrement(long increment) {
-        load();
-        loader.getXml().increment = increment;
     }
 
     public void writeRepository(Writer writer) throws XMLStreamException {
@@ -69,6 +58,23 @@ public class OsgiRepository extends XmlRepository {
     private void load() {
         // Force repository load
         getResources();
+    }
+
+    public void addResourcesAndSave(List<Resource> resources) throws XMLStreamException, IOException {
+        lock.writeLock().lock();
+        try {
+            load();
+            for (Resource resource : resources) {
+                loader.getXml().resources.add(resource);
+                addResource(resource);
+            }
+            loader.getXml().increment = System.currentTimeMillis();
+            try (Writer writer = Files.newBufferedWriter(Paths.get(URI.create(getUrl())), StandardCharsets.UTF_8)) {
+                StaxParser.write(loader.getXml(), writer);
+            }
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 
     protected static class OsgiLoader extends XmlLoader {

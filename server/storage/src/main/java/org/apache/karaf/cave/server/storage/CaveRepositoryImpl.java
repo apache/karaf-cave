@@ -27,12 +27,17 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+
+import javax.xml.stream.XMLStreamException;
 
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
@@ -43,7 +48,6 @@ import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.osgi.framework.BundleException;
-import org.osgi.framework.Constants;
 import org.osgi.resource.Capability;
 import org.osgi.resource.Resource;
 import org.slf4j.Logger;
@@ -74,7 +78,9 @@ public class CaveRepositoryImpl implements CaveRepository {
         if (scan) {
             scan();
         } else if (!Files.exists(getRepositoryXmlFile())) {
-            generateRepositoryXml();
+            try (Writer writer = Files.newBufferedWriter(getRepositoryXmlFile(), StandardCharsets.UTF_8)) {
+                repository.writeRepository(writer);
+            }
         }
     }
 
@@ -123,31 +129,6 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
-     * Generate the repository.xml with the artifact at the given URL.
-     *
-     * @throws Exception in case of repository.xml update failure.
-     */
-    private void generateRepositoryXml() throws Exception {
-        try (Writer writer = Files.newBufferedWriter(getRepositoryXmlFile(), StandardCharsets.UTF_8)) {
-            repository.writeRepository(writer);
-        }
-    }
-
-    /**
-     * Add a resource in the OBR repository.
-     *
-     * @param resource the resource to add.
-     * @throws Exception in case of failure.
-     */
-    private void addResource(ResourceImpl resource) throws Exception {
-        if (resource != null) {
-            useResourceRelativeUri(resource);
-            repository.addResource(resource);
-            repository.setIncrement(System.currentTimeMillis());
-        }
-    }
-
-    /**
      * Upload an artifact from the given URL.
      *
      * @param url the URL of the artifact.
@@ -171,8 +152,7 @@ public class CaveRepositoryImpl implements CaveRepository {
         }
         Files.move(temp, destination);
         resource = createResource(destination.toUri().toURL());
-        addResource(resource);
-        generateRepositoryXml();
+        addResources(Collections.<Resource>singletonList(resource));
     }
 
     /**
@@ -182,8 +162,15 @@ public class CaveRepositoryImpl implements CaveRepository {
      */
     public void scan() throws Exception {
         repository = new OsgiRepository(getRepositoryXml().toString(), getName());
-        scan(new File(getLocation()));
-        generateRepositoryXml();
+        List<Resource> resources = new ArrayList<>();
+        scan(new File(getLocation()), resources);
+        addResources(resources);
+    }
+
+    private void addResources(List<Resource> resources) throws IOException, XMLStreamException {
+        if (!resources.isEmpty()) {
+            repository.addResourcesAndSave(resources);
+        }
     }
 
     /**
@@ -192,12 +179,12 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @param entry the
      * @throws Exception
      */
-    private void scan(File entry) throws Exception {
+    private void scan(File entry, List<Resource> resources) throws Exception {
         if (entry.isDirectory()) {
             File[] children = entry.listFiles();
             if (children != null) {
                 for (File child : children) {
-                    scan(child);
+                    scan(child, resources);
                 }
             }
         } else {
@@ -206,7 +193,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                 URL bundleUrl = entry.toURI().toURL();
                 if (isPotentialBundle(bundleUrl.toString())) {
                     ResourceImpl resource = createResource(bundleUrl);
-                    addResource(resource);
+                    resources.add(resource);
                 }
             } catch (BundleException e) {
                 LOGGER.warn(e.getMessage());
@@ -237,13 +224,15 @@ public class CaveRepositoryImpl implements CaveRepository {
         if (url.getProtocol().equals("file")) {
             // filesystem proxyFilesystem (to another folder)
             File proxyFolder = new File(url.toURI());
-            proxyFilesystem(proxyFolder, filter);
-        }
-        if (url.getProtocol().equals("http")) {
+            List<Resource> resources = new ArrayList<>();
+            proxyFilesystem(proxyFolder, filter, resources);
+            addResources(resources);
+        } else if (url.getProtocol().equals("http")) {
             // HTTP proxyFilesystem
-            proxyHttp(url.toExternalForm(), filter);
+            List<Resource> resources = new ArrayList<>();
+            proxyHttp(url.toExternalForm(), filter, resources);
+            addResources(resources);
         }
-        generateRepositoryXml();
     }
 
     /**
@@ -263,21 +252,20 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @param filter regex filter. Only the artifacts URL matching the filter will be considered.
      * @throws Exception in case of proxyFilesystem failure
      */
-    private void proxyFilesystem(File entry, String filter) throws Exception {
+    private void proxyFilesystem(File entry, String filter, List<Resource> resources) throws Exception {
         LOGGER.debug("Proxying filesystem {}", entry.getAbsolutePath());
         if (entry.isDirectory()) {
             File[] children = entry.listFiles();
             if (children != null) {
                 for (File child : children) {
-                    proxyFilesystem(child, filter);
+                    proxyFilesystem(child, filter, resources);
                 }
             }
         } else {
             try {
                 if ((filter == null) || (entry.toURI().toURL().toString().matches(filter))) {
                     Resource resource = createResource(entry.toURI().toURL());
-                    repository.addResource(resource);
-                    repository.setIncrement(System.currentTimeMillis());
+                    resources.add(resource);
                 }
             } catch (BundleException e) {
                 LOGGER.warn(e.getMessage());
@@ -292,7 +280,9 @@ public class CaveRepositoryImpl implements CaveRepository {
     private ResourceImpl createResource(URL url, String uri) throws BundleException, IOException {
         Map<String, String> headers = getHeaders(url);
         try {
-            return ResourceBuilder.build(uri, headers);
+            ResourceImpl resource = ResourceBuilder.build(uri, headers);
+            useResourceRelativeUri(resource);
+            return resource;
         } catch (BundleException e) {
             throw new BundleException("Unable to create resource from " + uri + ": " + e.getMessage(), e);
         }
@@ -323,7 +313,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
      * @throws Exception in case of proxy failure.
      */
-    private void proxyHttp(String url, String filter) throws Exception {
+    private void proxyHttp(String url, String filter, List<Resource> resources) throws Exception {
         LOGGER.debug("Proxying HTTP URL {}", url);
 
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
@@ -334,8 +324,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                 try {
                     if ((filter == null) || (url.matches(filter))) {
                         Resource resource = createResource(new URL(url));
-                        repository.addResource(resource);
-                        repository.setIncrement(System.currentTimeMillis());
+                        resources.add(resource);
                     }
                 } catch (BundleException e) {
                     LOGGER.warn(e.getMessage());
@@ -347,7 +336,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                     for (Element link : document.select("a")) {
                         String absoluteHref = link.attr("abs:href");
                         if (absoluteHref.startsWith(url)) {
-                            proxyHttp(absoluteHref, filter);
+                            proxyHttp(absoluteHref, filter, resources);
                         }
                     }
                 } catch (UnsupportedMimeTypeException e) {
@@ -369,14 +358,15 @@ public class CaveRepositoryImpl implements CaveRepository {
         if (url.getProtocol().equals("file")) {
             // populate the Cave repository from a filesystem folder
             File populateFolder = new File(url.toURI());
-            populateFromFilesystem(populateFolder, filter, update);
+            List<Resource> resources = new ArrayList<>();
+            populateFromFilesystem(populateFolder, filter, update, resources);
+            addResources(resources);
         }
         if (url.getProtocol().equals("http")) {
             // populate the Cave repository from a HTTP URL
-            populateFromHttp(url.toExternalForm(), filter, update);
-        }
-        if (update) {
-            generateRepositoryXml();
+            List<Resource> resources = new ArrayList<>();
+            populateFromHttp(url.toExternalForm(), filter, update, resources);
+            addResources(resources);
         }
     }
 
@@ -399,13 +389,13 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @param update     if true, the resources are added into the OBR metadata, false else.
      * @throws Exception in case of populate failure.
      */
-    private void populateFromFilesystem(File filesystem, String filter, boolean update) throws Exception {
+    private void populateFromFilesystem(File filesystem, String filter, boolean update, List<Resource> resources) throws Exception {
         LOGGER.debug("Populating from filesystem {}", filesystem.getAbsolutePath());
         if (filesystem.isDirectory()) {
             File[] children = filesystem.listFiles();
             if (children != null) {
                 for (File child : children) {
-                    populateFromFilesystem(child, filter, update);
+                    populateFromFilesystem(child, filter, update, resources);
                 }
             }
         } else {
@@ -419,7 +409,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                     if (update) {
                         resource = createResource(destination.toUri().toURL());
                         LOGGER.debug("Update the OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
-                        addResource(resource);
+                        resources.add(resource);
                     }
                 }
             } catch (BundleException e) {
@@ -436,7 +426,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @param update true if the OBR metadata should be updated, false else.
      * @throws Exception in case of populate failure.
      */
-    private void populateFromHttp(String url, String filter, boolean update) throws Exception {
+    private void populateFromHttp(String url, String filter, boolean update, List<Resource> resources) throws Exception {
         LOGGER.debug("Populating from HTTP URL {}", url);
 
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
@@ -456,7 +446,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                         if (update) {
                             resource = createResource(destination.toUri().toURL());
                             LOGGER.debug("Update OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
-                            addResource(resource);
+                            resources.add(resource);
                         }
                     }
                 } catch (BundleException e) {
@@ -468,7 +458,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                 for (Element link : document.select("a")) {
                     String absoluteHref = link.attr("abs:href");
                     if (absoluteHref.startsWith(url)) {
-                        populateFromHttp(absoluteHref, filter, update);
+                        populateFromHttp(absoluteHref, filter, update, resources);
                     }
                 }
             }
@@ -479,9 +469,8 @@ public class CaveRepositoryImpl implements CaveRepository {
      * Convert the Resource absolute URI to an URI relative to the repository one.
      *
      * @param resource the Resource to manipulate.
-     * @throws Exception in cave of URI conversion failure.
      */
-    private void useResourceRelativeUri(ResourceImpl resource) throws Exception {
+    private void useResourceRelativeUri(ResourceImpl resource) {
         for (Capability cap : resource.getCapabilities(null)) {
             if (cap.getNamespace().equals(CONTENT_NAMESPACE)) {
                 String resourceURI = cap.getAttributes().get(CAPABILITY_URL_ATTRIBUTE).toString();
@@ -504,7 +493,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @return the File corresponding to the OBR repository.xml.
      * @throws Exception
      */
-    private Path getRepositoryXmlFile() throws Exception {
+    private Path getRepositoryXmlFile() {
         return getLocationPath().resolve("repository.xml");
     }
 
