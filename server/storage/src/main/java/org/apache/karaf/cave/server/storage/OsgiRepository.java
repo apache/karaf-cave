@@ -43,7 +43,7 @@ public class OsgiRepository extends XmlRepository {
     }
 
     public OsgiRepository(String url) {
-        super(url);
+        super(url, -1, false);
     }
 
     public long getIncrement() {
@@ -79,11 +79,11 @@ public class OsgiRepository extends XmlRepository {
 
     protected static class OsgiLoader extends XmlLoader {
         public OsgiLoader(String url) {
-            super(url);
+            super(url, -1);
         }
 
         public OsgiLoader(String url, StaxParser.XmlRepository xml) {
-            super(url, xml);
+            super(url, -1, xml);
         }
 
         public StaxParser.XmlRepository getXml() {
