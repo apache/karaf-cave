@@ -43,6 +43,7 @@ import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
+import org.apache.karaf.features.internal.resolver.ResourceUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
@@ -169,7 +170,21 @@ public class CaveRepositoryImpl implements CaveRepository {
 
     private void addResources(List<Resource> resources) throws IOException, XMLStreamException {
         if (!resources.isEmpty()) {
-            repository.addResourcesAndSave(resources);
+            Map<String, Resource> ids = new HashMap<>();
+            for (Resource resource : repository.getResources()) {
+                ids.put(ResourceUtils.getUri(resource), resource);
+            }
+            List<Resource> toAdd = new ArrayList<>();
+            for (Resource resource : resources) {
+                String uri = ResourceUtils.getUri(resource);
+                if (!ids.containsKey(uri)) {
+                    toAdd.add(resource);
+                    ids.put(uri, resource);
+                }
+            }
+            if (!toAdd.isEmpty()) {
+                repository.addResourcesAndSave(resources);
+            }
         }
     }
 
