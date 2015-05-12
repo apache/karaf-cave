@@ -27,6 +27,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -303,7 +304,7 @@ public class CaveRepositoryImpl implements CaveRepository {
         }
     }
 
-    Map<String, String> getHeaders(URL url) throws IOException {
+    Map<String, String> getHeaders(URL url) throws IOException, BundleException {
         try (InputStream is = url.openStream()) {
             ZipInputStream zis = new ZipInputStream(is);
             ZipEntry entry;
@@ -318,7 +319,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                 }
             }
         }
-        throw new IllegalArgumentException("Resource " + url + " does not contain a manifest");
+        throw new BundleException("Resource " + url + " does not contain a manifest");
     }
 
     /**
@@ -420,7 +421,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                     // copy the resource
                     Path destination = getLocationPath().resolve(filesystem.getName());
                     LOGGER.debug("Copy from {} to {}", filesystem.getAbsolutePath(), destination.toAbsolutePath().toString());
-                    Files.copy(filesystem.toPath(), destination);
+                    Files.copy(filesystem.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
                     if (update) {
                         resource = createResource(destination.toUri().toURL());
                         LOGGER.debug("Update the OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
