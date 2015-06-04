@@ -1,0 +1,55 @@
+= Populate repository
+
+You can add new artifacts in a repository.
+
+== Upload a single artifact
+
+You can upload a single artifact into a Cave Repository:
+
+----
+karaf@root> cave:repository-upload-artifact my-repository file:/home/user/.m2/repository/org/apache/servicemix/bundles/org.apache.servicemix.bundles.asm/3.3_2/org.apache.servicemix.bundles.asm-3.3_2.jar
+karaf@root> cave:repository-upload-artifact my-repository http://svn.apache.org/repos/asf/servicemix/m2-repo/org/apache/qpid/qpid-broker/0.8.0/qpid-broker-0.8.0.jar
+----
+
+You can also use Maven style URL:
+
+----
+karaf@root> cave:repository-upload-artifact my-repository mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/1.7.0_5
+----
+
+=== Populate from an external repository
+
+You can also make a kind of "bulk" population of your repository, using an external repository:
+
+----
+karaf@root> cave:repository-populate my-repository file:/home/user/.m2/repository
+----
+
+Apache Karaf Cave supports _file:_ but also _http:_ URL. It means that Apache Karaf Cave is able to browse a remote repository and copy the artifacts
+in your "local" repository.
+
+For instance, you can populate your repository using all Ant ServiceMix bundles present on the Central Maven
+repository:
+
+----
+karaf@root> cave:repository-populate my-repository http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.ant/
+----
+
+You can also populate with the whole Central Maven Repository:
+
+----
+karaf@root> cave:repository-populate my-repository http://repo1.maven.org/maven2
+----
+
+[WARNING]
+====
+Maven Central repository is really huge and populating from the whole Maven Central Repository will take
+very very long time. It's just for demonstration purpose.
+====
+
+You can filter the artifacts that you want to pick up to populate the repository. The _cave:repository-populate_ command accepts
+a regex option for the filter. For instance, to pick up only joda-time version 2 artifact, you can run:
+
+----
+karaf@root> cave:repository-populate --filter .*joda-time-2.* my-repository http://repo2.maven.org/maven2/joda-time/joda-time
+----
