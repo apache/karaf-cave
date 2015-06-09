@@ -16,7 +16,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-cave-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.2.0 http://karaf.apache.org/xmlns/features/v1.2.0">
+<features name="karaf-cave-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
 
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
 
@@ -45,20 +45,23 @@
     </feature>
 
     <feature name="cave-http" version="${project.version}">
-        <feature>http</feature>
+        <feature dependency="true">http</feature>
+        <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <feature>cave-storage</feature>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.http/${project.version}</bundle>
     </feature>
 
     <feature name="cave-rest" version="${project.version}">
-        <feature>http</feature>
+        <feature dependency="true">http</feature>
+        <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <feature version="[3,4)">cxf-jaxrs</feature>
         <feature>cave-storage</feature>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.rest/${project.version}</bundle>
     </feature>
 
     <feature name="cave-maven" version="${project.version}">
-        <feature>http</feature>
+        <feature dependency="true">http</feature>
+        <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.maven/${project.version}</bundle>
     </feature>
 
