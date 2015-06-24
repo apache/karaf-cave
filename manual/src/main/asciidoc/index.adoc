@@ -1,0 +1,6 @@
+= Apache Karaf Cave
+
+This project contains documentation about Apache Karaf Cave.
+
+* link:overview.adoc[Overview]
+* link:user-guide/index.adoc[User Guide]

@@ -1,0 +1,45 @@
+
+= Installation
+
+This chapter describes how to install Apache Karaf Cave into an existing Apache Karaf instance.
+
+== Pre-installation requirements
+
+As Apache Karaf Cave is a Apache Karaf sub-project, it has to be installed into a running Apache Karaf instance.
+
+Apache Karaf Cave is available as Apache Karaf features. The easiest way to install is just to have an internet
+connection from the Apache Karaf running instance.
+
+== Registration of the Apache Karaf Cave features
+
+Simply register the Apache Karaf Cave features URL in your Apache Karaf instance:
+
+----
+karaf@root> features:addurl mvn:org.apache.karaf.cave/apache-karaf-cave/2.3.0/xml/features
+----
+
+Now Apache Karaf Cave features are available, ready to be installed:
+
+----
+karaf@root> features:list|grep -i cave
+[uninstalled  ] [2.3.0 ] cave-server                   karaf-cave-2.3.0
+----
+
+=== Starting Apache Karaf Cave Server
+
+The Apache Karaf Cave Server is installed by the _cave-server_ feature:
+
+----
+karaf@root> features:install cave-server
+----
+
+NB: installation of the cave-server feature will install additional features, such as obr, http, war. It could take
+several minutes depending of your network connection speed.
+
+New Apache Karaf Cave commands are now available:
+
+----
+karaf@root> cave:<TAB>
+cave:repositories-list             cave:repository-create             cave:repository-install            cave:repository-populate
+cave:repository-proxy              cave:repository-uninstall          cave:repository-update             cave:repository-upload-artifact
+----

@@ -1,0 +1,161 @@
+= Repository
+
+A Cave Repository is a container for:
+
+* OSGi bundles (jar files)
+* OBR (OSGi Bundle Repository) metadata (aka a repository.xml file)
+
+By default, a repository uses a filesystem backend for the storage, the directory used is KARAF_BASE/cave.
+
+You can change the storage location in the _etc/org.apache.karaf.cave.server.storage.cfg_ configuration file:
+
+----
+################################################################################
+#
+#    Licensed to the Apache Software Foundation (ASF) under one or more
+#    contributor license agreements.  See the NOTICE file distributed with
+#    this work for additional information regarding copyright ownership.
+#    The ASF licenses this file to You under the Apache License, Version 2.0
+#    (the "License"); you may not use this file except in compliance with
+#    the License.  You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS,
+#    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#    See the License for the specific language governing permissions and
+#    limitations under the License.
+#
+################################################################################
+
+#
+# Storage location where Apache Karaf Cave create repositories by default
+#
+storage.location=cave
+----
+
+For instance, you can define _/var/cave/store_ for the _storage.location_ property.
+
+== Create
+
+The _cave:repository-create_ command creates a new repository:
+
+----
+karaf@root> cave:repository-create my-repository
+----
+
+A repository is identified by a name, _my-repository_ in our example.
+
+Apache Karaf Cave creates the repository storage for you.
+
+If you want to use an existing directory, and avoid Cave to create one in the storage location, you can use the _-l_
+(_--location_) option:
+
+----
+karaf@root> cave:repository-create -l /home/user/.m2/repository m2
+----
+
+By default, Apache Karaf Cave scans the repository storage and create the OBR metadata. You can use the _-no_ (_--no-obr-generate_)
+option to avoid this step:
+
+----
+karaf@root> cave:repository-create -no -l /home/user/.m2/repository m2
+----
+
+By default, Apache Karaf Cave registers (installs) a new repository into the OBR service. You can use the _-ni_ (_--no-install_)
+option to avoid this step:
+
+----
+karaf@root> cave:repository-create -ni -l /home/user/m2/repository m2
+----
+
+NB: the _-no_ and _-ni_ options are interesting when you use an existing location for the repository. If you create a
+new empty repository, these options don't have really any effect.
+
+== List
+
+You can list the repositories:
+
+----
+karaf@root> cave:repositories-list
+Name                 Location
+[my-repository]      [/opt/apache-karaf-2.3.3/cave/my-repository]
+[m2]                 [/home/user/.m2/repository]
+----
+
+You can find the repository name and location.
+
+== Repository and OBR service
+
+By default, Apache Karaf Cave installs the repository in the Apache Karaf OBR service.
+
+You can see the installed repositories using the _obr:listurl_ command:
+
+----
+karaf@root> obr:listurl
+file:/home/jbonofre/.m2/repository/repository.xml
+file:/home/jbonofre/apache-karaf-2.3.3/cave/my-repository/repository.xml
+----
+
+You can refresh a repository or install a repository in the OBR service using the _cave:repository-install_ command:
+
+----
+karaf@root> cave:repository-install my-repository
+----
+
+You can uninstall a repository from the Apache Karaf OBR service using the _cave:repository-uninstall_ command:
+
+----
+karaf@root> cave:repository-uninstall my-repository
+----
+
+You can see with the _obr:listurl_ command that the repository is no more known by the OBR service:
+
+----
+karaf@root> obr:listurl
+file:/home/jbonofre/.m2/repository/repository.xml
+----
+
+You can "re-install" the repository at any time using the _cave:repository-install_ command again:
+
+----
+karaf@root> cave:repository-install my-repository
+karaf@root> obr:listurl
+file:/home/jbonofre/.m2/repository/repository.xml
+file:/home/jbonofre/apache-karaf-2.3.3/cave/my-repository/repository.xml
+----
+
+At any time, you can force the generation and update of the OBR metadata using the _cave:repository-update_ command:
+
+----
+karaf@root> cave:repository-update my-repository
+----
+
+This command scan the repository storage location, seeking all OSGi bundles, and generate the OBR metadata (aka a repository.xml).
+
+NB: If you add or remove any artifact in the repository storage location by hand (for instance, using cp, rm, etc on Unix),
+you have to update the repository OBR metadata using the _cave:repository-update_ command.
+
+== Destroy
+
+The _cave:repository-destroy_ command deletes the repository storage location:
+
+----
+karaf@root> cave:repository-destroy my-repository
+----
+
+[WARNING]
+====
+Be aware that this command completely deletes the repository storage. By extremely careful when using this command
+with repository using "custom" location.
+====
+
+== What's next
+
+Apache Karaf Cave provides a HTTP service to expose the repositories. It allows you to use the repositories remotely.
+You can find details in the HTTP wrapper service sectionhttp-wrapperHTTP wrapper service section of the user guide.
+
+If repositories are installed in the OBR service, you can use the OBR command as explained in the link:obr-command.adoc[OBR commands section]
+of the user guide.
+
