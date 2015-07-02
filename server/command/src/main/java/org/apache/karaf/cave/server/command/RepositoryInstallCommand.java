@@ -23,9 +23,9 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
- * Command to install a Cave repository into the OBR service.
+ * Start the Repository Service for a Cave repository.
  */
-@Command(scope = "cave", name = "repository-install", description = "Install a Cave repository in the OBR service")
+@Command(scope = "cave", name = "repository-install", description = "Start the Repository Service for a Cave repository.")
 @Service
 public class RepositoryInstallCommand extends CaveRepositoryCommandSupport {
 

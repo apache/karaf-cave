@@ -23,7 +23,6 @@ Initial Setup
 
 1) Install J2SE 7.0 SDK (or later), which can be downloaded from
    http://www.oracle.com/technetwork/java/javase/downloads.
-   Use version of "JDK 6.0 Update 50" (or later).
 
 2) Make sure that your JAVA_HOME environment variable is set to the newly installed
    JDK location, and that your PATH includes %JAVA_HOME%\bin (windows) or

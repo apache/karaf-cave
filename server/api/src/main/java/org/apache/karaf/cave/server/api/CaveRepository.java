@@ -20,7 +20,7 @@ import java.net.URL;
 
 /**
  * Cave repository is a storage area where to upload artifacts.
- * It's already the basement of the OBR repository.xml metadata.
+ * It's already the basement of the repository.xml metadata.
  */
 public interface CaveRepository {
 
@@ -55,14 +55,14 @@ public interface CaveRepository {
 
     /**
      * Scan the whole repository, reading bundle MANIFEST, etc to update
-     * or generate the OBR repository.xml.
+     * or generate the repository.xml.
      *
      * @throws Exception in case of scan failure.
      */
     public void scan() throws Exception;
 
     /**
-     * Proxy an URL (for instance a Maven repository) and add OBR information.
+     * Proxy an URL (for instance a Maven repository) and add repository metadata..
      *
      * @param url the URL to proxy.
      * @throws Exception
@@ -70,7 +70,7 @@ public interface CaveRepository {
     public void proxy(URL url) throws Exception;
 
     /**
-     * Proxy an URL (for instance a Maven repository), eventually filtering some artifacts, and add OBR information.
+     * Proxy an URL (for instance a Maven repository), eventually filtering some artifacts, and add repository metadata..
      *
      * @param url the URL to proxy.
      * @param filter regex filter on the artifacts URL.
@@ -79,20 +79,20 @@ public interface CaveRepository {
     public void proxy(URL url, String filter) throws Exception;
 
     /**
-     * Populate from a remote URL (for instance a Maven repository), and eventually update the OBR information.
+     * Populate from a remote URL (for instance a Maven repository), and eventually update the repository metadata.
      *
      * @param url the URL to copy.
-     * @param update if true the OBR information is updated, false else.
+     * @param update if true the repository metadata is updated, false else.
      * @throws Exception in case of copy failure.
      */
     public void populate(URL url, boolean update) throws Exception;
 
     /**
-     * Populate from a remote URL (for instance a Maven repository), eventually filtering artifacts, and eventually update the OBR information.
+     * Populate from a remote URL (for instance a Maven repository), eventually filtering artifacts, and eventually update the repository metadata.
      *
      * @param url the URL to copy.
      * @param filter regex filter on the artifacts URL.
-     * @param update if true the OBR information is updated, false else.
+     * @param update if true the repository metadata is updated, false else.
      * @throws Exception
      */
     public void populate(URL url, String filter, boolean update) throws Exception;
@@ -116,9 +116,9 @@ public interface CaveRepository {
     //public OutputStream getResourceById(String id) throws Exception;
 
     /**
-     * Return the repository URL of the OBR repository.xml.
+     * Return the repository URL of the repository.xml.
      *
-     * @return the URL of the OBR repository.xml.
+     * @return the URL of the repository.xml.
      * @throws Exception in case of failure to get repository.xml URL.
      */
     public URL getRepositoryXml() throws Exception;

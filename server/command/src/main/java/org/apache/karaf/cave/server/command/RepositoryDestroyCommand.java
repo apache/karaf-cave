@@ -20,6 +20,7 @@ import org.apache.karaf.cave.server.command.completers.RepositoryCompleter;
 import org.apache.karaf.shell.api.action.Argument;
 import org.apache.karaf.shell.api.action.Command;
 import org.apache.karaf.shell.api.action.Completion;
+import org.apache.karaf.shell.api.action.Option;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
@@ -33,12 +34,17 @@ public class RepositoryDestroyCommand extends CaveRepositoryCommandSupport {
     @Completion(RepositoryCompleter.class)
     String name = null;
 
+    @Option(name = "-s", aliases = "--storage", description = "Remove the repository from the backend storage (WARNING)", required = false, multiValued = false)
+    boolean removeStorage = false;
+
     protected Object doExecute() throws Exception {
         if (getCaveRepositoryService().getRepository(name) == null) {
             System.err.println("Cave repository " + name + " doesn't exist");
             return null;
         }
-        getCaveRepositoryService().destroy(name);
+        if (removeStorage)
+            getCaveRepositoryService().destroy(name);
+        else getCaveRepositoryService().remove(name);
         return null;
     }
 

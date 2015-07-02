@@ -33,7 +33,7 @@ import org.apache.karaf.shell.api.action.lifecycle.Service;
 @Service
 public class RepositoryPopulateCommand extends CaveRepositoryCommandSupport {
 
-    @Option(name = "-no", aliases = { "--no-obr-generate" }, description = "Do not generate the OBR metadata", required = false, multiValued = false)
+    @Option(name = "-no", aliases = { "--no-generate" }, description = "Do not generate the repository metadata", required = false, multiValued = false)
     boolean noUpdate = false;
 
     @Option(name = "-f", aliases = { "--filter" }, description = "Regex filter on the artifacts URL", required = false, multiValued = false)

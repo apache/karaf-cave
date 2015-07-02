@@ -25,7 +25,7 @@ public interface CaveRepositoryService {
      * Create a Cave repository.
      *
      * @param name the name of the repository
-     * @param scan if true, the repository is scanned at creation time, and the OBR metadata are created.
+     * @param scan if true, the repository is scanned at creation time, and the repository metadata are created.
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
@@ -36,14 +36,14 @@ public interface CaveRepositoryService {
      *
      * @param name the name of the repository.
      * @param location the storage location of the repository.
-     * @param scan if true, the repository is scanned at creation time, and the OBR metadata are created.
+     * @param scan if true, the repository is scanned at creation time, and the repository metadata are created.
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
     CaveRepository create(String name, String location, boolean scan) throws Exception;
 
     /**
-     * Uninstall a Cave repository from the OBR service.
+     * Uninstall a Cave repository from the repository service.
      *
      * @param name the name of the repository.
      * @throws Exception in case of uninstall failure.
@@ -67,7 +67,7 @@ public interface CaveRepositoryService {
     void destroy(String name) throws Exception;
 
     /**
-     * Install a Cave repository into the OBR service.
+     * Install a Cave repository into the repository service.
      *
      * @param name the name of the Cave repository.
      * @throws Exception in case of registration failure.

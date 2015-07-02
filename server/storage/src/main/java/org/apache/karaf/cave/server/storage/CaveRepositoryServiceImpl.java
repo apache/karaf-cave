@@ -97,7 +97,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
     }
 
     /**
-     * Uninstall a Cave repository from the repositories registry.
+     * Remove the OSGi Repository service corresponding to Cave repository.
      *
      * @param name the name of Cave repository to remove.
      * @throws Exception in case of remove failure.
@@ -146,8 +146,8 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
     }
 
     /**
-     * Install a Cave repository in the OBR service.
-     * NB: this method allows refresh the repository in the OBR "client".
+     * Expose a Cave repository as a OSGi Repository service.
+     * NB: this method allows refresh the repository in the repository "client".
      *
      * @param name the name of the Cave repository.
      * @throws Exception in case of registration failure.

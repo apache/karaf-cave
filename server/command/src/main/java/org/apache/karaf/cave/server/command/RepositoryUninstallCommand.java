@@ -23,9 +23,9 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
- * Uninstall a Cave repository from the repositories registry
+ * Stop the OSGi repository service of a Cave repository.
  */
-@Command(scope = "cave", name = "repository-uninstall", description = "Uninstall a Cave repository from the repositories registry")
+@Command(scope = "cave", name = "repository-uninstall", description = "Stop the Repository Service for a Cave repository")
 @Service
 public class RepositoryUninstallCommand extends CaveRepositoryCommandSupport {
 

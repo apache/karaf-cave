@@ -24,9 +24,9 @@ import org.apache.karaf.shell.api.action.Completion;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 
 /**
- *  Update the OBR metadata of a Cave repository
+ *  Update the repository metadata of a Cave repository
  */
-@Command(scope = "cave", name = "repository-update", description = "Update OBR metadata of a Cave repository")
+@Command(scope = "cave", name = "repository-update", description = "Update repository metadata of a Cave repository")
 @Service
 public class RepositoryUpdateCommand extends CaveRepositoryCommandSupport {
 

@@ -22,13 +22,13 @@ public interface CaveRepositoryMBean {
 
     TabularData getCaveRepositories() throws Exception;
 
-    void createRepository(String name, String location, boolean generateObr, boolean install) throws Exception;
+    void createRepository(String name, String location, boolean generate, boolean install) throws Exception;
     void destroyRepository(String name) throws Exception;
     void installRepository(String name) throws Exception;
     void uninstallRepository(String name) throws Exception;
-    void populateRepository(String name, String url, boolean generateObr, String filter) throws Exception;
-    void proxyRepository(String name, String url, boolean generateObr, String filter) throws Exception;
+    void populateRepository(String name, String url, boolean generate, String filter) throws Exception;
+    void proxyRepository(String name, String url, boolean generate, String filter) throws Exception;
     void updateRepository(String name) throws Exception;
-    void uploadArtifact(String repository, String artifactUrl, boolean generateObr) throws Exception;
+    void uploadArtifact(String repository, String artifactUrl, boolean generate) throws Exception;
 
 }

@@ -42,7 +42,7 @@ public class Service {
      * Create a Cave repository.
      *
      * @param name the name of the repository
-     * @param scan if true, the repository is scanned at creation time, and the OBR metadata are created.
+     * @param scan if true, the repository is scanned at creation time, and the repository metadata are created.
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
@@ -58,7 +58,7 @@ public class Service {
      *
      * @param name the name of the repository.
      * @param location the storage location of the repository.
-     * @param scan if true, the repository is scanned at creation time, and the OBR metadata are created.
+     * @param scan if true, the repository is scanned at creation time, and the repository metadata are created.
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
@@ -70,7 +70,7 @@ public class Service {
     }
 
     /**
-     * Uninstall a Cave repository from the OBR service.
+     * Uninstall a Cave repository from the repository service.
      *
      * @param name the name of the repository.
      * @throws Exception in case of uninstall failure.
@@ -100,7 +100,7 @@ public class Service {
     }
 
     /**
-     * Install a Cave repository into the OBR service.
+     * Install a Cave repository into the repository service.
      *
      * @param name the name of the Cave repository.
      * @throws Exception in case of registration failure.

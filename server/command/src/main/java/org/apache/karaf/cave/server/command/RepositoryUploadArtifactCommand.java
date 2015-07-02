@@ -40,7 +40,7 @@ public class RepositoryUploadArtifactCommand extends CaveRepositoryCommandSuppor
     @Argument(index = 1, name = "artifact", description = "The URL of the artifact to upload", required = true, multiValued = false)
     String url = null;
 
-    @Option(name = "-no", aliases = { "--no-update", "--no-refresh", "--no-obr-register" }, description = "Do not refresh the OBR service", required = false, multiValued = true)
+    @Option(name = "-no", aliases = { "--no-update", "--no-refresh", "--no-register" }, description = "Do not refresh the repository service", required = false, multiValued = true)
     boolean noUpdate = false;
 
     public Object doExecute() throws Exception {

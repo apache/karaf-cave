@@ -32,10 +32,10 @@ public class RepositoryCreateCommand extends CaveRepositoryCommandSupport {
     @Option(name = "-l", aliases = {"--location"}, description = "Location of the repository on the file system", required = false, multiValued = false)
     String location;
 
-    @Option(name = "-no", aliases = {"--no-obr-generate"}, description = "Do not generate OBR metadata", required = false, multiValued = false)
-    boolean noOBRGenerate = false;
+    @Option(name = "-no", aliases = {"--no-generate"}, description = "Do not generate repository metadata", required = false, multiValued = false)
+    boolean noGenerate = false;
 
-    @Option(name = "-ni", aliases = {"--no-install"}, description = "Do not install the repository in the OBR service", required = false, multiValued = false)
+    @Option(name = "-ns", aliases = {"--no-start"}, description = "Do not start the Repository Service", required = false, multiValued = false)
     boolean noInstall = false;
 
     @Argument(index = 0, name = "name", description = "The name of the repository", required = true, multiValued = false)
@@ -52,7 +52,7 @@ public class RepositoryCreateCommand extends CaveRepositoryCommandSupport {
             getCaveRepositoryService().create(name, false);
         }
         CaveRepository caveRepository = getCaveRepositoryService().getRepository(name);
-        if (!noOBRGenerate) {
+        if (!noGenerate) {
             caveRepository.scan();
         }
         if (!noInstall) {

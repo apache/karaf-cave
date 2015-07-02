@@ -230,7 +230,7 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
-     * Proxy an URL (by adding repository.xml OBR information) in the Cave repository.
+     * Proxy an URL (by adding repository.xml repository metadata) in the Cave repository.
      *
      * @param url    the URL to proxyFilesystem. the URL to proxyFilesystem.
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
@@ -252,7 +252,7 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
-     * Proxy an URL (by adding repository.xml OBR information) in the Cave repository.
+     * Proxy an URL (by adding repository.xml repository metadata) in the Cave repository.
      *
      * @param url the URL to proxy.
      * @throws Exception
@@ -363,11 +363,11 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
-     * Populate an URL into the Cave repository, and eventually update the OBR information.
+     * Populate an URL into the Cave repository, and eventually update the repository metadata.
      *
      * @param url    the URL to copy.
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
-     * @param update if true the OBR information is updated, false else.
+     * @param update if true the repository metadata is updated, false else.
      * @throws Exception in case of populate failure.
      */
     public void populate(URL url, String filter, boolean update) throws Exception {
@@ -387,10 +387,10 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
-     * Populate an URL into the Cave repository, and eventually update the OBR information.
+     * Populate an URL into the Cave repository, and eventually update the repository metadata.
      *
      * @param url    the URL to copy.
-     * @param update if true the OBR information is updated, false else.
+     * @param update if true the repository metadata is updated, false else.
      * @throws Exception
      */
     public void populate(URL url, boolean update) throws Exception {
@@ -402,7 +402,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      *
      * @param filesystem the "source" directory.
      * @param filter     regex filter. Only artifacts URL matching the filter will be considered.
-     * @param update     if true, the resources are added into the OBR metadata, false else.
+     * @param update     if true, the resources are added into the repository metadata, false else.
      * @throws Exception in case of populate failure.
      */
     private void populateFromFilesystem(File filesystem, String filter, boolean update, List<Resource> resources) throws Exception {
@@ -424,7 +424,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                     Files.copy(filesystem.toPath(), destination, StandardCopyOption.REPLACE_EXISTING);
                     if (update) {
                         resource = createResource(destination.toUri().toURL());
-                        LOGGER.debug("Update the OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
+                        LOGGER.debug("Update the repository metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
                         resources.add(resource);
                     }
                 }
@@ -439,7 +439,7 @@ public class CaveRepositoryImpl implements CaveRepository {
      *
      * @param url    the "source" HTTP URL.
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
-     * @param update true if the OBR metadata should be updated, false else.
+     * @param update true if the repository metadata should be updated, false else.
      * @throws Exception in case of populate failure.
      */
     private void populateFromHttp(String url, String filter, boolean update, List<Resource> resources) throws Exception {
@@ -461,7 +461,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                         Files.copy(is, destination);
                         if (update) {
                             resource = createResource(destination.toUri().toURL());
-                            LOGGER.debug("Update OBR metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
+                            LOGGER.debug("Update repository metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
                             resources.add(resource);
                         }
                     }
@@ -504,9 +504,9 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
-     * Get the File object of the OBR repository.xml file.
+     * Get the File object of the repository.xml file.
      *
-     * @return the File corresponding to the OBR repository.xml.
+     * @return the File corresponding to the repository.xml.
      * @throws Exception
      */
     private Path getRepositoryXmlFile() {
@@ -532,9 +532,9 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
-     * Return the OBR repository.xml corresponding to this Cave repository.
+     * Return the repository.xml corresponding to this Cave repository.
      *
-     * @return the URL of the OBR repository.xml.
+     * @return the URL of the repository.xml.
      * @throws Exception in case of lookup failure.
      */
     public URL getRepositoryXml() throws Exception {

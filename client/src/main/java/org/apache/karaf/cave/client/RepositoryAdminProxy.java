@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- *  Implementation of the OBR RepositoryAdmin service which proxy to a Karaf Cave server.
+ *  Implementation of the OSGi RepositoryAdmin service which proxy to a Karaf Cave server.
  */
 public class RepositoryAdminProxy implements RepositoryAdmin {
 

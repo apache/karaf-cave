@@ -17,27 +17,26 @@
 
 Welcome to Apache Karaf Cave
 ============================
-Apache Karaf Cave is an Apache Karaf subproject. It provides an OSGi Bundle Repository (OBR) and Karaf 
-Features Repository (KFR).
+Apache Karaf Cave is an Apache Karaf subproject. It provides an implementation of the OSGi Repository specification, with
+additional feature such as a complete Maven repository support, a REST API for management, support of remote repository
+proxy.
 
-OBR provides a service that can automatically install a bundle, with its deployment dependencies, from a bundle
-repository.
+Cave deals with the requirements and capabilities of all artifacts.
 
 Apache Karaf Cave provides the following features:
-    * Storage: Karaf Cave provides a filesystem storage. The storage backend is designed with a kind of plugin system,
-      it means that we can change the default filesystem storage by another kind of storage
-    * OBR metadata generation: Karaf Cave automatically creates the OBR metadata for you, using the artifacts presents
-      in the Cave repository.
-    * OBR registration: Karaf Cave allows you to directly register a Cave repository into the OBR RepositoryAdmin OSGi
-      service.
-    * Artifact upload: you can update any OSGi bundle in a Cave repository, using advanced URL, e.g.
-      mvn:groupId/artifactId/version
-    * "External" repository proxy: you can proxy an existing repository (like a Maven one) into a Cave repository. In
-      that case, the artifacts are still resident on the proxied repository, Cave handles the OBR metadata. Cave supports
-      file: and http: like URL, it means that Cave is able to browse a remote HTTP Maven repository.
-    * "External" repository population: you can populate your local Cave repository from an external repository.
-      It means that Cave browse the external repository URL (file: or http:), looking for OSGi bundles in the artifacts,
-      and copy the bundles in the Cave repository storage.
+* Storage: Cave includes a storage backend. The default one is a simple filesystem backend. As the Cave backend
+is designed in a plugin way, you can implement your own backend (for instance, JDBC or LDAP backend).
+* Repository Metadata Generation: Cave creates the repository metadata for you, using the artifacts presents in the
+repository storage.
+* Maven support: Cave repositories act as a complete Maven repository, allowing you to use Cave directly with Maven.
+* REST API: Cave provides a REST API to manipulate the repositories.
+* Artifact Upload: Users can upload OSGi bundle in a Cave repository. It supports URLs like mvn:groupId/artifactId/version,
+file:, http:, etc.
+* Repository proxy: Cave is able to proxy an existing repository, for instance an existing Maven repository.
+The artifacts are located on the "external" repository, Cave handles the repository metadata. Cave supports file: and http:
+URLs, it means that Cave is able to browse a remote HTTP Maven repository for instance.
+* Repository population: Cave is able to get artifacts present on an "external" repository (local file: or
+remote http:), looking for OSGi bundles, and copy the artifacts in the Cave repository storage.
 
 
 Getting Started
@@ -47,7 +46,7 @@ BUILDING for instructions on building Apache Karaf Cave.
 
 To install Apache Karaf Cave, first you have to register the Cave features descriptor:
 
-karaf@root()> feature:repo-add mvn:org.apache.karaf.cave/apache-karaf-cave/3.0.0/xml/features
+karaf@root()> feature:repo-add mvn:org.apache.karaf.cave/apache-karaf-cave/4.0.0/xml/features
 
 Now, you can install the Cave feature simply by typing:
 
