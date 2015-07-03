@@ -213,6 +213,10 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
     private void saveStorage(Properties properties, File location, String comment) throws IOException {
         OutputStream os = null;
         try {
+            if (!location.exists()) {
+                location.getParentFile().mkdirs();
+                location.createNewFile();
+            }
             os = new FileOutputStream(location);
             properties.store(os, comment);
         } finally {
