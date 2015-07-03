@@ -62,7 +62,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      *
      * @param name the name of the repository
      * @param scan if true, the repository is scanned at creation time.
-     * @return  the Cave repository.
+     * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
     public synchronized CaveRepository create(String name, boolean scan) throws Exception {
@@ -73,9 +73,9 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
     /**
      * Create a Cave repository.
      *
-     * @param name the name of the repository.
+     * @param name     the name of the repository.
      * @param location the storage location of the repository.
-     * @param scan if true, the repository is scanned at creation time.
+     * @param scan     if true, the repository is scanned at creation time.
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
@@ -106,6 +106,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
 
     /**
      * Remove a Cave repository from the repositories registry.
+     *
      * @param name the name of the repository.
      * @throws Exception
      */
@@ -185,13 +186,17 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      * Write the Cave repositories storage properties into a file.
      *
      * @param properties the Cave repositories storage properties.
-     * @param location the output file location.
-     * @param comment a comment to write in the properties file.
+     * @param location   the output file location.
+     * @param comment    a comment to write in the properties file.
      * @throws IOException in case of saving failure.
      */
     private void saveStorage(Properties properties, File location, String comment) throws IOException {
         OutputStream os = null;
         try {
+            if (!location.exists()) {
+                location.getParentFile().mkdirs();
+                location.createNewFile();
+            }
             os = new FileOutputStream(location);
             properties.store(os, comment);
         } finally {
