@@ -53,7 +53,7 @@ public class Activator extends BaseActivator implements ManagedService {
     protected void doStart() throws Exception {
         CaveRepositoryServiceImpl service = new CaveRepositoryServiceImpl();
         service.setBundleContext(FrameworkUtil.getBundle(Activator.class).getBundleContext());
-        service.setStorageLocation(new File(getString("cave.storage.location", System.getProperty("karaf.data") + "/cave")));
+        service.setStorageLocation(new File(getString("cave.storage.location", System.getProperty("karaf.data") + File.separator + "cave")));
         service.init();
         register(CaveRepositoryService.class, service);
     }
