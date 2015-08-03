@@ -1,54 +1,66 @@
-h1. Populate repository
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Populate repository
 
 You can add new artifacts in a repository.
 
-h2. Upload a single artifact
+=== Upload a single artifact
 
 You can upload a single artifact into a Cave Repository:
 
-{code}
+----
 karaf@root()> cave:repository-upload my-repository file:/home/user/.m2/repository/org/apache/servicemix/bundles/org.apache.servicemix.bundles.asm/3.3_2/org.apache.servicemix.bundles.asm-3.3_2.jar
 karaf@root()> cave:repository-upload my-repository http://svn.apache.org/repos/asf/servicemix/m2-repo/org/apache/qpid/qpid-broker/0.8.0/qpid-broker-0.8.0.jar
-{code}
+----
 
 You can also use Maven style URL:
 
-{code}
+----
 karaf@root()> cave:repository-upload my-repository mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/1.7.0_5
-{code}
+----
 
-h3. Populate from an external repository
+=== Populate from an external repository
 
 You can also make a kind of "bulk" population of your repository, using an external repository:
 
-{code}
+----
 karaf@root()> cave:repository-populate my-repository file:/home/user/.m2/repository
-{code}
+----
 
-Apache Karaf Cave supports {{file:}} but also {{http:}} URL. It means that Apache Karaf Cave is able to browse a remote repository and copy the artifacts
+Apache Karaf Cave supports 'file:' but also 'http:' URL. It means that Apache Karaf Cave is able to browse a remote repository and copy the artifacts
 in your "local" repository.
 
 For instance, you can populate your repository using all Ant ServiceMix bundles present on the Central Maven
 repository:
 
-{code}
+----
 karaf@root()> cave:repository-populate my-repository http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.ant/
-{code}
+----
 
 You can also populate with the whole Central Maven Repository:
 
-{code}
+----
 karaf@root()> cave:repository-populate my-repository http://repo1.maven.org/maven2
-{code}
+----
 
-{warning}
 Maven Central repository is really huge and populating from the whole Maven Central Repository will take
 very very long time. It's just for demonstration purpose.
-{warning}
 
-You can filter the artifacts that you want to pick up to populate the repository. The {{cave:repository-populate}} command accepts
+You can filter the artifacts that you want to pick up to populate the repository. The 'cave:repository-populate' command accepts
 a regex option for the filter. For instance, to pick up only joda-time version 2 artifact, you can run:
 
-{code}
+----
 karaf@root()> cave:repository-populate --filter .*joda-time-2.* my-repository http://repo2.maven.org/maven2/joda-time/joda-time
-{code}
+----

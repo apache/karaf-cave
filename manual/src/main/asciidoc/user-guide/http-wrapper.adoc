@@ -1,33 +1,46 @@
-h1. HTTP wrapper service
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== HTTP wrapper service
 
 When you install the Apache Karaf Cave Server, it starts a HTTP service wrapper.
 
 It means that all artifacts and repository metadata presents in local repositories are exposed over HTTP.
 
-h2. Repository metadata access
+=== Repository metadata access
 
 Assuming that you have the following repositories:
 
-{code}
+----
 karaf@root()> cave:repositories
 Name          | Location
 -----------------------------------------------------------------------------
 my-repository | /opt/apache-karaf-4.0.0/data/cave/my-repository
-
-{code}
+----
 
 You can access the repository metadata using the following URL in your favorite browser:
 
-{code}
+----
 http://localhost:8181/cave/http/my-repository-repository.xml
-{code}
+----
 
 NB: the port 8181 is the default one of the Apache Karaf HTTP service.
 
 You can see that the URL follows the format:
 
-{code}
+----
 http://[cave_server_hostname]:[http_service_port]/cave/http/[cave_repository_name]-repository.xml
-{code}
+----
 
 It means that you can register the repositories on remote Apache Karaf instances.

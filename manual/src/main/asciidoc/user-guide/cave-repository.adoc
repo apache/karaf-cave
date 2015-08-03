@@ -1,15 +1,29 @@
-h1. Repository
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 
-A Cave Repository is a container for:
+== Repository
+
+A Cave repository is a container for:
 
 * Artifacts (files)
 * Repository metadata
 
 By default, a repository uses a filesystem backend for the storage, the directory used is KARAF_BASE/cave.
 
-You can change the storage location in the {{etc/org.apache.karaf.cave.server.storage.cfg}} configuration file:
+You can change the storage location in the 'etc/org.apache.karaf.cave.server.storage.cfg' configuration file:
 
-{code}
+----
 ################################################################################
 #
 #    Licensed to the Apache Software Foundation (ASF) under one or more
@@ -33,75 +47,54 @@ You can change the storage location in the {{etc/org.apache.karaf.cave.server.st
 # Storage location where Apache Karaf Cave create repositories by default
 #
 cave.storage.location=cave
-{code}
+----
 
-For instance, you can define {{/var/cave/store}} for the {{storage.location}} property.
+For instance, you can define '/var/cave/store' for the 'storage.location' property.
 
-h2. Create
+=== Create
 
-The {{cave:repository-create}} command creates a new repository:
+The 'cave:repository-create' command creates a new repository:
 
-{code}
+----
 karaf@root()> cave:repository-create my-repository
-{code}
+----
 
-A repository is identified by a name, {{my-repository}} in our example.
+A repository is identified by a name, 'my-repository' in our example.
 
 Apache Karaf Cave creates the repository storage for you.
 
-If you want to use an existing directory, and avoid Cave to create one in the storage location, you can use the {{-l}}
-({{--location}}) option:
+If you want to use an existing directory, and avoid Cave to create one in the storage location, you can use the '-l'
+('--location') option:
 
-{code}
+----
 karaf@root()> cave:repository-create -l /home/user/.m2/repository m2
-{code}
+----
 
-By default, Apache Karaf Cave scans the repository storage and create the repository metadata. You can use the {{-no}} ({{--no-generate}})
+By default, Apache Karaf Cave scans the repository storage and create the repository metadata. You can use the '-no' ('--no-generate')
 option to avoid this step:
 
-{code}
+----
 karaf@root()> cave:repository-create -no -l /home/user/.m2/repository m2
-{code}
+----
 
-By default, Apache Karaf Cave registers (installs) a new repository into the repository service. You can use the {{-ns}} ({{--no-start}})
+By default, Apache Karaf Cave registers (installs) a new repository into the repository service. You can use the '-ns' ('--no-start')
 option to avoid this step:
 
-{code}
+----
 karaf@root()> cave:repository-create -ns -l /home/user/m2/repository m2
-{code}
+----
 
-NB: the {{-no}} and {{-ni}} options are interesting when you use an existing location for the repository. If you create a
+NB: the '-no' and '-ni' options are interesting when you use an existing location for the repository. If you create a
 new empty repository, these options don't have really any effect.
 
-h2. List
+=== List
 
 You can list the repositories:
 
-{code}
+----
 karaf@root()> cave:repositories
 Name          | Location
 ----------------------------------------------------------------
 my-repository | /opt/apache-karaf-4.0.0/data/cave/my-repository
-{code}
+----
 
-You can find the repository name and location.
-
-h2. Destroy
-
-The {{cave:repository-destroy}} command deletes the repository:
-
-{code}
-karaf@root()> cave:repository-destroy my-repository
-{code}
-
-The {{-s}} ({{--storage}}) also deletes the repository backend storage.
-
-{warning}
-Be aware that the {{-s}} option completely deletes the repository storage. By extremely careful when using this command
-with repository using "custom" location.
-{warning}
-
-h2. What's next
-
-Apache Karaf Cave provides a HTTP service to expose the repositories. It allows you to use the repositories remotely.
-You can find details in the [HTTP wrapper service section|http-wrapper] of the user guide.
