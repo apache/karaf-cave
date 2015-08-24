@@ -16,7 +16,9 @@
  */
 package org.apache.karaf.cave.server.storage;
 
+import javax.xml.stream.XMLStreamException;
 import java.io.File;
+import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
@@ -28,6 +30,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -37,8 +41,6 @@ import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import javax.xml.stream.XMLStreamException;
 
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.features.internal.resolver.ResolverUtil;
@@ -56,6 +58,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static java.util.jar.JarFile.MANIFEST_NAME;
+import static org.osgi.service.repository.ContentNamespace.CAPABILITY_MIME_ATTRIBUTE;
+import static org.osgi.service.repository.ContentNamespace.CAPABILITY_SIZE_ATTRIBUTE;
 import static org.osgi.service.repository.ContentNamespace.CAPABILITY_URL_ATTRIBUTE;
 import static org.osgi.service.repository.ContentNamespace.CONTENT_NAMESPACE;
 
@@ -289,37 +293,107 @@ public class CaveRepositoryImpl implements CaveRepository {
         }
     }
 
-    private ResourceImpl createResource(URL url) throws BundleException, IOException {
-        return createResource(url, url.toExternalForm());
+    private ResourceImpl createResource(URL url) throws BundleException, IOException, NoSuchAlgorithmException {
+        return createResource(url, url.toExternalForm(), true);
     }
 
-    private ResourceImpl createResource(URL url, String uri) throws BundleException, IOException {
-        Map<String, String> headers = getHeaders(url);
+    private ResourceImpl createResource(URL url, String uri, boolean readFully) throws BundleException, IOException, NoSuchAlgorithmException {
+        Map<String, String> headers = null;
+        String digest = null;
+        long size = -1;
+        // Find headers, compute length and checksum
+        try (ContentInputStream is = new ContentInputStream(url.openStream())) {
+            ZipInputStream zis = new ZipInputStream(is);
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (MANIFEST_NAME.equals(entry.getName())) {
+                    Attributes attributes = new Manifest(zis).getMainAttributes();
+                    headers = new HashMap<>();
+                    for (Map.Entry attr : attributes.entrySet()) {
+                        headers.put(attr.getKey().toString(), attr.getValue().toString());
+                    }
+                    if (!readFully) {
+                        break;
+                    }
+                }
+            }
+            if (readFully) {
+                digest = is.getDigest();
+                size = is.getSize();
+            }
+        }
+        if (headers == null) {
+            throw new BundleException("Resource " + url + " does not contain a manifest");
+        }
+        // Fix the content directive
         try {
             ResourceImpl resource = ResourceBuilder.build(uri, headers);
-            useResourceRelativeUri(resource);
+            for (Capability cap : resource.getCapabilities(null)) {
+                if (cap.getNamespace().equals(CONTENT_NAMESPACE)) {
+                    String resourceURI = cap.getAttributes().get(CAPABILITY_URL_ATTRIBUTE).toString();
+                    String locationURI = "file:" + getLocation();
+                    LOGGER.debug("Converting resource URI {} relatively to repository URI {}", resourceURI, locationURI);
+                    if (resourceURI.startsWith(locationURI)) {
+                        resourceURI = resourceURI.substring(locationURI.length() + 1);
+                        LOGGER.debug("Resource URI converted to " + resourceURI);
+                        // This is a bit hacky, but the map is not read only
+                        cap.getAttributes().put(CAPABILITY_URL_ATTRIBUTE, resourceURI);
+                    }
+                    if (readFully) {
+                        cap.getAttributes().put(CONTENT_NAMESPACE, digest);
+                        cap.getAttributes().put(CAPABILITY_SIZE_ATTRIBUTE, size);
+                    }
+                    cap.getAttributes().put(CAPABILITY_MIME_ATTRIBUTE, "application/vnd.osgi.bundle");
+                    break;
+                }
+            }
             return resource;
         } catch (BundleException e) {
             throw new BundleException("Unable to create resource from " + uri + ": " + e.getMessage(), e);
         }
     }
 
-    Map<String, String> getHeaders(URL url) throws IOException, BundleException {
-        try (InputStream is = url.openStream()) {
-            ZipInputStream zis = new ZipInputStream(is);
-            ZipEntry entry;
-            while ((entry = zis.getNextEntry()) != null) {
-                if (MANIFEST_NAME.equals(entry.getName())) {
-                    Attributes attributes = new Manifest(zis).getMainAttributes();
-                    Map<String, String> headers = new HashMap<>();
-                    for (Map.Entry attr : attributes.entrySet()) {
-                        headers.put(attr.getKey().toString(), attr.getValue().toString());
-                    }
-                    return headers;
-                }
-            }
+    private static class ContentInputStream extends FilterInputStream {
+        final MessageDigest md;
+        long size = 0;
+
+        public ContentInputStream(InputStream in) throws NoSuchAlgorithmException {
+            super(in);
+            md = MessageDigest.getInstance("SHA-256");
         }
-        throw new BundleException("Resource " + url + " does not contain a manifest");
+
+        @Override
+        public int read() throws IOException {
+            int b = super.read();
+            if (b >= 0) {
+                md.update((byte) b);
+                size++;
+            }
+            return b;
+        }
+
+        @Override
+        public int read(byte[] b, int off, int len) throws IOException {
+            int length = super.read(b, off, len);
+            if (length > 0) {
+                md.update(b, off, length);
+                this.size += length;
+            }
+            return length;
+        }
+
+        public String getDigest() {
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        }
+
+        public long getSize() {
+            return size;
+        }
     }
 
     /**
@@ -335,7 +409,9 @@ public class CaveRepositoryImpl implements CaveRepository {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         try (InputStream is = conn.getInputStream()) {
             String type = conn.getContentType();
-            if ("application/java-archive".equals(type) || "application/octet-stream".equals(type)) {
+            if ("application/java-archive".equals(type)
+                    || "application/octet-stream".equals(type)
+                    || "application/vnd.osgi.bundle".equals(type)) {
                 // I have a jar/binary, potentially a resource
                 try {
                     if ((filter == null) || (url.matches(filter))) {
@@ -448,9 +524,12 @@ public class CaveRepositoryImpl implements CaveRepository {
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
         try (InputStream is = conn.getInputStream()) {
             String type = conn.getContentType();
-            if ("application/java-archive".equals(type) || "application/octet-stream".equals(type)) {
+            if ("application/java-archive".equals(type)
+                    || "application/octet-stream".equals(type)
+                    || "application/vnd.osgi.bundle".equals(type)) {
                 try {
                     if ((filter == null) || (url.matches(filter))) {
+                        // Make sure this is a valid bundle
                         ResourceImpl resource = createResource(new URL(url));
                         LOGGER.debug("Copy {} into the Cave repository storage", url);
                         int index = url.lastIndexOf("/");
@@ -482,32 +561,9 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     /**
-     * Convert the Resource absolute URI to an URI relative to the repository one.
-     *
-     * @param resource the Resource to manipulate.
-     */
-    private void useResourceRelativeUri(ResourceImpl resource) {
-        for (Capability cap : resource.getCapabilities(null)) {
-            if (cap.getNamespace().equals(CONTENT_NAMESPACE)) {
-                String resourceURI = cap.getAttributes().get(CAPABILITY_URL_ATTRIBUTE).toString();
-                String locationURI = "file:" + getLocation();
-                LOGGER.debug("Converting resource URI {} relatively to repository URI {}", resourceURI, locationURI);
-                if (resourceURI.startsWith(locationURI)) {
-                    resourceURI = resourceURI.substring(locationURI.length() + 1);
-                    LOGGER.debug("Resource URI converted to " + resourceURI);
-                    // This is a bit hacky, but the map is not read only
-                    cap.getAttributes().put(CAPABILITY_URL_ATTRIBUTE, resourceURI);
-                }
-                break;
-            }
-        }
-    }
-
-    /**
      * Get the File object of the repository.xml file.
      *
      * @return the File corresponding to the repository.xml.
-     * @throws Exception
      */
     private Path getRepositoryXmlFile() {
         return getLocationPath().resolve("repository.xml");
