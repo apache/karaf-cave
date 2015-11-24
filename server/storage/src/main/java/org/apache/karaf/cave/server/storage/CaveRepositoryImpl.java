@@ -410,6 +410,7 @@ public class CaveRepositoryImpl implements CaveRepository {
         try (InputStream is = conn.getInputStream()) {
             String type = conn.getContentType();
             if ("application/java-archive".equals(type)
+                    || "application/x-java-archive".equals(type)
                     || "application/octet-stream".equals(type)
                     || "application/vnd.osgi.bundle".equals(type)) {
                 // I have a jar/binary, potentially a resource
@@ -525,6 +526,7 @@ public class CaveRepositoryImpl implements CaveRepository {
         try (InputStream is = conn.getInputStream()) {
             String type = conn.getContentType();
             if ("application/java-archive".equals(type)
+                    || "application/x-java-archive".equals(type)
                     || "application/octet-stream".equals(type)
                     || "application/vnd.osgi.bundle".equals(type)) {
                 try {
