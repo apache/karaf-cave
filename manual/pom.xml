@@ -52,8 +52,8 @@
                                 <copy file="${project.build.directory}/generated-docs/index.html" tofile="target/documentation.html"/>
                                 <echo message="Generating PDF using Prince XML (http://www.princexml.com/)"/>
                                 <exec executable="prince">
-                                    <arg value="documentation.html"/>
-                                    <arg value="documentation.pdf"/>
+                                    <arg value="target/documentation.html"/>
+                                    <arg value="target/documentation.pdf"/>
                                     <arg value="--log"/>
                                     <arg value="${project.build.directory}/prince.log"/>
                                 </exec>
