@@ -1,4 +1,18 @@
-h1. Apache Karaf Cave overview
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+= Overview
 
 Apache Karaf Cave is an Apache Karaf sub-project.
 
@@ -15,12 +29,12 @@ is designed in a plugin way, you can implement your own backend (for instance, J
 in the Cave repository storage.
 * *OBR Registration*: Karaf Cave allows you to directly register a Cave repository into an OBR RepositoryAdmin OSGi
 service.
-* *Artifact Upload*: Users can upload OSGi bundle in a Cave repository. It supports URLs like mvn:groupId/artifactId/version,
-file:, http:, etc.
+* *Artifact Upload*: Users can upload OSGi bundle in a Cave repository. It supports URLs like `mvn:groupId/artifactId/version`,
+`file:`, `http:`, etc.
 * *Repository proxy*: Karaf Cave is able to proxy an existing repository, for instance an existing Maven repository.
 The artifacts are located on the "external" repository, Cave handles the OBR metadata. Cave supports file: and http:
 URLs, it means that Cave is able to browse a remote HTTP Maven repository for instance.
 * *Repository population*: Karaf Cave is able to get artifacts present on an "external" repository (local file: or
 remote http:), looking for OSGi bundles, and copy the artifacts in the Cave repository storage.
 
-The {{cave-server}} feature provides the OBR and KFR server, including the storage backend, management layer and shell commands.
+The `cave-server` feature provides the OBR and KFR server, including the storage backend, management layer and shell commands.

@@ -1,33 +1,47 @@
-h1. OBR commands
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== OBR commands
 
 To install a repository in the OBR service, you have to use:
 
-{code}
+----
 karaf@root()> cave:repository-install cave-repo
-{code}
+----
 
 Now, you can see the repository OBR metadata register in the OBR service:
 
-{code}
+----
 karaf@root()> obr:url-list
 Index | OBR URL
 --------------------------------------------------------------------------------
 0     | file:/home/jbonofre/apache-karaf-3.0.1/cave/my-repository/repository.xml
-{code}
+----
 
 And the OSGi bundles present in the repository OSGi bundles are available in the OBR service:
 
-{code}
+----
 karaf@root()> obr:list
 Name                                         | Symbolic Name                              | Version
 ---------------------------------------------------------------------------------------------------
 Apache ServiceMix :: Bundles :: commons-dbcp | org.apache.servicemix.bundles.commons-dbcp | 1.4.0.3
 ...
-{code}
+----
 
 You can get some detail about an OSGi bundle:
 
-{code}
+----
 karaf@root()> obr:info org.apache.servicemix.bundles.commons-dbcp,1.4.0.3
 --------------------------------------------
 Apache ServiceMix :: Bundles :: commons-dbcp
@@ -58,7 +72,7 @@ Capabilities:
    package:{package=org.apache.commons.dbcp.managed, uses:=org.apache.commons.dbcp,javax.sql,org.apache.commons.pool.impl,javax.transaction,org.apache.commons.pool,javax.transaction.xa, version=1.4.0}
    package:{package=org.apache.commons.dbcp.datasources, uses:=javax.sql,org.apache.commons.pool,javax.naming,org.apache.commons.dbcp,javax.naming.spi,org.apache.commons.pool.impl, version=1.4.0}
    package:{package=org.apache.commons.jocl, uses:=org.xml.sax.helpers,org.xml.sax, version=1.4.0}
-{code}
+----
 
 NB: in Apache Karaf, the OBR entry format is symbolicname,version
 
@@ -69,7 +83,7 @@ It's able to manage version, etc.
 
 For instance, we have the following commons-dbcp bundle details:
 
-{code}
+----
 karaf@root> obr:info org.apache.servicemix.bundles.commons-dbcp
 --------------------------------------------
 Apache ServiceMix :: Bundles :: commons-dbcp
@@ -101,13 +115,13 @@ Capabilities:
    package:{package=org.apache.commons.dbcp.datasources, uses:=javax.sql,org.apache.commons.pool,javax.naming,org.apache.commons.dbcp,javax.naming.spi,org.apache.commons.pool.impl, version=1.4.0}
    package:{package=org.apache.commons.jocl, uses:=org.xml.sax.helpers,org.xml.sax, version=1.4.0}
 
-{code}
+----
 
 We can see that commons-dbcp requires org.apache.commons.pool package (between version 1.3.0 and 2.0.0).
 
 If we take a look on commons-pool bundle details:
 
-{code}
+----
 karaf@root()> obr:info org.apache.servicemix.bundles.commons-pool
 --------------------------------------------
 Apache ServiceMix :: Bundles :: commons-pool
@@ -125,13 +139,13 @@ Capabilities:
    bundle:{manifestversion=2, symbolicname=org.apache.servicemix.bundles.commons-pool, presentationname=Apache ServiceMix :: Bundles :: commons-pool, version=1.5.4.3}
    package:{package=org.apache.commons.pool.impl, uses:=org.apache.commons.pool, version=1.5.4}
    package:{package=org.apache.commons.pool, version=1.5.4}
-{code}
+----
 
 This bundle provides package org.apache.commons.pool capability.
 
 It means that if I deploy the commons-dbcp bundle, the OBR should also install the commons-pool bundle:
 
-{code}
+----
 karaf@root()> obr:deploy org.apache.servicemix.bundles.commons-dbcp
 Target resource(s):
 -------------------
@@ -142,9 +156,9 @@ Required resource(s):
    Apache ServiceMix :: Bundles :: commons-pool (1.5.4.3)
 
 Deploying...done.
-{code}
+----
 
 Done: the OBR has resolved the commons-dbcp requirements using the commons-pool capabilities and so installed the
 commons-pool bundle.
 
-NB: in the {{obr:deploy}} command, if you don't mention the version, it will take the highly version available.
+NB: in the `obr:deploy` command, if you don't mention the version, it will take the highly version available.

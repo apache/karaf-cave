@@ -1,32 +1,46 @@
-h1. HTTP wrapper service
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== HTTP wrapper service
 
 When you install the Apache Karaf Cave Server, it starts a HTTP service wrapper.
 
 It means that all artifacts and OBR metadata presents in local repositories are exposed over HTTP.
 
-h2. OBR metadata access
+=== OBR metadata access
 
 Assuming that you have the following repositories:
 
-{code}
+----
 karaf@root()> cave:repositories
 Name          | Location
 --------------------------------------------------------------------
 my-repository | /home/jbonofre/apache-karaf-3.0.1/cave/my-repository
 m2            | /home/jbonofre/.m2/repository
-{code}
+----
 
 You can access the OBR metadata using the following URL in your favorite browser:
 
-{code}
+----
 http://localhost:8181/cave/m2-repository.xml
-{code}
+----
 
 and
 
-{code}
+----
 http://localhost:8181/cave/my-repository-repository.xml
-{code}
+----
 
 NB: the port 8181 is the default one of the Apache Karaf HTTP service.
 
@@ -34,43 +48,43 @@ You can see that the URL follows the format:
 
 You can note the OBR metadata Cave URL format:
 
-{code}
+----
 http://[cave_server_hostname]:[http_service_port]/cave/[cave_repository_name]-repository.xml
-{code}
+----
 
 It means that you can register the repositories on remote Apache Karaf instances.
 
 In a remote Apache Karaf instance, you just have to install the obr feature and register the HTTP wrapper repository.xml URL:
 
-{code}
+----
 karaf@other()> feature:install obr
 karaf@other()> obr:url-add http://cave_server:8181/cave/cave-repo-repository.xml
 karaf@other()> obr:url-add http://cave_server:8181/cave/m2-repository.xml
-{code}
+----
 
-h2. OSGi bundles access
+=== OSGi bundles access
 
 Apache Karaf Cave HTTP wrapper service also provide the OSGi bundles binaries via HTTP.
 
 For instance, you have register the my-repository repository in the OBR service:
 
-{code}
+----
 karaf@root()> cave:repository-install my-repository
-{code}
+----
 
 So you have the following bundles available in the OBR service:
 
-{code}
+----
 karaf@root()> obr:list
 Name                                                                                                  | Symbolic Name                                                       | Version
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 Apache ServiceMix :: Bundles :: commons-dbcp                                                          | org.apache.servicemix.bundles.commons-dbcp                          | 1.4.0.3
 ...
-{code}
+----
 
 If we take a look on the detail of the commons-dbcp bundle:
 
-{code}
+----
 karaf@root()> obr:info org.apache.servicemix.bundles.commons-dbcp
 --------------------------------------------
 Apache ServiceMix :: Bundles :: commons-dbcp
@@ -101,28 +115,28 @@ Capabilities:
    package:{package=org.apache.commons.dbcp.managed, uses:=org.apache.commons.dbcp,javax.sql,org.apache.commons.pool.impl,javax.transaction,org.apache.commons.pool,javax.transaction.xa, version=1.4.0}
    package:{package=org.apache.commons.dbcp.datasources, uses:=javax.sql,org.apache.commons.pool,javax.naming,org.apache.commons.dbcp,javax.naming.spi,org.apache.commons.pool.impl, version=1.4.0}
    package:{package=org.apache.commons.jocl, uses:=org.xml.sax.helpers,org.xml.sax, version=1.4.0}
-{code}
+----
 
-we can see that the URI is {{file:/home/jbonofre/.m2/repository/org/apache/servicemix/bundles/org.apache.servicemix.bundles.commons-dbcp/1.4_3/org.apache.servicemix.bundles.commons-dbcp-1.4_3.jar}}.
+we can see that the URI is `file:/home/jbonofre/.m2/repository/org/apache/servicemix/bundles/org.apache.servicemix.bundles.commons-dbcp/1.4_3/org.apache.servicemix.bundles.commons-dbcp-1.4_3.jar`.
 
 But the HTTP wrapper service also exposes the bundle on:
 
-{code}
+----
 http://localhost:8181/cave/org.apache.servicemix.bundles.commons-dbcp-1.4.0.3.jar
-{code}
+----
 
 Actually, Apache Karaf Cave handles bundle URI relatively to the repository.
 
 So, it means that, if you register the my-repository repository on a remote Apache Karaf instance:
 
-{code}
+----
 karaf@other()> feature:install obr
 karaf@other()> obr:url-add http://cave_server:8181/cave/my-repository-repository.xml
-{code}
+----
 
 you can take a look on the commons-dbcp details:
 
-{code}
+----
 karaf@root()> obr:info org.apache.servicemix.bundles.commons-dbcp
 --------------------------------------------
 Apache ServiceMix :: Bundles :: commons-dbcp
@@ -153,13 +167,13 @@ Capabilities:
    package:{package=org.apache.commons.dbcp.managed, uses:=org.apache.commons.dbcp,javax.sql,org.apache.commons.pool.impl,javax.transaction,org.apache.commons.pool,javax.transaction.xa, version=1.4.0}
    package:{package=org.apache.commons.dbcp.datasources, uses:=javax.sql,org.apache.commons.pool,javax.naming,org.apache.commons.dbcp,javax.naming.spi,org.apache.commons.pool.impl, version=1.4.0}
    package:{package=org.apache.commons.jocl, uses:=org.xml.sax.helpers,org.xml.sax, version=1.4.0}
-{code}
+----
 
-we can see that the URI is {{http://localhost:8181/cave/org.apache.servicemix.bundles.commons-dbcp-1.4.0.3.jar}}.
+we can see that the URI is `http://localhost:8181/cave/org.apache.servicemix.bundles.commons-dbcp-1.4.0.3.jar`.
 
-It means that we can use directly {{obr:deploy}} command:
+It means that we can use directly `obr:deploy` command:
 
-{code}
+----
 karaf@root> obr:deploy org.apache.servicemix.bundles.commons-dbcp
 Target resource(s):
 -------------------
@@ -170,4 +184,4 @@ Required resource(s):
    Apache ServiceMix :: Bundles :: commons-pool (1.5.4.3)
 
 Deploying...done.
-{code}
+----

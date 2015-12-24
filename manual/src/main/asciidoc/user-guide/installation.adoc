@@ -1,45 +1,59 @@
-h1. Installation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Installation
 
 This chapter describes how to install Apache Karaf Cave into an existing Apache Karaf instance.
 
-h2. Pre-installation requirements
+=== Pre-installation requirements
 
 As Apache Karaf Cave is a Apache Karaf sub-project, it has to be installed into a running Apache Karaf instance.
 
 Apache Karaf Cave is available as Apache Karaf features. The easiest way to install is just to have an internet
 connection from the Apache Karaf running instance.
 
-h2. Registration of the Apache Karaf Cave features
+=== Registration of the Apache Karaf Cave features
 
 Simply register the Apache Karaf Cave features URL in your Apache Karaf instance:
 
-{code}
+----
 karaf@root()> feature:repo-add mvn:org.apache.karaf.cave/apache-karaf-cave/3.0.0/xml/features
-{code}
+----
 
 Now Apache Karaf Cave features are available, ready to be installed:
 
-{code}
+----
 karaf@root()> feature:list |grep -i cave
 cave-server                   | 3.0.0   | x         | karaf-cave-3.0.0 |
-{code}
+----
 
-h3. Starting Apache Karaf Cave Server
+=== Starting Apache Karaf Cave Server
 
-The Apache Karaf Cave Server is installed by the {{cave-server}} feature:
+The Apache Karaf Cave Server is installed by the `cave-server` feature:
 
-{code}
+----
 karaf@root()> feature:install cave-server
-{code}
+----
 
 NB: installation of the cave-server feature will install additional features, such as obr, http, war. It could take
 several minutes depending of your network connection speed.
 
 New Apache Karaf Cave commands are now available:
 
-{code}
+----
 karaf@root()> cave:<TAB>
 cave:repositories            cave:repository-create       cave:repository-destroy
 cave:repository-install      cave:repository-populate     cave:repository-proxy
 cave:repository-uninstall    cave:repository-update       cave:repository-upload
-{code}
+----

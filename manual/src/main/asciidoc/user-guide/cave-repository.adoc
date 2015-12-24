@@ -1,4 +1,18 @@
-h1. Repository
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Repository
 
 A Cave Repository is a container for:
 
@@ -7,9 +21,9 @@ A Cave Repository is a container for:
 
 By default, a repository uses a filesystem backend for the storage, the directory used is KARAF_BASE/cave.
 
-You can change the storage location in the {{etc/org.apache.karaf.cave.server.storage.cfg}} configuration file:
+You can change the storage location in the `etc/org.apache.karaf.cave.server.storage.cfg` configuration file:
 
-{code}
+----
 ################################################################################
 #
 #    Licensed to the Apache Software Foundation (ASF) under one or more
@@ -33,134 +47,132 @@ You can change the storage location in the {{etc/org.apache.karaf.cave.server.st
 # Storage location where Apache Karaf Cave create repositories by default
 #
 storage.location=cave
-{code}
+----
 
-For instance, you can define {{/var/cave/store}} for the {{storage.location}} property.
+For instance, you can define `/var/cave/store` for the `storage.location` property.
 
-h2. Create
+=== Create
 
-The {{cave:repository-create}} command creates a new repository:
+The `cave:repository-create` command creates a new repository:
 
-{code}
+----
 karaf@root()> cave:repository-create my-repository
-{code}
+----
 
-A repository is identified by a name, {{my-repository}} in our example.
+A repository is identified by a name, `my-repository` in our example.
 
 Apache Karaf Cave creates the repository storage for you.
 
-If you want to use an existing directory, and avoid Cave to create one in the storage location, you can use the {{-l}}
-({{--location}}) option:
+If you want to use an existing directory, and avoid Cave to create one in the storage location, you can use the `-l`
+(`--location`) option:
 
-{code}
+----
 karaf@root()> cave:repository-create -l /home/user/.m2/repository m2
-{code}
+----
 
-By default, Apache Karaf Cave scans the repository storage and create the OBR metadata. You can use the {{-no}} ({{--no-obr-generate}})
+By default, Apache Karaf Cave scans the repository storage and create the OBR metadata. You can use the `-no` (`--no-obr-generate`)
 option to avoid this step:
 
-{code}
+----
 karaf@root()> cave:repository-create -no -l /home/user/.m2/repository m2
-{code}
+----
 
-By default, Apache Karaf Cave registers (installs) a new repository into the OBR service. You can use the {{-ni}} ({{--no-install}})
+By default, Apache Karaf Cave registers (installs) a new repository into the OBR service. You can use the `-ni` (`--no-install`)
 option to avoid this step:
 
-{code}
+----
 karaf@root()> cave:repository-create -ni -l /home/user/m2/repository m2
-{code}
+----
 
-NB: the {{-no}} and {{-ni}} options are interesting when you use an existing location for the repository. If you create a
+NB: the `-no` and `-ni` options are interesting when you use an existing location for the repository. If you create a
 new empty repository, these options don't have really any effect.
 
-h2. List
+=== List
 
-You can list the repositories using the {{cave:repositories}} command:
+You can list the repositories using the `cave:repositories` command:
 
-{code}
+----
 karaf@root()> cave:repositories
 Name          | Location
 --------------------------------------------------------------------
 my-repository | /home/jbonofre/apache-karaf-3.0.1/cave/my-repository
 m2            | /home/jbonofre/.m2/repository
-{code}
+----
 
 You can find the repository name and location.
 
-h2. Repository and OBR service
+=== Repository and OBR service
 
 By default, Apache Karaf Cave installs the repository in the Apache Karaf OBR service.
 
-You can see the installed repositories using the {{obr:url-list}} command:
+You can see the installed repositories using the `obr:url-list` command:
 
-{code}
+----
 karaf@root()> obr:url-list
 Index | OBR URL
 --------------------------------------------------------------------------------
 0     | file:/home/jbonofre/.m2/repository/repository.xml
 1     | file:/home/jbonofre/apache-karaf-3.0.1/cave/my-repository/repository.xml
-{code}
+----
 
-You can refresh a repository or install a repository in the OBR service using the {{cave:repository-install}} command:
+You can refresh a repository or install a repository in the OBR service using the `cave:repository-install` command:
 
-{code}
+----
 karaf@root()> cave:repository-install my-repository
-{code}
+----
 
-You can uninstall a repository from the Apache Karaf OBR service using the {{cave:repository-uninstall}} command:
+You can uninstall a repository from the Apache Karaf OBR service using the `cave:repository-uninstall` command:
 
-{code}
+----
 karaf@root()> cave:repository-uninstall my-repository
-{code}
+----
 
-You can see with the {{obr:url-list}} command that the repository is no more known by the OBR service:
+You can see with the `obr:url-list` command that the repository is no more known by the OBR service:
 
-{code}
+----
 karaf@root()> obr:url-list
 Index | OBR URL
 ---------------------------------------------------------
 0     | file:/home/jbonofre/.m2/repository/repository.xml
-{code}
+----
 
-You can "re-install" the repository at any time using the {{cave:repository-install}} command again:
+You can "re-install" the repository at any time using the `cave:repository-install` command again:
 
-{code}
+----
 karaf@root()> cave:repository-install my-repository
 karaf@root()> obr:url-list
 Index | OBR URL
 --------------------------------------------------------------------------------
 0     | file:/home/jbonofre/.m2/repository/repository.xml
 1     | file:/home/jbonofre/apache-karaf-3.0.1/cave/my-repository/repository.xml
-{code}
+----
 
-At any time, you can force the generation and update of the OBR metadata using the {{cave:repository-update}} command:
+At any time, you can force the generation and update of the OBR metadata using the `cave:repository-update` command:
 
-{code}
+----
 karaf@root()> cave:repository-update my-repository
-{code}
+----
 
 This command scan the repository storage location, seeking all OSGi bundles, and generate the OBR metadata (aka a repository.xml).
 
 NB: If you add or remove any artifact in the repository storage location by hand (for instance, using cp, rm, etc on Unix),
-you have to update the repository OBR metadata using the {{cave:repository-update}} command.
+you have to update the repository OBR metadata using the `cave:repository-update` command.
 
-h2. Destroy
+=== Destroy
 
-The {{cave:repository-destroy}} command deletes the repository storage location:
+The `cave:repository-destroy` command deletes the repository storage location:
 
-{code}
+----
 karaf@root()> cave:repository-destroy my-repository
-{code}
+----
 
-{warning}
-Be aware that this command completely deletes the repository storage. By extremely careful when using this command
-with repository using "custom" location.
-{warning}
+*Be aware that this command completely deletes the repository storage. By extremely careful when using this command
+with repository using "custom" location.*
 
-h2. What's next
+=== What's next
 
 Apache Karaf Cave provides a HTTP service to expose the repositories. It allows you to use the repositories remotely.
-You can find details in the [HTTP wrapper service section|http-wrapper] of the user guide.
+You can find details in the link::http-wrapper[HTTP wrapper service section] of the user guide.
 
-If repositories are installed in the OBR service, you can use the OBR command as explained in the [OBR commands section|obr-command]
+If repositories are installed in the OBR service, you can use the OBR command as explained in the link::obr-command[OBR commands section]
 of the user guide.

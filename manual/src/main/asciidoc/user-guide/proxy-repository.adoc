@@ -1,0 +1,35 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+== Proxy repository
+
+As you can link::populate-repository[populate repository], you can also proxy an "external" repository.
+
+It means that the artifacts stay on the remote repository, Apache Karaf Cave generates the OBR metadata in the local repository
+for the remote artifacts:
+
+----
+karaf@root()> cave:repository-proxy my-repository http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.commons-lang/
+----
+
+NB: the Cave repository will only handle the OBR metadata, it doesn't monitor the remote repository. It means that you
+have to call the `cave:proxy-repository` command each time the remote repository change (new artifacts, etc).
+
+NB: a best practice is to create a Cave repository dedicated for each proxied repository.
+
+The `cave:proxy-repository` command accepts the filter option, as the `cave:populate-repository` command:
+
+----
+karaf@root()> cave:repository-proxy --filter .*joda-time-2.* my-repository http://repo2.maven.org/maven2/joda-time/joda-time
+----
