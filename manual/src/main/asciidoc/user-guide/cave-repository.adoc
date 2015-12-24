@@ -49,42 +49,42 @@ You can change the storage location in the 'etc/org.apache.karaf.cave.server.sto
 cave.storage.location=cave
 ----
 
-For instance, you can define '/var/cave/store' for the 'storage.location' property.
+For instance, you can define `/var/cave/store` for the `storage.location` property.
 
 === Create
 
-The 'cave:repository-create' command creates a new repository:
+The `cave:repository-create` command creates a new repository:
 
 ----
 karaf@root()> cave:repository-create my-repository
 ----
 
-A repository is identified by a name, 'my-repository' in our example.
+A repository is identified by a name, `my-repository` in our example.
 
 Apache Karaf Cave creates the repository storage for you.
 
-If you want to use an existing directory, and avoid Cave to create one in the storage location, you can use the '-l'
+If you want to use an existing directory, and avoid Cave to create one in the storage location, you can use the `-l`
 ('--location') option:
 
 ----
 karaf@root()> cave:repository-create -l /home/user/.m2/repository m2
 ----
 
-By default, Apache Karaf Cave scans the repository storage and create the repository metadata. You can use the '-no' ('--no-generate')
+By default, Apache Karaf Cave scans the repository storage and create the repository metadata. You can use the `-no` (`--no-generate`)
 option to avoid this step:
 
 ----
 karaf@root()> cave:repository-create -no -l /home/user/.m2/repository m2
 ----
 
-By default, Apache Karaf Cave registers (installs) a new repository into the repository service. You can use the '-ns' ('--no-start')
+By default, Apache Karaf Cave registers (installs) a new repository into the repository service. You can use the `-ns` (`--no-start`)
 option to avoid this step:
 
 ----
 karaf@root()> cave:repository-create -ns -l /home/user/m2/repository m2
 ----
 
-NB: the '-no' and '-ni' options are interesting when you use an existing location for the repository. If you create a
+NB: the `-no` and `-ni` options are interesting when you use an existing location for the repository. If you create a
 new empty repository, these options don't have really any effect.
 
 === List

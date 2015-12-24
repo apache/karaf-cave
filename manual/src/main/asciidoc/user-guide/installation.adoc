@@ -45,7 +45,7 @@ cave-rest                       | 4.0.0                   |          | Uninstall
 cave-maven                      | 4.0.0                   |          | Uninstalled | karaf-cave-4.0.0 |
 ----
 
-h3. Starting Apache Karaf Cave Server
+=== Starting Apache Karaf Cave Server
 
 The Apache Karaf Cave Server is installed by the 'cave-server' feature:
 
@@ -54,6 +54,7 @@ karaf@root()> feature:install cave-server
 ----
 
 The cave-server feature is a meta-feature which actually installs:
+
 * cave-storage feature providing the Cave filesystem default storage.
 * cave-http feature providing the Cave HTTP service allowing a remote access to the repositories.
 * cave-rest feature providing the Cave REST API allowing to manipulate the repository remotely with any REST HTTP client.

@@ -39,7 +39,7 @@ You can also make a kind of "bulk" population of your repository, using an exter
 karaf@root()> cave:repository-populate my-repository file:/home/user/.m2/repository
 ----
 
-Apache Karaf Cave supports 'file:' but also 'http:' URL. It means that Apache Karaf Cave is able to browse a remote repository and copy the artifacts
+Apache Karaf Cave supports `file:` but also `http:` URL. It means that Apache Karaf Cave is able to browse a remote repository and copy the artifacts
 in your "local" repository.
 
 For instance, you can populate your repository using all Ant ServiceMix bundles present on the Central Maven
@@ -58,7 +58,7 @@ karaf@root()> cave:repository-populate my-repository http://repo1.maven.org/mave
 Maven Central repository is really huge and populating from the whole Maven Central Repository will take
 very very long time. It's just for demonstration purpose.
 
-You can filter the artifacts that you want to pick up to populate the repository. The 'cave:repository-populate' command accepts
+You can filter the artifacts that you want to pick up to populate the repository. The `cave:repository-populate` command accepts
 a regex option for the filter. For instance, to pick up only joda-time version 2 artifact, you can run:
 
 ----
