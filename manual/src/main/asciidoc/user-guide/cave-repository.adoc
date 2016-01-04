@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Repository
+=== Repository
 
 A Cave repository is a container for:
 
@@ -51,7 +51,7 @@ cave.storage.location=cave
 
 For instance, you can define `/var/cave/store` for the `storage.location` property.
 
-=== Create
+==== Create
 
 The `cave:repository-create` command creates a new repository:
 
@@ -84,10 +84,13 @@ option to avoid this step:
 karaf@root()> cave:repository-create -ns -l /home/user/m2/repository m2
 ----
 
-NB: the `-no` and `-ni` options are interesting when you use an existing location for the repository. If you create a
+[NOTE]
+====
+The `-no` and `-ni` options are interesting when you use an existing location for the repository. If you create a
 new empty repository, these options don't have really any effect.
+====
 
-=== List
+==== List
 
 You can list the repositories:
 

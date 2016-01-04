@@ -12,11 +12,11 @@
 // limitations under the License.
 //
 
-== Populate repository
+=== Populate repository
 
 You can add new artifacts in a repository.
 
-=== Upload a single artifact
+==== Upload a single artifact
 
 You can upload a single artifact into a Cave Repository:
 
@@ -31,7 +31,7 @@ You can also use Maven style URL:
 karaf@root()> cave:repository-upload my-repository mvn:org.apache.servicemix.bundles/org.apache.servicemix.bundles.ant/1.7.0_5
 ----
 
-=== Populate from an external repository
+==== Populate from an external repository
 
 You can also make a kind of "bulk" population of your repository, using an external repository:
 

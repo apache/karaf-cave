@@ -15,7 +15,7 @@
 Apache Karaf Cave 4.x - Documentation
 ======================================
 Apache Software Foundation
-:doctype: book
+:doctype: article
 :toc: left
 :toclevels: 3
 :toc-position: left
@@ -24,7 +24,7 @@ Apache Software Foundation
 
 include::overview.adoc[]
 
-= User Guide
+== User Guide
 
 include::user-guide/installation.adoc[]
 

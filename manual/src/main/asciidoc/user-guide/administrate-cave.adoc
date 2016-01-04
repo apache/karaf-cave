@@ -12,9 +12,9 @@
 // limitations under the License.
 //
 
-== Administration
+=== Administration
 
-=== JMX
+==== JMX
 
 When you install Apache Karaf Cave server, it provides a CaveServerMBean.
 
@@ -35,7 +35,7 @@ Thanks to this MBean, using any JMX client (like jconsole for instance), you can
 * void updateRepository(String name) throws Exception;
 * void uploadArtifact(String repository, String artifactUrl, boolean generate) throws Exception;
 
-=== REST
+==== REST
 
 Cave provides a complete REST API to manipulate the repositories.
 
@@ -45,7 +45,10 @@ The API is available on:
 http://localhost:8181/cave/rest
 ----
 
-NB: 8181 is the default port of the Apache Karaf HTTP service.
+[NOTE]
+====
+8181 is the default port of the Apache Karaf HTTP service.
+====
 
 You can get the WADL:
 

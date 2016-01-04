@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Proxy repository
+=== Proxy repository
 
 As you can populate repository, you can also proxy an "external" repository.
 
@@ -23,10 +23,16 @@ for the remote artifacts:
 karaf@root()> cave:repository-proxy my-repository http://repo1.maven.org/maven2/org/apache/servicemix/bundles/org.apache.servicemix.bundles.commons-lang/
 ----
 
-NB: the Cave repository will only handle the repository metadata, it doesn't monitor the remote repository. It means that you
+[NOTE]
+====
+The Cave repository will only handle the repository metadata, it doesn't monitor the remote repository. It means that you
 have to call the `cave:proxy-repository` command each time the remote repository change (new artifacts, etc).
+====
 
-NB: a best practice is to create a Cave repository dedicated for each proxied repository.
+[NOTE]
+====
+A best practice is to create a Cave repository dedicated for each proxied repository.
+====
 
 The `cave:repository-proxy` command accepts the filter option, as the `cave:repository-populate` command:
 

@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Maven wrapper service
+=== Maven wrapper service
 
 When you install the Apache Karaf Cave Server, it starts a Maven service wrapper.
 
@@ -36,7 +36,10 @@ You can access the corresponding Maven repository using:
 http://localhost:8181/cave/maven
 ----
 
-NB: the port 8181 is the default one of the Apache Karaf HTTP service.
+[NOTE]
+====
+The port 8181 is the default one of the Apache Karaf HTTP service.
+====
 
 You can see that the URL follows the format:
 
