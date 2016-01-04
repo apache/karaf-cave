@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== Repository
+=== Repository
 
 A Cave Repository is a container for:
 
@@ -51,7 +51,7 @@ storage.location=cave
 
 For instance, you can define `/var/cave/store` for the `storage.location` property.
 
-=== Create
+==== Create
 
 The `cave:repository-create` command creates a new repository:
 
@@ -84,10 +84,13 @@ option to avoid this step:
 karaf@root()> cave:repository-create -ni -l /home/user/m2/repository m2
 ----
 
-NB: the `-no` and `-ni` options are interesting when you use an existing location for the repository. If you create a
+[NOTE]
+====
+The `-no` and `-ni` options are interesting when you use an existing location for the repository. If you create a
 new empty repository, these options don't have really any effect.
+====
 
-=== List
+==== List
 
 You can list the repositories using the `cave:repositories` command:
 
@@ -101,7 +104,7 @@ m2            | /home/jbonofre/.m2/repository
 
 You can find the repository name and location.
 
-=== Repository and OBR service
+==== Repository and OBR service
 
 By default, Apache Karaf Cave installs the repository in the Apache Karaf OBR service.
 
@@ -155,10 +158,13 @@ karaf@root()> cave:repository-update my-repository
 
 This command scan the repository storage location, seeking all OSGi bundles, and generate the OBR metadata (aka a repository.xml).
 
-NB: If you add or remove any artifact in the repository storage location by hand (for instance, using cp, rm, etc on Unix),
+[NOTE]
+====
+If you add or remove any artifact in the repository storage location by hand (for instance, using cp, rm, etc on Unix),
 you have to update the repository OBR metadata using the `cave:repository-update` command.
+====
 
-=== Destroy
+==== Destroy
 
 The `cave:repository-destroy` command deletes the repository storage location:
 
@@ -166,10 +172,13 @@ The `cave:repository-destroy` command deletes the repository storage location:
 karaf@root()> cave:repository-destroy my-repository
 ----
 
-*Be aware that this command completely deletes the repository storage. By extremely careful when using this command
-with repository using "custom" location.*
+[NOTE]
+====
+Be aware that this command completely deletes the repository storage. By extremely careful when using this command
+with repository using "custom" location.
+====
 
-=== What's next
+==== What's next
 
 Apache Karaf Cave provides a HTTP service to expose the repositories. It allows you to use the repositories remotely.
 You can find details in the link::http-wrapper[HTTP wrapper service section] of the user guide.

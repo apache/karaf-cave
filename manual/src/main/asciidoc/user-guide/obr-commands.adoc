@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-== OBR commands
+=== OBR commands
 
 To install a repository in the OBR service, you have to use:
 
@@ -74,7 +74,10 @@ Capabilities:
    package:{package=org.apache.commons.jocl, uses:=org.xml.sax.helpers,org.xml.sax, version=1.4.0}
 ----
 
-NB: in Apache Karaf, the OBR entry format is symbolicname,version
+[NOTE]
+====
+In Apache Karaf, the OBR entry format is symbolicname,version
+====
 
 You have the details of the OSGi bundle, especially the requirements and capabilities of the bundle.
 
@@ -161,4 +164,7 @@ Deploying...done.
 Done: the OBR has resolved the commons-dbcp requirements using the commons-pool capabilities and so installed the
 commons-pool bundle.
 
-NB: in the `obr:deploy` command, if you don't mention the version, it will take the highly version available.
+[NOTE]
+====
+In the `obr:deploy` command, if you don't mention the version, it will take the highly version available.
+====

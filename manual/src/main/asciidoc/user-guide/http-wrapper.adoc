@@ -12,13 +12,13 @@
 // limitations under the License.
 //
 
-== HTTP wrapper service
+=== HTTP wrapper service
 
 When you install the Apache Karaf Cave Server, it starts a HTTP service wrapper.
 
 It means that all artifacts and OBR metadata presents in local repositories are exposed over HTTP.
 
-=== OBR metadata access
+==== OBR metadata access
 
 Assuming that you have the following repositories:
 
@@ -42,7 +42,10 @@ and
 http://localhost:8181/cave/my-repository-repository.xml
 ----
 
-NB: the port 8181 is the default one of the Apache Karaf HTTP service.
+[NOTE]
+====
+The port 8181 is the default one of the Apache Karaf HTTP service.
+====
 
 You can see that the URL follows the format:
 
@@ -62,7 +65,7 @@ karaf@other()> obr:url-add http://cave_server:8181/cave/cave-repo-repository.xml
 karaf@other()> obr:url-add http://cave_server:8181/cave/m2-repository.xml
 ----
 
-=== OSGi bundles access
+==== OSGi bundles access
 
 Apache Karaf Cave HTTP wrapper service also provide the OSGi bundles binaries via HTTP.
 
