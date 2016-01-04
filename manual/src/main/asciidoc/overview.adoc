@@ -12,7 +12,7 @@
 // limitations under the License.
 //
 
-= Overview
+== Overview
 
 Apache Karaf Cave is an Apache Karaf sub-project.
 
