@@ -38,7 +38,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
+import java.net.URI;
 import java.net.URL;
+import java.nio.file.Paths;
 
 /**
  * Default implementation of a Cave repository.
@@ -430,15 +432,21 @@ public class CaveRepositoryImpl extends CaveRepository {
      * @throws Exception in cave of URI conversion failure.
      */
     private void useResourceRelativeUri(ResourceImpl resource) throws Exception {
-        String resourceURI = resource.getURI();
+        URI resourceURI = new URI(resource.getURI());
         String locationURI = "file:" + this.getLocation();
-        LOGGER.debug("Converting resource URI {} relatively to repository URI {}", resourceURI, locationURI);
-        if (resourceURI.startsWith(locationURI)) {
-            resourceURI = resourceURI.substring(locationURI.length() + 1);
-            LOGGER.debug("Resource URI converted to " + resourceURI);
-            resource.put(Resource.URI, resourceURI);
+
+        if(locationURI.contains("\\")){
+            locationURI = "file:/" + this.getLocation();
+            locationURI = locationURI.replace("\\","/");
         }
 
+        LOGGER.debug("Converting resource URI {} relatively to repository URI {}", resourceURI, locationURI);
+        String fullResourceURI = resourceURI.getScheme() + ":" +  resourceURI.getPath();
+        if (fullResourceURI.startsWith(locationURI)) {
+            String ResourceURIString = fullResourceURI.substring(locationURI.length() + 1);
+            LOGGER.debug("Resource URI converted to " + ResourceURIString);
+            resource.put(Resource.URI, ResourceURIString);
+        }
     }
 
     /**
