@@ -84,28 +84,28 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
     }
 
     public void destroyRepository(String name) throws Exception {
-        if (getCaveRepositoryService().getRepository(name) != null) {
+        if (getCaveRepositoryService().getRepository(name) == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         caveRepositoryService.destroy(name);
     }
 
     public void installRepository(String name) throws Exception {
-        if (getCaveRepositoryService().getRepository(name) != null) {
+        if (getCaveRepositoryService().getRepository(name) == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         caveRepositoryService.install(name);
     }
 
     public void uninstallRepository(String name) throws Exception {
-        if (getCaveRepositoryService().getRepository(name) != null) {
+        if (getCaveRepositoryService().getRepository(name) == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         caveRepositoryService.uninstall(name);
     }
 
     public void populateRepository(String name, String url, boolean generate, String filter) throws Exception {
-        if (getCaveRepositoryService().getRepository(name) != null) {
+        if (getCaveRepositoryService().getRepository(name) == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         CaveRepository repository = getCaveRepositoryService().getRepository(name);
@@ -116,7 +116,7 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
     }
 
     public void proxyRepository(String name, String url, boolean generate, String filter) throws Exception {
-        if (getCaveRepositoryService().getRepository(name) != null) {
+        if (getCaveRepositoryService().getRepository(name) == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         CaveRepository repository = getCaveRepositoryService().getRepository(name);
@@ -127,7 +127,7 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
     }
 
     public void updateRepository(String name) throws Exception {
-        if (getCaveRepositoryService().getRepository(name) != null) {
+        if (getCaveRepositoryService().getRepository(name) == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         CaveRepository caveRepository = getCaveRepositoryService().getRepository(name);
@@ -135,7 +135,7 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
     }
 
     public void uploadArtifact(String repository, String artifactUrl, boolean generate) throws Exception {
-        if (getCaveRepositoryService().getRepository(repository) != null) {
+        if (getCaveRepositoryService().getRepository(repository) == null) {
             throw new IllegalArgumentException("Cave repository " + repository + " doesn't exist");
         }
         CaveRepository caveRepository = getCaveRepositoryService().getRepository(repository);
