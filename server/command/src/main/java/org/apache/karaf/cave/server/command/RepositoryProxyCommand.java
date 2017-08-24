@@ -46,13 +46,16 @@ public class RepositoryProxyCommand extends CaveRepositoryCommandSupport {
     @Option(name = "-f", aliases = { "--filter" }, description = "Regex filter on the artifacts URL", required = false, multiValued = false)
     String filter;
 
+    @Option(name="-prop", aliases = { "--properties" }, description = "Path to Properties file containing URL authorization parameters", required = false, multiValued = false)
+    String properties;
+
     protected Object doExecute() throws Exception {
         if (getCaveRepositoryService().getRepository(name) == null) {
             System.err.println("Cave repository " + name + " doesn't exist");
             return null;
         }
         CaveRepository repository = getCaveRepositoryService().getRepository(name);
-        repository.proxy(new URL(url), filter);
+        repository.proxy(new URL(url), filter, properties);
         if (!noUpdate) {
             getCaveRepositoryService().install(name);
         }

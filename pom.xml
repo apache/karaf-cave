@@ -39,6 +39,7 @@
         <cxf.version>3.1.0</cxf.version>
         <httpclient.version>4.3.4</httpclient.version>
         <jsoup.version>1.7.3</jsoup.version>
+        <commons-codec.version>1.10</commons-codec.version>
         <karaf.version>4.0.0</karaf.version>
         <osgi.version>5.0.0</osgi.version>
         <wagon.version>1.0</wagon.version>
@@ -391,6 +392,7 @@
                     <plugin>
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>1.5</version>
                         <executions>
                             <execution>
                                 <id>attach-assemblies</id>

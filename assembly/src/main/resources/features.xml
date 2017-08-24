@@ -32,6 +32,7 @@
             mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/filesystem
         </configfile>
         <bundle>mvn:org.jsoup/jsoup/${jsoup.version}</bundle>
+        <bundle>mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.api/${project.version}</bundle>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.storage/${project.version}</bundle>
         <conditional>

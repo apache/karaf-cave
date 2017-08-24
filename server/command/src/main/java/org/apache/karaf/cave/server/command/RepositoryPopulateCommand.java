@@ -46,13 +46,16 @@ public class RepositoryPopulateCommand extends CaveRepositoryCommandSupport {
     @Argument(index = 1, name = "url", description = "The source URL to use", required = true, multiValued = false)
     String url = null;
 
+    @Option(name="-prop", aliases = { "--properties" }, description = "Path to Properties file containing URL authorization parameters", required = false, multiValued = false)
+    String properties;
+
     protected Object doExecute() throws Exception {
         if (getCaveRepositoryService().getRepository(name) == null) {
             System.err.println("Cave repository " + name + " doesn't exist");
             return null;
         }
         CaveRepository repository = getCaveRepositoryService().getRepository(name);
-        repository.populate(new URL(url), filter, !noUpdate);
+        repository.populate(new URL(url), filter, properties, !noUpdate);
         if (!noUpdate) {
             getCaveRepositoryService().install(name);
         }

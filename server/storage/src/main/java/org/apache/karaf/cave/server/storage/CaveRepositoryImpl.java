@@ -47,6 +47,7 @@ import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
+import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
@@ -241,6 +242,19 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @throws Exception
      */
     public void proxy(URL url, String filter) throws Exception {
+        proxy(url, filter, null);
+    }
+
+    /**
+     * Proxy an URL (by adding repository.xml repository metadata) in the Cave repository.
+     *
+     * @param url    the URL to proxyFilesystem. the URL to proxyFilesystem.
+     * @param filter regex filter. Only artifacts URL matching the filter will be considered.
+     * @param properties a Properties file containing URL authorization parameters
+     *                   to access URLs that require authorization.
+     * @throws Exception
+     */
+    public void proxy(URL url, String filter, String properties) throws Exception {
         if (url.getProtocol().equals("file")) {
             // filesystem proxyFilesystem (to another folder)
             File proxyFolder = new File(url.toURI());
@@ -250,7 +264,7 @@ public class CaveRepositoryImpl implements CaveRepository {
         } else if (url.getProtocol().equals("http")) {
             // HTTP proxyFilesystem
             List<Resource> resources = new ArrayList<>();
-            proxyHttp(url.toExternalForm(), filter, resources);
+            proxyHttp(url.toExternalForm(), filter, properties, resources);
             addResources(resources);
         }
     }
@@ -403,10 +417,11 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
      * @throws Exception in case of proxy failure.
      */
-    private void proxyHttp(String url, String filter, List<Resource> resources) throws Exception {
+    private void proxyHttp(String url, String filter, String properties, List<Resource> resources) throws Exception {
         LOGGER.debug("Proxying HTTP URL {}", url);
 
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        conn = (new Utils.Authorizer(properties)).authorize(conn);
         try (InputStream is = conn.getInputStream()) {
             String type = conn.getContentType();
             if ("application/java-archive".equals(type)
@@ -425,11 +440,12 @@ public class CaveRepositoryImpl implements CaveRepository {
             } else {
                 // try to find link to "browse"
                 try {
-                    Document document = Jsoup.connect(url).get();
+                    Connection jConn = Jsoup.connect(url);
+                    Document document = (new Utils.Authorizer(properties)).authorize(jConn).get();
                     for (Element link : document.select("a")) {
                         String absoluteHref = link.attr("abs:href");
                         if (absoluteHref.startsWith(url)) {
-                            proxyHttp(absoluteHref, filter, resources);
+                            proxyHttp(absoluteHref, filter, properties, resources);
                         }
                     }
                 } catch (UnsupportedMimeTypeException e) {
@@ -444,10 +460,12 @@ public class CaveRepositoryImpl implements CaveRepository {
      *
      * @param url    the URL to copy.
      * @param filter regex filter. Only artifacts URL matching the filter will be considered.
+     * @param properties a Properties file containing URL authorization parameters
+     *                   to access URLs that require authorization.
      * @param update if true the repository metadata is updated, false else.
      * @throws Exception in case of populate failure.
      */
-    public void populate(URL url, String filter, boolean update) throws Exception {
+    public void populate(URL url, String filter, String properties, boolean update) throws Exception {
         if (url.getProtocol().equals("file")) {
             // populate the Cave repository from a filesystem folder
             File populateFolder = new File(url.toURI());
@@ -458,9 +476,21 @@ public class CaveRepositoryImpl implements CaveRepository {
         if (url.getProtocol().equals("http")) {
             // populate the Cave repository from a HTTP URL
             List<Resource> resources = new ArrayList<>();
-            populateFromHttp(url.toExternalForm(), filter, update, resources);
+            populateFromHttp(url.toExternalForm(), filter, properties, update, resources);
             addResources(resources);
         }
+    }
+
+    /**
+     * Populate an URL into the Cave repository, and eventually update the repository metadata.
+     *
+     * @param url    the URL to copy.
+     * @param filter regex filter. Only artifacts URL matching the filter will be considered.
+     * @param update if true the repository metadata is updated, false else.
+     * @throws Exception in case of populate failure.
+     */
+    public void populate(URL url, String filter, boolean update) throws Exception {
+        populate(url, filter, null, update);
     }
 
     /**
@@ -519,10 +549,13 @@ public class CaveRepositoryImpl implements CaveRepository {
      * @param update true if the repository metadata should be updated, false else.
      * @throws Exception in case of populate failure.
      */
-    private void populateFromHttp(String url, String filter, boolean update, List<Resource> resources) throws Exception {
+    private void populateFromHttp(String url, String filter, String properties,
+                                  boolean update, List<Resource> resources) throws Exception {
+
         LOGGER.debug("Populating from HTTP URL {}", url);
 
         HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        conn = (new Utils.Authorizer(properties)).authorize(conn);
         try (InputStream is = conn.getInputStream()) {
             String type = conn.getContentType();
             if ("application/java-archive".equals(type)
@@ -555,7 +588,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                 for (Element link : document.select("a")) {
                     String absoluteHref = link.attr("abs:href");
                     if (absoluteHref.startsWith(url)) {
-                        populateFromHttp(absoluteHref, filter, update, resources);
+                        populateFromHttp(absoluteHref, filter, properties, update, resources);
                     }
                 }
             }
