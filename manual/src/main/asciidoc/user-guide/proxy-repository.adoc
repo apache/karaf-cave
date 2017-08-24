@@ -39,3 +39,18 @@ The `cave:repository-proxy` command accepts the filter option, as the `cave:repo
 ----
 karaf@root()> cave:repository-proxy --filter .*joda-time-2.* my-repository http://repo2.maven.org/maven2/joda-time/joda-time
 ----
+
+The `cave:repository-proxy` command accepts the properties option, as the `cave:repository-populate` command:
+
+----
+karaf@root()> cave:repository-proxy --properties <properties-file-path> my-repository <remote-repository-url>
+----
+
+where, `remote-repository-url` is the link to the external remote repository and `<properties-file-path>` is the path to the .properties file containing the following keys:
+
+----
+# Authorization parameters for remote repository
+cave.storage.http.username=
+cave.storage.http.password=
+----
+
