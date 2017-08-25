@@ -104,23 +104,23 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
         caveRepositoryService.uninstall(name);
     }
 
-    public void populateRepository(String name, String url, boolean generate, String filter) throws Exception {
+    public void populateRepository(String name, String url, boolean generate, String filter, String properties) throws Exception {
         if (getCaveRepositoryService().getRepository(name) == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         CaveRepository repository = getCaveRepositoryService().getRepository(name);
-        repository.populate(new URL(url), filter, generate);
+        repository.populate(new URL(url), filter, properties, generate);
         if (generate) {
             getCaveRepositoryService().install(name);
         }
     }
 
-    public void proxyRepository(String name, String url, boolean generate, String filter) throws Exception {
+    public void proxyRepository(String name, String url, boolean generate, String filter, String properties) throws Exception {
         if (getCaveRepositoryService().getRepository(name) == null) {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         CaveRepository repository = getCaveRepositoryService().getRepository(name);
-        repository.proxy(new URL(url), filter);
+        repository.proxy(new URL(url), filter, properties);
         if (generate) {
             getCaveRepositoryService().install(name);
         }
