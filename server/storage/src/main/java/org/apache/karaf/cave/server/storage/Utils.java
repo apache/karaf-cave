@@ -19,6 +19,7 @@ package org.apache.karaf.cave.server.storage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.URLConnection;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -96,6 +97,21 @@ public class Utils {
          * @return  a modified <code>HttpURLConnection</code> object.
          */
         public HttpURLConnection authorize(HttpURLConnection connection) {
+            if (containsAuthorizationKeys()) {
+                connection.setRequestProperty(HttpHeaders.AUTHORIZATION, getAuthorizationHeader());
+            }
+            return connection;
+        }
+
+        /**
+         * Returns the given <code>URLConnection</code> object
+         * modified by setting the <code>HttpHeaders.AUTHORIZATION</code> header
+         * depending on whether or not the authorization keys have been set.
+         *
+         * @param   connection an instance of <code>URLConnection</code>.
+         * @return  a modified <code>URLConnection</code> object.
+         */
+        public URLConnection authorize(URLConnection connection) {
             if (containsAuthorizationKeys()) {
                 connection.setRequestProperty(HttpHeaders.AUTHORIZATION, getAuthorizationHeader());
             }

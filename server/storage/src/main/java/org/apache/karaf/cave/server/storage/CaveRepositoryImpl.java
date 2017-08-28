@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.cave.server.storage;
 
+import java.net.URLConnection;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FilterInputStream;
@@ -308,15 +309,19 @@ public class CaveRepositoryImpl implements CaveRepository {
     }
 
     private ResourceImpl createResource(URL url) throws BundleException, IOException, NoSuchAlgorithmException {
-        return createResource(url, url.toExternalForm(), true);
+        return createResource(url.openConnection());
     }
 
-    private ResourceImpl createResource(URL url, String uri, boolean readFully) throws BundleException, IOException, NoSuchAlgorithmException {
+    private ResourceImpl createResource(URLConnection urlConnection) throws BundleException, IOException, NoSuchAlgorithmException {
+        return createResource(urlConnection, urlConnection.getURL().toExternalForm(), true);
+    }
+
+    private ResourceImpl createResource(URLConnection urlConnection, String uri, boolean readFully) throws BundleException, IOException, NoSuchAlgorithmException {
         Map<String, String> headers = null;
         String digest = null;
         long size = -1;
         // Find headers, compute length and checksum
-        try (ContentInputStream is = new ContentInputStream(url.openStream())) {
+        try (ContentInputStream is = new ContentInputStream(urlConnection.getInputStream())) {
             ZipInputStream zis = new ZipInputStream(is);
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
@@ -337,7 +342,7 @@ public class CaveRepositoryImpl implements CaveRepository {
             }
         }
         if (headers == null) {
-            throw new BundleException("Resource " + url + " does not contain a manifest");
+            throw new BundleException("Resource " + urlConnection.getURL() + " does not contain a manifest");
         }
         // Fix the content directive
         try {
@@ -565,7 +570,9 @@ public class CaveRepositoryImpl implements CaveRepository {
                 try {
                     if ((filter == null) || (url.matches(filter))) {
                         // Make sure this is a valid bundle
-                        ResourceImpl resource = createResource(new URL(url));
+                        URLConnection urlConnection = (URLConnection) new URL(url).openConnection();
+                        urlConnection = (new Utils.Authorizer(properties)).authorize(urlConnection);
+                        ResourceImpl resource = createResource(urlConnection);
                         LOGGER.debug("Copy {} into the Cave repository storage", url);
                         int index = url.lastIndexOf("/");
                         if (index > 0) {
