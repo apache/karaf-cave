@@ -18,6 +18,7 @@ package org.apache.karaf.cave.server.command;
 
 import java.net.URL;
 
+import java.util.Properties;
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.command.completers.RepositoryCompleter;
 import org.apache.karaf.shell.api.action.Argument;
@@ -47,7 +48,7 @@ public class RepositoryProxyCommand extends CaveRepositoryCommandSupport {
     String filter;
 
     @Option(name="-prop", aliases = { "--properties" }, description = "Path to Properties file containing URL authorization parameters", required = false, multiValued = false)
-    String properties;
+    Properties properties;
 
     protected Object doExecute() throws Exception {
         if (getCaveRepositoryService().getRepository(name) == null) {

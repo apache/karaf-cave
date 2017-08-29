@@ -50,21 +50,6 @@ public class Utils {
     }
 
     /**
-     * Returns the <code>Properties</code> object as represented by the
-     * property list (key and element pairs) in the file path
-     * at the given <code<>propertiesFile</code>.
-     *
-     * @param   propertiesFile a Properties file containing key-element pairs.
-     * @return  a <code>Properties</code> object containing the properties read from the given file.
-     * @throws  IOException if an error occurred when reading from the input stream.
-     */
-    public static Properties loadProperties (String propertiesFile) throws IOException {
-        Properties properties = new Properties();
-        properties.load(new FileInputStream(propertiesFile));
-        return properties;
-    }
-
-    /**
      * An instance of the <code>Authorizer</code> class
      * sets the <code>HttpHeaders.AUTHORIZATION</code> request.
      */
@@ -74,18 +59,17 @@ public class Utils {
         private static final String HTTP_USERNAME = "cave.storage.http.username";
         private static final String HTTP_PASSWORD = "cave.storage.http.password";
 
-        // a Properties object to store the contents of the Properties file.
+        // a Properties object to store the authorization parameters.
         private Properties properties;
 
         /**
          * Instantiates an object of the <code>Authorizer</code> class
-         * with the given <code>propertiesFile</code>.
+         * with the given <code>properties</code>.
          *
-         * @param   propertiesFile a Properties file containing key-element pairs.
-         * @throws  IOException if an error occurred when reading from the input stream.
+         * @param   properties a Properties object containing key-element pairs.
          */
-        public Authorizer (String propertiesFile) throws IOException {
-            this.properties = Utils.loadProperties(propertiesFile);
+        public Authorizer (Properties properties) {
+            this.properties = properties;
         }
 
         /**

@@ -14,6 +14,9 @@
 
 package org.apache.karaf.cave.server.management.internal;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.apache.karaf.cave.server.management.CaveRepositoryMBean;
@@ -109,7 +112,7 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         CaveRepository repository = getCaveRepositoryService().getRepository(name);
-        repository.populate(new URL(url), filter, properties, generate);
+        repository.populate(new URL(url), filter, Utils.loadProperties(properties), generate);
         if (generate) {
             getCaveRepositoryService().install(name);
         }
@@ -120,7 +123,7 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         CaveRepository repository = getCaveRepositoryService().getRepository(name);
-        repository.proxy(new URL(url), filter, properties);
+        repository.proxy(new URL(url), filter, Utils.loadProperties(properties));
         if (generate) {
             getCaveRepositoryService().install(name);
         }
@@ -145,4 +148,21 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
         }
     }
 
+    static class Utils {
+
+        /**
+         * Returns the <code>Properties</code> object as represented by the
+         * property list (key and element pairs) in the file path
+         * at the given <code<>propertiesFile</code>.
+         *
+         * @param   propertiesFile a Properties file containing key-element pairs.
+         * @return  a <code>Properties</code> object containing the properties read from the given file.
+         * @throws  IOException if an error occurred when reading from the input stream.
+         */
+        public static Properties loadProperties (String propertiesFile) throws IOException {
+            Properties properties = new Properties();
+            properties.load(new FileInputStream(propertiesFile));
+            return properties;
+        }
+    }
 }
