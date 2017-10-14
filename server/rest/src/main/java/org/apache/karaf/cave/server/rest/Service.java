@@ -16,12 +16,13 @@
  */
 package org.apache.karaf.cave.server.rest;
 
-import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
@@ -47,9 +48,9 @@ public class Service {
      * @throws Exception in case of creation failure.
      */
     @POST
-    @Consumes("application/xml")
-    @Produces("application/xml")
-    public Repository create(String name, boolean scan) throws Exception {
+    @Path("/repositories")
+    @Produces("application/json")
+    public Repository create(@QueryParam(value = "name") String name, @QueryParam(value = "scan") boolean scan) throws Exception {
         return new Repository(service.create(name, scan));
     }
 
@@ -63,9 +64,9 @@ public class Service {
      * @throws Exception in case of creation failure.
      */
     @POST
-    @Consumes("application/xml")
-    @Produces("application/xml")
-    public Repository create(String name, String location, boolean scan) throws Exception {
+    @Path("/repositories")
+    @Produces("application/json")
+    public Repository create(@QueryParam(value = "name") String name, @QueryParam(value = "location") String location, @QueryParam(value = "scan") boolean scan) throws Exception {
         return new Repository(service.create(name, location, scan));
     }
 
@@ -75,7 +76,9 @@ public class Service {
      * @param name the name of the repository.
      * @throws Exception in case of uninstall failure.
      */
-    public void uninstall(String name) throws Exception {
+    @POST
+    @Path("/uninstall")
+    public void uninstall(@QueryParam(value = "name") String name) throws Exception {
         service.uninstall(name);
     }
 
@@ -85,7 +88,9 @@ public class Service {
      * @param name the name of the repository.
      * @throws Exception in case of remove failure.
      */
-    public void remove(String name) throws Exception {
+    @POST
+    @Path("/remove")
+    public void remove(@QueryParam(value = "name") String name) throws Exception {
         service.remove(name);
     }
 
@@ -95,7 +100,9 @@ public class Service {
      * @param name the name of the repository.
      * @throws Exception incase of remove failure.
      */
-    public void destroy(String name) throws Exception {
+    @DELETE
+    @Path("/repositories")
+    public void destroy(@QueryParam(value = "name") String name) throws Exception {
         service.destroy(name);
     }
 
@@ -106,8 +113,8 @@ public class Service {
      * @throws Exception in case of registration failure.
      */
     @POST
-    @Consumes("text/plain")
-    public void install(String name) throws Exception {
+    @Path("/install")
+    public void install(@QueryParam(value = "name") String name) throws Exception {
         service.install(name);
     }
 
@@ -118,13 +125,14 @@ public class Service {
      */
     @GET
     @Path("/repositories")
-    @Produces("application/xml")
+    @Produces("application/json")
     public Repository[] getRepositories() {
         CaveRepository[] repositories = service.getRepositories();
         Repository[] repos = new Repository[repositories.length];
         for (int i = 0; i < repositories.length; i++) {
             repos[i] = new Repository(repositories[i]);
         }
+        
         return repos;
     }
 
@@ -136,7 +144,7 @@ public class Service {
      */
     @GET
     @Path("/repositories/{name}")
-    @Produces("application/xml")
+    @Produces("application/json")
     public Repository getRepository(@PathParam("name") String name) {
         CaveRepository repository = service.getRepository(name);
         if (repository != null) {
