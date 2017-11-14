@@ -26,8 +26,8 @@ public interface CaveRepositoryMBean {
     void destroyRepository(String name) throws Exception;
     void installRepository(String name) throws Exception;
     void uninstallRepository(String name) throws Exception;
-    void populateRepository(String name, String url, boolean generate, String filter) throws Exception;
-    void proxyRepository(String name, String url, boolean generate, String filter) throws Exception;
+    void populateRepository(String name, String url, boolean generate, String filter, String properties) throws Exception;
+    void proxyRepository(String name, String url, boolean generate, String filter, String properties) throws Exception;
     void updateRepository(String name) throws Exception;
     void uploadArtifact(String repository, String artifactUrl, boolean generate) throws Exception;
 

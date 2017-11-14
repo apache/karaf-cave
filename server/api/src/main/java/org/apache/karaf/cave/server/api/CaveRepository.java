@@ -17,6 +17,7 @@
 package org.apache.karaf.cave.server.api;
 
 import java.net.URL;
+import java.util.Properties;
 
 /**
  * Cave repository is a storage area where to upload artifacts.
@@ -79,6 +80,17 @@ public interface CaveRepository {
     public void proxy(URL url, String filter) throws Exception;
 
     /**
+     * Proxy an URL (for instance a Maven repository), eventually filtering some artifacts,
+     * provide a Properties object containing URL authorization parameters and add repository metadata..
+     *
+     * @param url the URL to proxy.
+     * @param filter regex filter on the artifacts URL.
+     * @param properties a Properties object containing URL authorization parameters.
+     * @throws Exception
+     */
+    public void proxy(URL url, String filter, Properties properties) throws Exception;
+
+    /**
      * Populate from a remote URL (for instance a Maven repository), and eventually update the repository metadata.
      *
      * @param url the URL to copy.
@@ -96,6 +108,18 @@ public interface CaveRepository {
      * @throws Exception
      */
     public void populate(URL url, String filter, boolean update) throws Exception;
+
+    /**
+     * Populate from a remote URL (for instance a Maven repository), eventually filtering artifacts,
+     * provide a Properties object containing URL authorization parameters and eventually update the repository metadata.
+     *
+     * @param url the URL to copy.
+     * @param filter regex filter on the artifacts URL.
+     * @param properties a Properties object containing URL authorization parameters.
+     * @param update if true the repository metadata is updated, false else.
+     * @throws Exception
+     */
+    public void populate(URL url, String filter, Properties properties, boolean update) throws Exception;
 
     /**
      * Return an URL for the resource at the given URI.
