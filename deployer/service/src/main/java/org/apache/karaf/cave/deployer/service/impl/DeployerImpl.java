@@ -61,6 +61,15 @@ public class DeployerImpl implements Deployer {
     private final static Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     @Override
+    public void downloadArtifact(String artifactUrl, String localUrl) throws Exception {
+        InputStream is = new URI(artifactUrl).toURL().openStream();
+        File file = new File(localUrl);
+        file.getParentFile().mkdirs();
+        FileOutputStream os = new FileOutputStream(file);
+        copyStream(is, os);
+    }
+
+    @Override
     public void explodeKar(String karUrl, String repositoryUrl) throws Exception {
         File tempDirectory = Files.createTempDir();
         extract(karUrl, tempDirectory);

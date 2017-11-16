@@ -51,6 +51,13 @@ public class DeployerRest {
                 request.getRepositoryUrl());
     }
 
+    @Path("/artifact/download")
+    @Consumes("application/json")
+    @POST
+    public void downloadArtifact(String artifactUrl, String localPath) throws Exception {
+        deployer.downloadArtifact(artifactUrl, localPath);
+    }
+
     @Path("/bundle/deploy")
     @Consumes("application/json")
     @POST

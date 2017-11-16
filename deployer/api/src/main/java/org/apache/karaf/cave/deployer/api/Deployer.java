@@ -31,6 +31,15 @@ public interface Deployer {
     void explodeKar(String karUrl, String repositoryUrl) throws Exception;
 
     /**
+     * Download an artifact from a given URL and copy it on a local filesystem.
+     *
+     * @param artifactUrl The artifact URL.
+     * @param localUrl The local filesystem URL.
+     * @throws Exception in case of failure.
+     */
+    void downloadArtifact(String artifactUrl, String localUrl) throws Exception;
+
+    /**
      * Upload an artifact to a Maven repository using the provided Maven coordinates.
      *
      * @param groupId The resulting artifact groupId.
