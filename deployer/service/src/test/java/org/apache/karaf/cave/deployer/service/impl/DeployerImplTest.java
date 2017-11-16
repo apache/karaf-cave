@@ -39,7 +39,7 @@ public class DeployerImplTest {
 
     @Test
     public void explodeKarTest() throws Exception {
-        deployer.explodeKar("mvn:org.apache.karaf.features/framework/4.0.4/kar", "file:target/test/repository/kar");
+        deployer.explodeKar("mvn:org.apache.karaf.features/framework/4.1.3/kar", "file:target/test/repository/kar");
     }
 
     @Test
