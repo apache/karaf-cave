@@ -84,10 +84,13 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                         <Import-Package>
                             !org.apache.karaf.features.internal.*,
+                            org.apache.karaf.features;version="[2,5)",
                             *
                         </Import-Package>
                         <Private-Package>
                             org.apache.felix.utils*,
+                            org.apache.felix.resolver,
+                            org.apache.felix.resolver.util,
                             org.apache.karaf.features.internal.resolver,
                             org.apache.karaf.features.internal.repository,
                             org.apache.karaf.util.tracker*

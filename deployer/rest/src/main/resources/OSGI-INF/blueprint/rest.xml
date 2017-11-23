@@ -32,7 +32,7 @@
         </cxf:features>
     </cxf:bus>
 
-    <jaxrs:server id="deployerRest" address="/">
+    <jaxrs:server id="deployerRest" address="/cave/deployer">
         <jaxrs:serviceBeans>
             <ref component-id="serviceBean" />
         </jaxrs:serviceBeans>

@@ -28,7 +28,7 @@ import javax.ws.rs.Produces;
 import java.util.List;
 import java.util.Map;
 
-@Path("/cave/deployer")
+@Path("/")
 public class DeployerRest {
 
     private Deployer deployer;
