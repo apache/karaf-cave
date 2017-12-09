@@ -22,22 +22,31 @@ import java.util.Map;
 public interface Deployer {
 
     /**
-     * Explode a KAR file and upload the content on a Maven repository.
+     * Explode a file (KAR or zip) and upload the content on a Maven repository.
      *
-     * @param karUrl The location of the KAR file.
-     * @param repositoryUrl The location of the Maven repository where to upload.
+     * @param url The location of the file.
+     * @param repository The location of the Maven repository where to upload.
      * @throws Exception in case of failure.
      */
-    void explodeKar(String karUrl, String repositoryUrl) throws Exception;
+    void explode(String url, String repository) throws Exception;
+
+    /**
+     * Extract a file (KAR or zip) to a local Karaf directory.
+     *
+     * @param url The location of the file.
+     * @param directory The location of the directory where to extract.
+     * @throws Exception in case of failure.
+     */
+    void extract(String url, String directory) throws Exception;
 
     /**
      * Download an artifact from a given URL and copy it on a local filesystem.
      *
-     * @param artifactUrl The artifact URL.
-     * @param localUrl The local filesystem URL.
+     * @param artifact The artifact URL.
+     * @param directory The local directory.
      * @throws Exception in case of failure.
      */
-    void downloadArtifact(String artifactUrl, String localUrl) throws Exception;
+    void download(String artifact, String directory) throws Exception;
 
     /**
      * Upload an artifact to a Maven repository using the provided Maven coordinates.
@@ -49,7 +58,7 @@ public interface Deployer {
      * @param repositoryUrl The location of the Maven repository where to upload.
      * @throws Exception in case of failure.
      */
-    void uploadArtifact(String groupId, String artifactId, String version, String artifactUrl, String repositoryUrl)
+    void upload(String groupId, String artifactId, String version, String artifactUrl, String repositoryUrl)
         throws Exception;
 
     /**

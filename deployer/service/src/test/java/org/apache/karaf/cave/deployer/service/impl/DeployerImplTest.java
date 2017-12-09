@@ -39,17 +39,17 @@ public class DeployerImplTest {
 
     @Test
     public void downloadArtifactTest() throws Exception {
-        deployer.downloadArtifact("mvn:commons-lang/commons-lang/2.6", "target/test/commons-lang-2.6.jar");
+        deployer.download("mvn:commons-lang/commons-lang/2.6", "target/test/commons-lang-2.6.jar");
     }
 
     @Test
     public void explodeKarTest() throws Exception {
-        deployer.explodeKar("mvn:org.apache.karaf.features/framework/4.1.3/kar", "file:target/test/repository/kar");
+        deployer.explode("mvn:org.apache.karaf.features/framework/4.1.3/kar", "file:target/test/repository/kar");
     }
 
     @Test
     public void uploadArtifactTest() throws Exception {
-        deployer.uploadArtifact("test", "test", "1.0-SNAPSHOT", "mvn:commons-lang/commons-lang/2.6", "file:target/test/repository");
+        deployer.upload("test", "test", "1.0-SNAPSHOT", "mvn:commons-lang/commons-lang/2.6", "file:target/test/repository");
     }
 
     @Test

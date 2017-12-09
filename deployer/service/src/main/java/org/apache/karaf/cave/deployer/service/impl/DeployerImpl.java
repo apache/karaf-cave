@@ -61,20 +61,27 @@ public class DeployerImpl implements Deployer {
     private final static Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
 
     @Override
-    public void downloadArtifact(String artifactUrl, String localUrl) throws Exception {
-        InputStream is = new URI(artifactUrl).toURL().openStream();
-        File file = new File(localUrl);
+    public void download(String artifact, String directory) throws Exception {
+        InputStream is = new URI(artifact).toURL().openStream();
+        File file = new File(directory);
         file.getParentFile().mkdirs();
         FileOutputStream os = new FileOutputStream(file);
         copyStream(is, os);
     }
 
     @Override
-    public void explodeKar(String karUrl, String repositoryUrl) throws Exception {
+    public void explode(String artifact, String repository) throws Exception {
         File tempDirectory = Files.createTempDir();
-        extract(karUrl, tempDirectory);
+        extract(artifact, tempDirectory);
         File karRepository = new File(tempDirectory, "repository");
-        browseKar(karRepository, karRepository.getPath(), repositoryUrl);
+        browseKar(karRepository, karRepository.getPath(), repository);
+    }
+
+    @Override
+    public void extract(String artifact, String directory) throws Exception {
+        File directoryFile = new File(directory);
+        directoryFile.mkdirs();
+        extract(artifact, directoryFile);
     }
 
     protected void browseKar(File entry, String basePath, String repositoryUrl) {
@@ -189,11 +196,11 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void uploadArtifact(String groupId,
-                               String artifactId,
-                               String version,
-                               String artifactUrl,
-                               String repositoryUrl) throws Exception {
+    public void upload(String groupId,
+                       String artifactId,
+                       String version,
+                       String artifactUrl,
+                       String repositoryUrl) throws Exception {
 
         Map<String, String> coordonates = new HashMap<String, String>();
         if (isMavenUrl(artifactUrl)) {

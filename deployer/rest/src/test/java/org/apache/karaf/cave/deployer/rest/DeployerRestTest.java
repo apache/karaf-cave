@@ -49,7 +49,7 @@ public class DeployerRestTest {
         uploadRequest.setGroupId("kar-test");
         uploadRequest.setArtifactId("kar-test");
         uploadRequest.setVersion("1.0-SNAPSHOT");
-        rest.uploadArtifact(uploadRequest);
+        rest.upload(uploadRequest);
 
         DeployRequest request = new DeployRequest();
         request.setArtifactUrl("mvn:kar-test/kar-test/1.0-SNAPSHOT/kar");
@@ -73,14 +73,14 @@ public class DeployerRestTest {
         uploadRequest.setGroupId("kar-test");
         uploadRequest.setArtifactId("kar-test");
         uploadRequest.setVersion("1.0-SNAPSHOT");
-        rest.uploadArtifact(uploadRequest);
+        rest.upload(uploadRequest);
 
         KarExplodeRequest karExplodeRequest = new KarExplodeRequest();
         // TODO: the artifact URL should be the one on Maven repository
         // To simplify we use test resources location directly
         karExplodeRequest.setArtifactUrl("file:src/test/resources/test.kar");
         karExplodeRequest.setRepositoryUrl("file:target/test/repository");
-        rest.explodeKar(karExplodeRequest);
+        rest.explode(karExplodeRequest);
     }
 
     @Test

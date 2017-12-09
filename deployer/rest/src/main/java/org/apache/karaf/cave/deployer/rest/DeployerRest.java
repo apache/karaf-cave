@@ -21,10 +21,7 @@ import org.apache.karaf.cave.deployer.api.Deployer;
 import org.apache.karaf.cave.deployer.api.Feature;
 import org.apache.karaf.cave.deployer.api.FeaturesRepository;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.POST;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import java.util.List;
 import java.util.Map;
 
@@ -33,18 +30,25 @@ public class DeployerRest {
 
     private Deployer deployer;
 
-    @Path("/kar/explode")
+    @Path("/artifact/explode")
     @Consumes("application/json")
     @POST
-    public void explodeKar(KarExplodeRequest request) throws Exception {
-        deployer.explodeKar(request.getArtifactUrl(), request.getRepositoryUrl());
+    public void explode(KarExplodeRequest request) throws Exception {
+        deployer.explode(request.getArtifactUrl(), request.getRepositoryUrl());
+    }
+
+    @Path("/artifact/extract")
+    @Consumes("application/json")
+    @POST
+    public void extract(String artifactUrl, String directory) throws Exception {
+        deployer.extract(artifactUrl, directory);
     }
 
     @Path("/artifact/upload")
     @Consumes("application/json")
     @POST
-    public void uploadArtifact(UploadRequest request) throws Exception {
-        deployer.uploadArtifact(request.getGroupId(),
+    public void upload(UploadRequest request) throws Exception {
+        deployer.upload(request.getGroupId(),
                 request.getArtifactId(),
                 request.getVersion(),
                 request.getArtifactUrl(),
@@ -54,8 +58,8 @@ public class DeployerRest {
     @Path("/artifact/download")
     @Consumes("application/json")
     @POST
-    public void downloadArtifact(String artifactUrl, String localPath) throws Exception {
-        deployer.downloadArtifact(artifactUrl, localPath);
+    public void download(String artifactUrl, String localPath) throws Exception {
+        deployer.download(artifactUrl, localPath);
     }
 
     @Path("/bundle/deploy")
@@ -138,7 +142,7 @@ public class DeployerRest {
     @Path("/kars")
     @Consumes("application/json")
     @Produces("application/json")
-    @POST
+    @GET
     public List<String> listKars(BasicRequest request) throws Exception {
         return deployer.listKars(request.getJmxUrl(),
                 request.getKarafName(),
@@ -186,7 +190,7 @@ public class DeployerRest {
     @Path("/feature/repositories")
     @Consumes("application/json")
     @Produces("application/json")
-    @POST
+    @GET
     public List<FeaturesRepository> listFeaturesRepositories(BasicRequest request) throws Exception {
         return deployer.listFeaturesRepositories(request.getJmxUrl(),
                 request.getKarafName(),
@@ -219,7 +223,7 @@ public class DeployerRest {
     @Path("/features")
     @Consumes("application/json")
     @Produces("application/json")
-    @POST
+    @GET
     public List<Feature> listFeatures(BasicRequest request) throws Exception {
         return deployer.listFeatures(request.getJmxUrl(),
                 request.getKarafName(),
@@ -252,7 +256,7 @@ public class DeployerRest {
     @Path("/config/properties")
     @Consumes("application/json")
     @Produces("application/json")
-    @POST
+    @GET
     public Map<String, String> getConfigProperties(ConfigRequest request) throws Exception {
         return deployer.getConfigProperties(request.getPid(),
                 request.getJmxUrl(),
@@ -287,7 +291,7 @@ public class DeployerRest {
 
     @Path("/config/property/get")
     @Consumes("application/json")
-    @POST
+    @GET
     public String getConfigProperty(ConfigPropertyKeyRequest request) throws Exception {
         return deployer.getConfigProperty(request.getPid(),
                 request.getKey(),
@@ -372,7 +376,7 @@ public class DeployerRest {
     @Path("/cluster/nodes")
     @Consumes("application/json")
     @Produces("application/json")
-    @POST
+    @GET
     public List<String> clusterNodes(DeployRequest request) throws Exception {
         return deployer.clusterNodes(request.getJmxUrl(),
                 request.getKarafName(),
@@ -383,7 +387,7 @@ public class DeployerRest {
     @Path("/cluster/groups")
     @Consumes("application/json")
     @Produces("application/json")
-    @POST
+    @GET
     public Map<String, List<String>> clusterGroups(DeployRequest request) throws Exception {
         return deployer.clusterGroups(request.getJmxUrl(),
                 request.getKarafName(),
