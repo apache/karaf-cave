@@ -109,7 +109,7 @@ public class DeployerRest {
     @Path("/bundles")
     @Consumes("application/json")
     @Produces("application/json")
-    @POST
+    @GET
     public List<Bundle> listBundles(BasicRequest request) throws Exception {
         return deployer.listBundles(request.getJmxUrl(),
                 request.getKarafName(),
@@ -165,7 +165,7 @@ public class DeployerRest {
                 request.getConfigs());
     }
 
-    @Path("/feature/repository/add")
+    @Path("/feature/repository")
     @Consumes("application/json")
     @POST
     public void addFeaturesRepository(DeployRequest request) throws Exception {
@@ -176,9 +176,9 @@ public class DeployerRest {
                 request.getPassword());
     }
 
-    @Path("/feature/repository/remove")
+    @Path("/feature/repository")
     @Consumes("application/json")
-    @POST
+    @DELETE
     public void removeFeaturesRepository(DeployRequest request) throws Exception {
         deployer.removeFeaturesRepository(request.getArtifactUrl(),
                 request.getJmxUrl(),
@@ -242,9 +242,9 @@ public class DeployerRest {
                 request.getPassword());
     }
 
-    @Path("/config/delete")
+    @Path("/config")
     @Consumes("application/json")
-    @POST
+    @DELETE
     public void deleteConfig(ConfigRequest request) throws Exception {
         deployer.deleteConfig(request.getPid(),
                 request.getJmxUrl(),
@@ -301,9 +301,9 @@ public class DeployerRest {
                 request.getPassword());
     }
 
-    @Path("/config/property/delete")
+    @Path("/config/property")
     @Consumes("application/json")
-    @POST
+    @DELETE
     public void deleteConfigProperty(ConfigPropertyKeyRequest request) throws Exception {
         deployer.deleteConfigProperty(request.getPid(),
                 request.getKey(),
@@ -325,7 +325,7 @@ public class DeployerRest {
                 request.getUser(),
                 request.getPassword());
     }
-    @Path("/cluster/feature/repository/add")
+    @Path("/cluster/feature/repository")
     @Consumes("application/json")
     @POST
     public void clusterAddFeaturesRepository(ClusterDeployRequest request) throws Exception {
@@ -337,9 +337,9 @@ public class DeployerRest {
                 request.getPassword());
     }
 
-    @Path("/cluster/feature/repository/remove")
+    @Path("/cluster/feature/repository")
     @Consumes("application/json")
-    @POST
+    @DELETE
     public void clusterRemoveFeaturesRepository(ClusterDeployRequest request) throws Exception {
         deployer.clusterRemoveFeaturesRepository(request.getArtifactUrl(),
                 request.getClusterGroup(),
