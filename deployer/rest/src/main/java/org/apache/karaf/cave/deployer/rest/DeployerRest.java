@@ -109,7 +109,7 @@ public class DeployerRest {
     @Path("/bundles")
     @Consumes("application/json")
     @Produces("application/json")
-    @GET
+    @POST
     public List<Bundle> listBundles(BasicRequest request) throws Exception {
         return deployer.listBundles(request.getJmxUrl(),
                 request.getKarafName(),
@@ -142,7 +142,7 @@ public class DeployerRest {
     @Path("/kars")
     @Consumes("application/json")
     @Produces("application/json")
-    @GET
+    @POST
     public List<String> listKars(BasicRequest request) throws Exception {
         return deployer.listKars(request.getJmxUrl(),
                 request.getKarafName(),
@@ -176,9 +176,9 @@ public class DeployerRest {
                 request.getPassword());
     }
 
-    @Path("/feature/repository")
+    @Path("/feature/repository/remove")
     @Consumes("application/json")
-    @DELETE
+    @POST
     public void removeFeaturesRepository(DeployRequest request) throws Exception {
         deployer.removeFeaturesRepository(request.getArtifactUrl(),
                 request.getJmxUrl(),
@@ -190,7 +190,7 @@ public class DeployerRest {
     @Path("/feature/repositories")
     @Consumes("application/json")
     @Produces("application/json")
-    @GET
+    @POST
     public List<FeaturesRepository> listFeaturesRepositories(BasicRequest request) throws Exception {
         return deployer.listFeaturesRepositories(request.getJmxUrl(),
                 request.getKarafName(),
@@ -223,7 +223,7 @@ public class DeployerRest {
     @Path("/features")
     @Consumes("application/json")
     @Produces("application/json")
-    @GET
+    @POST
     public List<Feature> listFeatures(BasicRequest request) throws Exception {
         return deployer.listFeatures(request.getJmxUrl(),
                 request.getKarafName(),
@@ -242,9 +242,9 @@ public class DeployerRest {
                 request.getPassword());
     }
 
-    @Path("/config")
+    @Path("/config/delete")
     @Consumes("application/json")
-    @DELETE
+    @POST
     public void deleteConfig(ConfigRequest request) throws Exception {
         deployer.deleteConfig(request.getPid(),
                 request.getJmxUrl(),
@@ -256,7 +256,7 @@ public class DeployerRest {
     @Path("/config/properties")
     @Consumes("application/json")
     @Produces("application/json")
-    @GET
+    @POST
     public Map<String, String> getConfigProperties(ConfigRequest request) throws Exception {
         return deployer.getConfigProperties(request.getPid(),
                 request.getJmxUrl(),
@@ -291,7 +291,7 @@ public class DeployerRest {
 
     @Path("/config/property/get")
     @Consumes("application/json")
-    @GET
+    @POST
     public String getConfigProperty(ConfigPropertyKeyRequest request) throws Exception {
         return deployer.getConfigProperty(request.getPid(),
                 request.getKey(),
@@ -301,9 +301,9 @@ public class DeployerRest {
                 request.getPassword());
     }
 
-    @Path("/config/property")
+    @Path("/config/property/delete")
     @Consumes("application/json")
-    @DELETE
+    @POST
     public void deleteConfigProperty(ConfigPropertyKeyRequest request) throws Exception {
         deployer.deleteConfigProperty(request.getPid(),
                 request.getKey(),
@@ -337,9 +337,9 @@ public class DeployerRest {
                 request.getPassword());
     }
 
-    @Path("/cluster/feature/repository")
+    @Path("/cluster/feature/repository/remove")
     @Consumes("application/json")
-    @DELETE
+    @POST
     public void clusterRemoveFeaturesRepository(ClusterDeployRequest request) throws Exception {
         deployer.clusterRemoveFeaturesRepository(request.getArtifactUrl(),
                 request.getClusterGroup(),
@@ -376,7 +376,7 @@ public class DeployerRest {
     @Path("/cluster/nodes")
     @Consumes("application/json")
     @Produces("application/json")
-    @GET
+    @POST
     public List<String> clusterNodes(DeployRequest request) throws Exception {
         return deployer.clusterNodes(request.getJmxUrl(),
                 request.getKarafName(),
@@ -387,7 +387,7 @@ public class DeployerRest {
     @Path("/cluster/groups")
     @Consumes("application/json")
     @Produces("application/json")
-    @GET
+    @POST
     public Map<String, List<String>> clusterGroups(DeployRequest request) throws Exception {
         return deployer.clusterGroups(request.getJmxUrl(),
                 request.getKarafName(),
