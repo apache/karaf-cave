@@ -25,6 +25,7 @@ public class Bundle {
     private String name;
     private String version;
     private String state;
+    private int startLevel;
 
     public String getId() {
         return id;
@@ -32,6 +33,14 @@ public class Bundle {
 
     public void setId(String id) {
         this.id = id;
+    }
+
+    public int getStartLevel() {
+        return this.startLevel;
+    }
+
+    public void setStartLevel(int startLevel) {
+        this.startLevel = startLevel;
     }
 
     public String getName() {

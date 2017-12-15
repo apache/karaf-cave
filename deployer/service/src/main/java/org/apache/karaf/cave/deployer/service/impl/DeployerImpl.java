@@ -435,11 +435,13 @@ public class DeployerImpl implements Deployer {
                 String bundleName = (String) compositeData.get("Name");
                 String bundleVersion = (String) compositeData.get("Version");
                 String bundleState = (String) compositeData.get("State");
+                Integer bundleStartLevel = (Integer) compositeData.get("Start Level");
                 org.apache.karaf.cave.deployer.api.Bundle bundle = new org.apache.karaf.cave.deployer.api.Bundle();
                 bundle.setId(bundleId.toString());
                 bundle.setName(bundleName);
                 bundle.setVersion(bundleVersion);
                 bundle.setState(bundleState);
+                bundle.setStartLevel(bundleStartLevel);
                 result.add(bundle);
             }
             return result;
