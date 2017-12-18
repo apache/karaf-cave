@@ -16,10 +16,7 @@
  */
 package org.apache.karaf.cave.deployer.rest;
 
-import org.apache.karaf.cave.deployer.api.Bundle;
-import org.apache.karaf.cave.deployer.api.Deployer;
-import org.apache.karaf.cave.deployer.api.Feature;
-import org.apache.karaf.cave.deployer.api.FeaturesRepository;
+import org.apache.karaf.cave.deployer.api.*;
 
 import javax.ws.rs.*;
 import java.util.List;
@@ -62,92 +59,53 @@ public class DeployerRest {
         deployer.download(artifactUrl, localPath);
     }
 
-    @Path("/bundle/deploy")
-    @Consumes("application/json")
+    @Path("/{connection}/bundle/{url}")
     @POST
-    public void deployBundle(DeployRequest request) throws Exception {
-        deployer.deployBundle(request.getArtifactUrl(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    public void deployBundle(@PathParam("connection") String connection, @PathParam("url") String url) throws Exception {
+        deployer.deployBundle(url, connection);
     }
 
-    @Path("/bundle/undeploy")
-    @Consumes("application/json")
-    @POST
-    public void undeployBundle(DeployRequest request) throws Exception {
-        deployer.undeployBundle(request.getArtifactUrl(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/bundle/{id}")
+    @DELETE
+    public void undeployBundle(@PathParam("connection") String connection, @PathParam("id") String id) throws Exception {
+        deployer.undeployBundle(id, connection);
     }
 
-    @Path("/bundle/start")
-    @Consumes("application/json")
-    @POST
-    public void startBundle(DeployRequest request) throws Exception {
-        deployer.startBundle(request.getArtifactUrl(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/bundle/{id}/start")
+    @GET
+    public void startBundle(@PathParam("connection") String connection, @PathParam("id") String id) throws Exception {
+        deployer.startBundle(id, connection);
     }
 
-    @Path("/bundle/stop")
-    @Consumes("application/json")
-    @POST
-    public void stopBundle(DeployRequest request) throws Exception {
-        deployer.stopBundle(request.getArtifactUrl(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/bundle/{id}/stop")
+    @GET
+    public void stopBundle(@PathParam("connection") String connection, @PathParam("id") String id) throws Exception {
+        deployer.stopBundle(id, connection);
     }
 
-    @Path("/bundles")
-    @Consumes("application/json")
+    @Path("/{connection}/bundle")
     @Produces("application/json")
-    @POST
-    public List<Bundle> listBundles(BasicRequest request) throws Exception {
-        return deployer.listBundles(request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @GET
+    public List<Bundle> listBundles(@PathParam("connection") String connection) throws Exception {
+        return deployer.bundles(connection);
     }
 
-    @Path("/kar/install")
-    @Consumes("application/json")
+    @Path("/{connection}/kar/{url}")
     @POST
-    public void installKar(DeployRequest request) throws Exception {
-        deployer.installKar(request.getArtifactUrl(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    public void installKar(@PathParam("connection") String connection, @PathParam("url") String url) throws Exception {
+        deployer.installKar(url, connection);
     }
 
-    @Path("/kar/uninstall")
-    @Consumes("application/json")
-    @POST
-    public void uninstallKar(DeployRequest request) throws Exception {
-        deployer.uninstallKar(request.getArtifactUrl(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/kar/{id}")
+    @DELETE
+    public void uninstallKar(@PathParam("connection") String connection, @PathParam("id") String id) throws Exception {
+        deployer.uninstallKar(id, connection);
     }
 
-    @Path("/kars")
-    @Consumes("application/json")
-    @Produces("application/json")
-    @POST
-    public List<String> listKars(BasicRequest request) throws Exception {
-        return deployer.listKars(request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/kar")
+    @GET
+    public List<String> listKars(@PathParam("connection") String connection) throws Exception {
+        return deployer.kars(connection);
     }
 
     @Path("/feature/assemble")
@@ -165,234 +123,151 @@ public class DeployerRest {
                 request.getConfigs());
     }
 
-    @Path("/feature/repository")
-    @Consumes("application/json")
+    @Path("/{connection}/feature/repository/{url}")
     @POST
-    public void addFeaturesRepository(DeployRequest request) throws Exception {
-        deployer.addFeaturesRepository(request.getArtifactUrl(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    public void addFeaturesRepository(@PathParam("connection") String connection, @PathParam("url") String url) throws Exception {
+        deployer.addFeaturesRepository(url, connection);
     }
 
-    @Path("/feature/repository/remove")
-    @Consumes("application/json")
-    @POST
-    public void removeFeaturesRepository(DeployRequest request) throws Exception {
-        deployer.removeFeaturesRepository(request.getArtifactUrl(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/feature/repository/{name}")
+    @DELETE
+    public void removeFeaturesRepository(@PathParam("connection") String connection, @PathParam("name") String name) throws Exception {
+        deployer.removeFeaturesRepository(name, connection);
     }
 
-    @Path("/feature/repositories")
-    @Consumes("application/json")
+    @Path("/{connection}/feature/repository")
     @Produces("application/json")
-    @POST
-    public List<FeaturesRepository> listFeaturesRepositories(BasicRequest request) throws Exception {
-        return deployer.listFeaturesRepositories(request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @GET
+    public List<FeaturesRepository> listFeaturesRepositories(@PathParam("connection") String connection) throws Exception {
+        return deployer.featuresRepositories(connection);
     }
 
-    @Path("/feature/install")
-    @Consumes("application/json")
+    @Path("/{connection}/feature/{feature}")
     @POST
-    public void installFeature(DeployRequest request) throws Exception {
-        deployer.installFeature(request.getArtifactUrl(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    public void installFeature(@PathParam("connection") String connection, @PathParam("feature") String feature) throws Exception {
+        deployer.installFeature(feature, connection);
     }
 
-    @Path("/feature/uninstall")
-    @Consumes("application/json")
-    @POST
-    public void uninstallFeature(DeployRequest request) throws Exception {
-        deployer.uninstallFeature(request.getArtifactUrl(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/feature/{feature}")
+    @DELETE
+    public void uninstallFeature(@PathParam("connection") String connection, @PathParam("feature") String feature) throws Exception {
+        deployer.uninstallFeature(feature, connection);
     }
 
-    @Path("/features")
-    @Consumes("application/json")
+    @Path("/{connection}/feature")
     @Produces("application/json")
-    @POST
-    public List<Feature> listFeatures(BasicRequest request) throws Exception {
-        return deployer.listFeatures(request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @GET
+    public List<Feature> listFeatures(@PathParam("connection") String connection) throws Exception {
+        return deployer.features(connection);
     }
 
-    @Path("/config/create")
-    @Consumes("application/json")
+    @Path("/{connection}/config/{pid}")
     @POST
-    public void createConfig(ConfigRequest request) throws Exception {
-        deployer.createConfig(request.getPid(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    public void createConfig(@PathParam("connection") String connection, @PathParam("pid") String pid) throws Exception {
+        deployer.createConfig(pid, connection);
     }
 
-    @Path("/config/delete")
-    @Consumes("application/json")
-    @POST
-    public void deleteConfig(ConfigRequest request) throws Exception {
-        deployer.deleteConfig(request.getPid(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/config/{pid}")
+    @DELETE
+    public void deleteConfig(@PathParam("connection") String connection, @PathParam("pid") String pid) throws Exception {
+        deployer.deleteConfig(pid, connection);
     }
 
-    @Path("/config/properties")
-    @Consumes("application/json")
+    @Path("/{connection}/config/{pid}/properties")
     @Produces("application/json")
-    @POST
-    public Map<String, String> getConfigProperties(ConfigRequest request) throws Exception {
-        return deployer.getConfigProperties(request.getPid(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @GET
+    public Map<String, String> getConfigProperties(@PathParam("connection") String connection, @PathParam("pid") String pid) throws Exception {
+        return deployer.configProperties(pid, connection);
     }
 
-    @Path("/config/update")
+    @Path("/{connection}/config/{pid}")
     @Consumes("application/json")
-    @POST
-    public void updateConfig(ConfigUpdateRequest request) throws Exception {
-        deployer.updateConfig(request.getConfig(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @PUT
+    public void updateConfig(@PathParam("connection") String connection, @PathParam("pid") String pid, Map<String, String> properties) throws Exception {
+        Config config = new Config();
+        config.setPid(pid);
+        config.setProperties(properties);
+        deployer.updateConfig(config, connection);
     }
 
-    @Path("/config/property/set")
-    @Consumes("application/json")
+    @Path("/{connection}/config/{pid}/{key}/{value}")
     @POST
-    public void setConfigProperty(ConfigPropertyRequest request) throws Exception {
-        deployer.setConfigProperty(request.getPid(),
-                request.getKey(),
-                request.getValue(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    public void setConfigProperty(@PathParam("connection") String connection,
+                                  @PathParam("pid") String pid,
+                                  @PathParam("key") String key,
+                                  @PathParam("value") String value) throws Exception {
+        deployer.setConfigProperty(pid, key, value, connection);
     }
 
-    @Path("/config/property/get")
-    @Consumes("application/json")
-    @POST
-    public String getConfigProperty(ConfigPropertyKeyRequest request) throws Exception {
-        return deployer.getConfigProperty(request.getPid(),
-                request.getKey(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/config/{pid}/{key}")
+    @GET
+    public String getConfigProperty(@PathParam("connection") String connection,
+                                    @PathParam("pid") String pid,
+                                    @PathParam("key") String key) throws Exception {
+        return deployer.configProperty(pid, key, connection);
     }
 
-    @Path("/config/property/delete")
-    @Consumes("application/json")
-    @POST
-    public void deleteConfigProperty(ConfigPropertyKeyRequest request) throws Exception {
-        deployer.deleteConfigProperty(request.getPid(),
-                request.getKey(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/config/{pid}/{key}")
+    @DELETE
+    public void deleteConfigProperty(@PathParam("connection") String connection,
+                                     @PathParam("pid") String pid,
+                                     @PathParam("key") String key) throws Exception {
+        deployer.deleteConfigProperty(pid, key, connection);
     }
 
-    @Path("/config/property/append")
-    @Consumes("application/json")
-    @POST
-    public void appendConfigProperty(ConfigPropertyRequest request) throws Exception {
-        deployer.appendConfigProperty(request.getPid(),
-                request.getKey(),
-                request.getValue(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
-    }
-    @Path("/cluster/feature/repository")
-    @Consumes("application/json")
-    @POST
-    public void clusterAddFeaturesRepository(ClusterDeployRequest request) throws Exception {
-        deployer.clusterAddFeaturesRepository(request.getArtifactUrl(),
-                request.getClusterGroup(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/config/{pid}/{key}/{value}")
+    @PUT
+    public void appendConfigProperty(@PathParam("connection") String connection,
+                                     @PathParam("pid") String pid,
+                                     @PathParam("key") String key,
+                                     @PathParam("value") String value) throws Exception {
+        deployer.appendConfigProperty(pid, key, value, connection);
     }
 
-    @Path("/cluster/feature/repository/remove")
-    @Consumes("application/json")
+    @Path("/{connection}/cluster/{group}/feature/repository/{url}")
     @POST
-    public void clusterRemoveFeaturesRepository(ClusterDeployRequest request) throws Exception {
-        deployer.clusterRemoveFeaturesRepository(request.getArtifactUrl(),
-                request.getClusterGroup(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    public void clusterAddFeaturesRepository(@PathParam("connection") String connection,
+                                             @PathParam("group") String group,
+                                             @PathParam("url") String url) throws Exception {
+        deployer.clusterAddFeaturesRepository(url, group, connection);
     }
 
-    @Path("/cluster/feature/install")
-    @Consumes("application/json")
-    @POST
-    public void clusterInstallFeature(ClusterDeployRequest request) throws Exception {
-        deployer.clusterFeatureInstall(request.getArtifactUrl(),
-                request.getClusterGroup(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @Path("/{connection}/cluster/{group}feature/repository/{url}")
+    @DELETE
+    public void clusterRemoveFeaturesRepository(@PathParam("connection") String connection,
+                                                @PathParam("group") String group,
+                                                @PathParam("url") String url) throws Exception {
+        deployer.clusterRemoveFeaturesRepository(url, group, connection);
     }
 
-    @Path("/cluster/feature/uninstall")
-    @Consumes("application/json")
+    @Path("/{connection}/cluster/{group}/feature/{feature}")
     @POST
-    public void clusterUninstallFeature(ClusterDeployRequest request) throws Exception {
-        deployer.clusterFeatureUninstall(request.getArtifactUrl(),
-                request.getClusterGroup(),
-                request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    public void clusterInstallFeature(@PathParam("connection") String connection,
+                                      @PathParam("group") String group,
+                                      @PathParam("feature") String feature) throws Exception {
+        deployer.clusterFeatureInstall(feature, group, connection);
     }
 
-    @Path("/cluster/nodes")
-    @Consumes("application/json")
+    @Path("/{connection}/cluster/{group}/feature/{feature}")
+    @DELETE
+    public void clusterUninstallFeature(@PathParam("connection") String connection,
+                                        @PathParam("group") String group,
+                                        @PathParam("feature") String feature) throws Exception {
+        deployer.clusterFeatureUninstall(feature, group, connection);
+    }
+
+    @Path("/{connection}/cluster/nodes")
     @Produces("application/json")
-    @POST
-    public List<String> clusterNodes(DeployRequest request) throws Exception {
-        return deployer.clusterNodes(request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @GET
+    public List<String> clusterNodes(@PathParam("connection") String connection) throws Exception {
+        return deployer.clusterNodes(connection);
     }
 
-    @Path("/cluster/groups")
-    @Consumes("application/json")
+    @Path("/{connection}/cluster/groups")
     @Produces("application/json")
-    @POST
-    public Map<String, List<String>> clusterGroups(DeployRequest request) throws Exception {
-        return deployer.clusterGroups(request.getJmxUrl(),
-                request.getKarafName(),
-                request.getUser(),
-                request.getPassword());
+    @GET
+    public Map<String, List<String>> clusterGroups(@PathParam("connection") String connection) throws Exception {
+        return deployer.clusterGroups(connection);
     }
 
     public void setDeployer(Deployer deployer) {

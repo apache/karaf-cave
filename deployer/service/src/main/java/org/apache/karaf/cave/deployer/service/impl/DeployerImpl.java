@@ -17,6 +17,7 @@
 package org.apache.karaf.cave.deployer.service.impl;
 
 import com.google.common.io.Files;
+import org.apache.karaf.cave.deployer.api.Connection;
 import org.apache.karaf.cave.deployer.api.Deployer;
 import org.apache.karaf.cave.deployer.api.FeaturesRepository;
 import org.apache.karaf.features.internal.model.*;
@@ -36,6 +37,8 @@ import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
 import org.eclipse.aether.spi.connector.transport.TransporterFactory;
 import org.eclipse.aether.transport.file.FileTransporterFactory;
 import org.eclipse.aether.transport.http.HttpTransporterFactory;
+import org.osgi.service.cm.Configuration;
+import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +62,54 @@ public class DeployerImpl implements Deployer {
     private final static Logger LOGGER  = LoggerFactory.getLogger(DeployerImpl.class);
 
     private final static Pattern mvnPattern = Pattern.compile("mvn:([^/ ]+)/([^/ ]+)/([^/ ]*)(/([^/ ]+)(/([^/ ]+))?)?");
+
+    private final static String CONFIG_PID = "org.apache.karaf.cave.deployer";
+
+    private ConfigurationAdmin configurationAdmin;
+
+    public void setConfigurationAdmin(ConfigurationAdmin configurationAdmin) {
+        this.configurationAdmin = configurationAdmin;
+    }
+
+    @Override
+    public void registerConnection(Connection connection) throws Exception {
+        Configuration configuration = configurationAdmin.getConfiguration(CONFIG_PID);
+        Dictionary<String, Object> properties = configuration.getProperties();
+        properties.put(connection.getName() + ".jmx", connection.getJmxUrl());
+        properties.put(connection.getName() + ".instance", connection.getKarafName());
+        properties.put(connection.getName() + ".username", connection.getUser());
+        properties.put(connection.getName() + ".password", connection.getPassword());
+        configuration.update(properties);
+    }
+
+    @Override
+    public void deleteConnection(String connection) throws Exception {
+        Configuration configuration = configurationAdmin.getConfiguration(CONFIG_PID);
+        Dictionary<String, Object> properties = configuration.getProperties();
+        properties.remove(connection + ".jmx");
+        properties.remove(connection + ".instance");
+        properties.remove(connection + ".username");
+        properties.remove(connection + ".password");
+        configuration.update(properties);
+    }
+
+    private Connection getConnection(String name) throws Exception {
+        Connection connection = new Connection();
+        Configuration configuration = configurationAdmin.getConfiguration(CONFIG_PID);
+        Dictionary<String, Object> properties = configuration.getProperties();
+        String jmx = (String) properties.get(name + ".jmx");
+        String instance = (String) properties.get(name + ".instance");
+        String username = (String) properties.get(name + ".username");
+        String password = (String) properties.get(name + ".password");
+        if (jmx == null || instance == null) {
+            throw new IllegalArgumentException("No connection found with name " + name);
+        }
+        connection.setJmxUrl(jmx);
+        connection.setKarafName(instance);
+        connection.setUser(username);
+        connection.setPassword(password);
+        return connection;
+    }
 
     @Override
     public void download(String artifact, String directory) throws Exception {
@@ -324,12 +375,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void installKar(String artifactUrl, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void installKar(String artifactUrl, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=" + karafName);
-            connection.invoke(name, "install", new Object[]{ artifactUrl }, new String[]{ "java.lang.String" });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "install", new Object[]{ artifactUrl }, new String[]{ "java.lang.String" });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -338,12 +393,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void uninstallKar(String id, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void uninstallKar(String id, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=" + karafName);
-            connection.invoke(name, "uninstall", new Object[]{id}, new String[]{ "java.lang.String" });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "uninstall", new Object[]{id}, new String[]{ "java.lang.String" });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -352,12 +411,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public List<String> listKars(String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public List<String> kars(String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=" + karafName);
-            return ((List<String>) connection.getAttribute(name, "Kars"));
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=kar,name=" + connection.getKarafName());
+            return ((List<String>) mBeanServerConnection.getAttribute(name, "Kars"));
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -366,12 +429,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void deployBundle(String artifactUrl, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void deployBundle(String artifactUrl, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=" + karafName);
-            connection.invoke(name, "install", new Object[]{ artifactUrl, true }, new String[]{ "java.lang.String", boolean.class.getName() });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "install", new Object[]{ artifactUrl, true }, new String[]{ "java.lang.String", boolean.class.getName() });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -380,12 +447,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void undeployBundle(String id, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void undeployBundle(String id, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=" + karafName);
-            connection.invoke(name, "uninstall", new Object[]{id}, new String[]{ "java.lang.String" });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "uninstall", new Object[]{id}, new String[]{ "java.lang.String" });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -394,12 +465,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void startBundle(String id, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void startBundle(String id, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=" + karafName);
-            connection.invoke(name, "start", new Object[]{id}, new String[]{ "java.lang.String" });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "start", new Object[]{id}, new String[]{ "java.lang.String" });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -408,12 +483,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void stopBundle(String id, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void stopBundle(String id, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=" + karafName);
-            connection.invoke(name, "stop", new Object[]{id}, new String[]{ "java.lang.String" });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "stop", new Object[]{id}, new String[]{ "java.lang.String" });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -422,12 +501,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public List<org.apache.karaf.cave.deployer.api.Bundle> listBundles(String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public List<org.apache.karaf.cave.deployer.api.Bundle> bundles(String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=" + karafName);
-            TabularData tabularData = (TabularData) connection.getAttribute(name, "Bundles");
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=bundle,name=" + connection.getKarafName());
+            TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(name, "Bundles");
             List<org.apache.karaf.cave.deployer.api.Bundle> result = new ArrayList<org.apache.karaf.cave.deployer.api.Bundle>();
             for (Object value : tabularData.values()) {
                 CompositeData compositeData = (CompositeData) value;
@@ -453,12 +536,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void addFeaturesRepository(String artifactUrl, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void addFeaturesRepository(String artifactUrl, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + karafName);
-            connection.invoke(name, "addRepository", new Object[]{ artifactUrl, false }, new String[]{ "java.lang.String", boolean.class.getName() });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "addRepository", new Object[]{ artifactUrl, false }, new String[]{ "java.lang.String", boolean.class.getName() });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -467,12 +554,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void removeFeaturesRepository(String artifactUrl, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void removeFeaturesRepository(String artifactUrl, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + karafName);
-            connection.invoke(name, "removeRepository", new Object[]{ artifactUrl, true }, new String[]{ "java.lang.String", boolean.class.getName() });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "removeRepository", new Object[]{ artifactUrl, true }, new String[]{ "java.lang.String", boolean.class.getName() });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -481,13 +572,17 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public List<FeaturesRepository> listFeaturesRepositories(String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public List<FeaturesRepository> featuresRepositories(String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + karafName);
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + connection.getKarafName());
             List<FeaturesRepository> result = new ArrayList<FeaturesRepository>();
-            TabularData tabularData = (TabularData) connection.getAttribute(name, "Repositories");
+            TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(name, "Repositories");
             for (Object value : tabularData.values()) {
                 CompositeData compositeData = (CompositeData) value;
                 String repoName = (String) compositeData.get("Name");
@@ -506,12 +601,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void installFeature(String feature, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void installFeature(String feature, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + karafName);
-            connection.invoke(name, "installFeature", new Object[]{ feature }, new String[]{ "java.lang.String" });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "installFeature", new Object[]{ feature }, new String[]{ "java.lang.String" });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -520,12 +619,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void uninstallFeature(String feature, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void uninstallFeature(String feature, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + karafName);
-            connection.invoke(name, "uninstallFeature", new Object[]{ feature }, new String[]{ "java.lang.String", });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "uninstallFeature", new Object[]{ feature }, new String[]{ "java.lang.String", });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -534,12 +637,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public List<org.apache.karaf.cave.deployer.api.Feature> listFeatures(String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public List<org.apache.karaf.cave.deployer.api.Feature> features(String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + karafName);
-            TabularData tabularData = (TabularData) connection.getAttribute(name, "Features");
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + connection.getKarafName());
+            TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(name, "Features");
             List<org.apache.karaf.cave.deployer.api.Feature> result = new ArrayList<>();
             for (Object value : tabularData.values()) {
                 CompositeData compositeData = (CompositeData) value;
@@ -563,12 +670,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public List<String> listInstalledFeatures(String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public List<String> installedFeatures(String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + karafName);
-            TabularData tabularData = (TabularData) connection.getAttribute(name, "Features");
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + connection.getKarafName());
+            TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(name, "Features");
             List<String> result = new ArrayList<String>();
             for (Object value : tabularData.values()) {
                 CompositeData compositeData = (CompositeData) value;
@@ -587,12 +698,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void createConfig(String pid, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void createConfig(String pid, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + karafName);
-            connection.invoke(name, "create", new Object[]{ pid }, new String[]{ String.class.getName() });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "create", new Object[]{ pid }, new String[]{ String.class.getName() });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -601,12 +716,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void deleteConfig(String pid, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void deleteConfig(String pid, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + karafName);
-            connection.invoke(name, "delete", new Object[]{ pid }, new String[]{ String.class.getName() });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "delete", new Object[]{ pid }, new String[]{ String.class.getName() });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -615,12 +734,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void setConfigProperty(String pid, String key, String value, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void setConfigProperty(String pid, String key, String value, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + karafName);
-            connection.invoke(name, "setProperty", new Object[]{ pid, key, value }, new String[]{ String.class.getName(), String.class.getName(), String.class.getName() });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "setProperty", new Object[]{ pid, key, value }, new String[]{ String.class.getName(), String.class.getName(), String.class.getName() });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -629,18 +752,22 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public String getConfigProperty(String pid, String key, String jmxUrl, String karafName, String user, String password) throws Exception {
-        Map<String, String> properties = this.getConfigProperties(pid, jmxUrl, karafName, user, password);
+    public String configProperty(String pid, String key, String connectionName) throws Exception {
+        Map<String, String> properties = this.configProperties(pid, connectionName);
         return properties.get(key);
     }
 
     @Override
-    public void deleteConfigProperty(String pid, String key, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void deleteConfigProperty(String pid, String key, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + karafName);
-            connection.invoke(name, "deleteProperty", new Object[]{ pid, key }, new String[]{ String.class.getName(), String.class.getName()} );
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "deleteProperty", new Object[]{ pid, key }, new String[]{ String.class.getName(), String.class.getName()} );
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -649,12 +776,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void appendConfigProperty(String pid, String key, String value, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void appendConfigProperty(String pid, String key, String value, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + karafName);
-            connection.invoke(name, "appendProperty", new Object[]{ pid, key, value }, new String[]{ String.class.getName(), String.class.getName(), String.class.getName() });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "appendProperty", new Object[]{ pid, key, value }, new String[]{ String.class.getName(), String.class.getName(), String.class.getName() });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -663,12 +794,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void updateConfig(org.apache.karaf.cave.deployer.api.Config config, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void updateConfig(org.apache.karaf.cave.deployer.api.Config config, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + karafName);
-            connection.invoke(name, "update", new Object[] { config.getPid(), config.getProperties() }, new String[]{ String.class.getName(), Map.class.getName() });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "update", new Object[] { config.getPid(), config.getProperties() }, new String[]{ String.class.getName(), Map.class.getName() });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -677,12 +812,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public Map<String, String> getConfigProperties(String pid, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public Map<String, String> configProperties(String pid, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + karafName);
-            Map<String, String> result = (Map<String, String>) connection.invoke(name, "listProperties", new Object[]{ pid }, new String[]{ String.class.getName() });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            Map<String, String> result = (Map<String, String>) mBeanServerConnection.invoke(name, "listProperties", new Object[]{ pid }, new String[]{ String.class.getName() });
             return result;
         } finally {
             if (jmxConnector != null) {
@@ -692,13 +831,17 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public List<String> clusterNodes(String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public List<String> clusterNodes(String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         List<String> nodes = new ArrayList<String>();
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=node,name=" + karafName);
-            TabularData tabularData = (TabularData) connection.getAttribute(name, "nodes");
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=node,name=" + connection.getKarafName());
+            TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(name, "nodes");
             for (Object value : tabularData.values()) {
                 CompositeData data = (CompositeData) value;
                 String id = (String) data.get("id");
@@ -713,13 +856,17 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public Map<String, List<String>> clusterGroups(String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public Map<String, List<String>> clusterGroups(String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         Map<String, List<String>> groups = new HashMap<String, List<String>>();
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=group,name=" + karafName);
-            TabularData tabularData = (TabularData) connection.getAttribute(name, "groups");
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=group,name=" + connection.getKarafName());
+            TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(name, "groups");
             for (Object value : tabularData.values()) {
                 CompositeData data = (CompositeData) value;
                 String group = (String) data.get("name");
@@ -736,12 +883,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void clusterFeatureInstall(String feature, String clusterGroup, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void clusterFeatureInstall(String feature, String clusterGroup, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + karafName);
-            connection.invoke(name, "installFeature", new Object[]{ clusterGroup, feature }, new String[]{ "java.lang.String", "java.lang.String"});
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "installFeature", new Object[]{ clusterGroup, feature }, new String[]{ "java.lang.String", "java.lang.String"});
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -750,12 +901,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public boolean isFeatureOnClusterGroup(String feature, String clusterGroup, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public boolean isFeatureOnClusterGroup(String feature, String clusterGroup, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + karafName);
-            TabularData tabularData = (TabularData) connection.getAttribute(name, "features");
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + connection.getKarafName());
+            TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(name, "features");
             for (Object value : tabularData.values()) {
                 CompositeData data = (CompositeData) value;
                 String featureName = (String) data.get("name");
@@ -773,12 +928,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public boolean isFeatureLocal(String feature, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public boolean isFeatureLocal(String feature, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + karafName);
-            TabularData tabularData = (TabularData) connection.getAttribute(name, "features");
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + connection.getKarafName());
+            TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(name, "features");
             for (Object value : tabularData.values()) {
                 CompositeData data = (CompositeData) value;
                 String featureName = (String) data.get("name");
@@ -796,12 +955,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void clusterRemoveFeaturesRepository(String id, String clusterGroup, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void clusterRemoveFeaturesRepository(String id, String clusterGroup, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + karafName);
-            connection.invoke(name, "removeRepository", new Object[]{ clusterGroup, id }, new String[]{ "java.lang.String", "java.lang.String" });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "removeRepository", new Object[]{ clusterGroup, id }, new String[]{ "java.lang.String", "java.lang.String" });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -810,12 +973,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public boolean isFeaturesRepositoryLocal(String id, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public boolean isFeaturesRepositoryLocal(String id, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + karafName);
-            TabularData tabularData = (TabularData) connection.getAttribute(name, "repositories");
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=feature,name=" + connection.getKarafName());
+            TabularData tabularData = (TabularData) mBeanServerConnection.getAttribute(name, "repositories");
             for (Object value : tabularData.values()) {
                 CompositeData data = (CompositeData) value;
                 String repoName = (String) data.get("Name");
@@ -833,12 +1000,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void clusterFeatureUninstall(String feature, String clusterGroup, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void clusterFeatureUninstall(String feature, String clusterGroup, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + karafName);
-            connection.invoke(name, "uninstallFeature", new Object[]{ clusterGroup, feature }, new String[]{ "java.lang.String", "java.lang.String"});
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "uninstallFeature", new Object[]{ clusterGroup, feature }, new String[]{ "java.lang.String", "java.lang.String"});
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -847,12 +1018,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void clusterAddFeaturesRepository(String url, String clusterGroup, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public void clusterAddFeaturesRepository(String url, String clusterGroup, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + karafName);
-            connection.invoke(name, "addRepository", new Object[]{ clusterGroup, url }, new String[]{ "java.lang.String", "java.lang.String" });
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + connection.getKarafName());
+            mBeanServerConnection.invoke(name, "addRepository", new Object[]{ clusterGroup, url }, new String[]{ "java.lang.String", "java.lang.String" });
         } finally {
             if (jmxConnector != null) {
                 jmxConnector.close();
@@ -861,12 +1036,16 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public boolean isFeaturesRepositoryOnClusterGroup(String id, String clusterGroup, String jmxUrl, String karafName, String user, String password) throws Exception {
-        JMXConnector jmxConnector = connect(jmxUrl, karafName, user, password);
+    public boolean isFeaturesRepositoryOnClusterGroup(String id, String clusterGroup, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
         try {
-            MBeanServerConnection connection = jmxConnector.getMBeanServerConnection();
-            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + karafName);
-            List<String> repositories = (List<String>) connection.getAttribute(name, "repositories");
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf.cellar:type=feature,name=" + connection.getKarafName());
+            List<String> repositories = (List<String>) mBeanServerConnection.getAttribute(name, "repositories");
             for (String repository : repositories) {
                 if (repository.equals("id")) {
                     return true;

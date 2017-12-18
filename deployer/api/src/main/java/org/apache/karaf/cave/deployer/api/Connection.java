@@ -14,14 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.karaf.cave.deployer.rest;
+package org.apache.karaf.cave.deployer.api;
 
-public class BasicRequest {
+/**
+ * Simple wrapper describing a connection to a Karaf instance.
+ */
+public class Connection {
 
+    private String name;
     private String jmxUrl;
     private String karafName;
     private String user;
     private String password;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getJmxUrl() {
         return jmxUrl;

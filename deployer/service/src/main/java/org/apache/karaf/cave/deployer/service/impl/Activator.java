@@ -19,16 +19,21 @@ package org.apache.karaf.cave.deployer.service.impl;
 import org.apache.karaf.cave.deployer.api.Deployer;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.ProvideService;
+import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
+import org.osgi.service.cm.ConfigurationAdmin;
 
 @Services(
+        requires = { @RequireService(ConfigurationAdmin.class) },
         provides = { @ProvideService(Deployer.class) }
 )
 public class Activator extends BaseActivator {
 
     @Override
     public void doStart() {
+        ConfigurationAdmin configurationAdmin = getTrackedService(ConfigurationAdmin.class);
         DeployerImpl deployer = new DeployerImpl();
+        deployer.setConfigurationAdmin(configurationAdmin);
         register(Deployer.class, deployer);
     }
 
