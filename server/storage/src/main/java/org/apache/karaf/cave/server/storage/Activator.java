@@ -18,6 +18,7 @@ package org.apache.karaf.cave.server.storage;
 
 import java.io.File;
 
+import org.apache.karaf.cave.server.api.CaveFeatureGateway;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
@@ -27,7 +28,10 @@ import org.osgi.framework.FrameworkUtil;
 import org.osgi.service.cm.ManagedService;
 
 @Services(
-        provides = { @ProvideService(CaveRepositoryService.class) }
+        provides = {
+                @ProvideService(CaveRepositoryService.class),
+                @ProvideService(CaveFeatureGateway.class)
+        }
 )
 @Managed("org.apache.karaf.cave.server.storage")
 public class Activator extends BaseActivator implements ManagedService {
@@ -39,6 +43,9 @@ public class Activator extends BaseActivator implements ManagedService {
         service.setStorageLocation(new File(getString("cave.storage.location", System.getProperty("karaf.data") + File.separator + "cave")));
         service.init();
         register(CaveRepositoryService.class, service);
+
+        CaveFeatureGatewayImpl gateway = new CaveFeatureGatewayImpl();
+        register(CaveFeatureGateway.class, gateway);
     }
 
 }

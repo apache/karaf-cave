@@ -1,0 +1,84 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+=== Cave Features Gateway
+
+Apache Karaf Cave can also act as a central Karaf Features gateway. For instance, you can have an unique Cave server in your organization, providing
+a single features repository for your Karaf instances.
+
+Your Karaf instances on your ecosystem can connect to this unique Cave features gateway URL.
+
+Then, you manage your features repository on the "central" Cave server, and the Karaf instances get the features (without knowing exactly where they come from).
+
+The Cave Features Gateway is automatically installed by the `cave-server` feature.
+
+==== Cave Features Gateway server
+
+You can manipulate the Features Gateway using specific shell commands or corresponding MBean.
+
+===== Shell commands
+
+You can register a features repository in the gateway using `cave:gateway-register` command. For example, you can register
+Apache Camel feature in the gateway using:
+
+----
+karaf@root()> cave:gateway-register mvn:org.apache.camel.karaf/apache-camel/2.18.1/xml/features
+----
+
+Any URL (http, file, mvn, ...) supported by Apache Karaf is supported by Cave Features Gateway.
+
+You can see the features repository registered in the gateway using the `cave:gateway-register` command:
+
+----
+karaf@root()> cave:gateway-list
+mvn:org.apache.camel.karaf/apache-camel/2.18.1/xml/features
+----
+
+You can also delete a features repository from the gateway using `cave:gateway-remove` command:
+
+----
+karaf@root()> cave:gateway-remove mvn:org.apache.camel.karaf/apache-camel/2.18.1/xml/features
+----
+
+===== MBean
+
+Similar to the `cave:gateway*` commands, you find similar operation on the CaveGatewayMBean.
+
+This MBean uses the following object name:
+
+----
+org.apache.karaf.cave:type=gateway,name=*
+----
+
+This MBean provides the following operations:
+
+* `List<String> list()`
+* `register(repository)`
+* `remove(repository)`
+
+==== Plugin your Karaf instances with the central gateway
+
+The Cave Features Gateway is available on the Cave HTTP service at the following URL:
+
+----
+http://localhost:8181/cave/http/gateway
+----
+
+Any Karaf instance can use the gateway using the regular `feature:repo-add` command:
+
+----
+karaf@root()> feature:repo-add http://cave_server:8181/cave/http/gateway
+----
+
+NB: the Karaf instances use a cache, so you have to flush the changes on the gateway using the `feature:repo-refresh` command.

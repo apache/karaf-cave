@@ -16,10 +16,7 @@
  */
 package org.apache.karaf.cave.server.http;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.URI;
 import java.net.URL;
 import java.util.zip.GZIPOutputStream;
@@ -36,6 +33,7 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.karaf.cave.server.api.CaveFeatureGateway;
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.apache.karaf.util.XmlUtils;
@@ -85,17 +83,19 @@ public class CaveHttpServlet extends HttpServlet {
     protected long getLastModified(HttpServletRequest request) {
         String uri = request.getPathInfo();
         // remove the starting /
-        uri = uri.substring(1);
-        if (request.getPathInfo().endsWith("-repository.xml")) {
-            // the user wants to get the Cave repository repository.xml
-            // the expected format is {cave-repo-name}-repository.xml
-            int index = uri.indexOf("-repository.xml");
-            String caveRepositoryName = uri.substring(0, index);
-            CaveRepositoryService caveRepositoryService = tracker.getService();
-            if (caveRepositoryService != null) {
-                CaveRepository caveRepository = caveRepositoryService.getRepository(caveRepositoryName);
-                if (caveRepository != null) {
-                    return caveRepository.getIncrement();
+        if (uri != null) {
+            uri = uri.substring(1);
+            if (request.getPathInfo().endsWith("-repository.xml")) {
+                // the user wants to get the Cave repository repository.xml
+                // the expected format is {cave-repo-name}-repository.xml
+                int index = uri.indexOf("-repository.xml");
+                String caveRepositoryName = uri.substring(0, index);
+                CaveRepositoryService caveRepositoryService = tracker.getService();
+                if (caveRepositoryService != null) {
+                    CaveRepository caveRepository = caveRepositoryService.getRepository(caveRepositoryName);
+                    if (caveRepository != null) {
+                        return caveRepository.getIncrement();
+                    }
                 }
             }
         }
@@ -113,6 +113,22 @@ public class CaveHttpServlet extends HttpServlet {
     private void doIt2(CaveRepositoryService caveRepositoryService, HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String uri = request.getPathInfo();
+
+        // Cave Feature gateway
+        if (uri.equals("/gateway")) {
+            response.setContentType("application/xml");
+            File file = new File(CaveFeatureGateway.STORAGE);
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                PrintWriter writer = response.getWriter();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    writer.println(line);
+                }
+                writer.flush();
+                writer.close();
+            }
+            return;
+        }
 
         // remove the starting /
         uri = uri.substring(1);

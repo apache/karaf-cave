@@ -2,6 +2,7 @@ package org.apache.karaf.cave.server.management.internal;
 
 import java.util.Hashtable;
 
+import org.apache.karaf.cave.server.api.CaveFeatureGateway;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.RequireService;
@@ -23,28 +24,44 @@ import org.osgi.framework.ServiceRegistration;
  */
 
 @Services(
-        requires = { @RequireService(CaveRepositoryService.class) }
+        requires = {
+                @RequireService(CaveRepositoryService.class),
+                @RequireService(CaveFeatureGateway.class)
+        }
 )
 public class Activator extends BaseActivator {
 
-    private volatile ServiceRegistration registration;
+    private volatile ServiceRegistration repositoryRegistration;
+    private volatile ServiceRegistration gatewayRegistration;
 
     @Override
     protected void doStart() throws Exception {
-        CaveRepositoryService service = getTrackedService(CaveRepositoryService.class);
-        CaveRepositoryMBeanImpl mbean = new CaveRepositoryMBeanImpl();
-        mbean.setCaveRepositoryService(service);
+        CaveRepositoryService repositoryService = getTrackedService(CaveRepositoryService.class);
+        CaveRepositoryMBeanImpl repositoryMBean = new CaveRepositoryMBeanImpl();
+        repositoryMBean.setCaveRepositoryService(repositoryService);
 
-        Hashtable<String, Object> props = new Hashtable<>();
-        props.put("jmx.objectname", "org.apache.karaf.cave:type=repository,name=" + System.getProperty("karaf.name"));
-        registration = this.bundleContext.registerService(getInterfaceNames(mbean), mbean, props);
+        Hashtable<String, Object> repositoryProps = new Hashtable<>();
+        repositoryProps.put("jmx.objectname", "org.apache.karaf.cave:type=repository,name=" + System.getProperty("karaf.name"));
+        repositoryRegistration = this.bundleContext.registerService(getInterfaceNames(repositoryMBean), repositoryMBean, repositoryProps);
+
+        CaveFeatureGateway gatewayService = getTrackedService(CaveFeatureGateway.class);
+        CaveGatewayMBeanImpl gatewayMBean = new CaveGatewayMBeanImpl();
+        gatewayMBean.setGateway(gatewayService);
+
+        Hashtable<String, Object> gatewayProps = new Hashtable<>();
+        gatewayProps.put("jmx.objectname", "org.apache.karaf.cave:type=gateway,name=" + System.getProperty("karaf.name"));
+        gatewayRegistration = this.bundleContext.registerService(getInterfaceNames(gatewayMBean), gatewayMBean, gatewayProps);
     }
 
     @Override
     protected void doStop() {
-        if (registration != null) {
-            registration.unregister();
-            registration = null;
+        if (repositoryRegistration != null) {
+            repositoryRegistration.unregister();
+            repositoryRegistration = null;
+        }
+        if (gatewayRegistration != null) {
+            gatewayRegistration.unregister();
+            gatewayRegistration = null;
         }
         super.doStop();
     }

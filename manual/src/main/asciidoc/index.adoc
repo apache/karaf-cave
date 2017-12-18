@@ -39,3 +39,5 @@ include::user-guide/http-wrapper.adoc[]
 include::user-guide/maven-wrapper.adoc[]
 
 include::user-guide/administrate-cave.adoc[]
+
+include::user-guide/features-gateway.adoc[]
