@@ -32,6 +32,11 @@ public interface Deployer {
     void deleteConnection(String connectionName) throws Exception;
 
     /**
+     * Get the connections registered in the Deployer service.
+     */
+    List<Connection> connections() throws Exception;
+
+    /**
      * Explode a file (KAR or zip) and upload the content on a Maven repository.
      *
      * @param url The location of the file.
@@ -92,15 +97,15 @@ public interface Deployer {
                          List<Config> configs) throws Exception;
 
     /**
-     * A simple remote deployment operation for bundle. You can deploy a bundle to a remote Karaf instance.
+     * A simple remote deployment operation for bundle. You can install a bundle to a remote Karaf instance.
      */
-    void deployBundle(String artifactUrl, String connection)
+    void installBundle(String artifactUrl, String connection)
         throws Exception;
 
     /**
      * A simple remote undeploy operation for bundle. You can undeploy a bundle from a remote Karaf instance.
      */
-    void undeployBundle(String id, String connection) throws Exception;
+    void uninstallBundle(String id, String connection) throws Exception;
 
     /**
      * A simple remote start operation for bundle. You can start a bundle on a remote Karaf instance.

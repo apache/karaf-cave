@@ -68,6 +68,7 @@
 
     <feature name="cave-deployer" version="${project.version}">
         <feature version="${project.version}">cave-deployer-rest</feature>
+        <feature version="${project.version}">cave-deployer-command</feature>
     </feature>
 
     <feature name="cave-deployer-service" version="${project.version}">
@@ -90,5 +91,9 @@
         <bundle>mvn:org.apache.karaf.cave.deployer/org.apache.karaf.cave.deployer.rest/${project.version}</bundle>
     </feature>
 
+    <feature name="cave-deployer-command" version="${project.version}">
+        <feature version="${project.version}">cave-deployer-service</feature>
+        <bundle>mvn:org.apache.karaf.cave.deployer/org.apache.karaf.cave.deployer.command/${project.version}</bundle>
+    </feature>
 
 </features>

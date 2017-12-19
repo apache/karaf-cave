@@ -93,6 +93,30 @@ public class DeployerImpl implements Deployer {
         configuration.update(properties);
     }
 
+    @Override
+    public List<Connection> connections() throws Exception {
+        List<Connection> connections = new ArrayList<>();
+
+        Configuration configuration = configurationAdmin.getConfiguration(CONFIG_PID);
+        Dictionary<String, Object> properties = configuration.getProperties();
+        Enumeration<String> keys = properties.keys();
+        while (keys.hasMoreElements()) {
+            String key = keys.nextElement();
+            if (key.endsWith(".jmx")) {
+                String connectionName = key.substring(0, key.indexOf(".jmx"));
+                Connection connection = new Connection();
+                connection.setName(connectionName);
+                connection.setJmxUrl((String) properties.get(connectionName + ".jmx"));
+                connection.setKarafName((String) properties.get(connectionName + ".instance"));
+                connection.setUser((String) properties.get(connectionName + ".username"));
+                connection.setPassword((String) properties.get(connectionName + ".password"));
+                connections.add(connection);
+            }
+        }
+
+        return connections;
+    }
+
     private Connection getConnection(String name) throws Exception {
         Connection connection = new Connection();
         Configuration configuration = configurationAdmin.getConfiguration(CONFIG_PID);
@@ -418,7 +442,7 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void deployBundle(String artifactUrl, String connectionName) throws Exception {
+    public void installBundle(String artifactUrl, String connectionName) throws Exception {
         Connection connection = getConnection(connectionName);
         JMXConnector jmxConnector = connect(connection.getJmxUrl(),
                 connection.getKarafName(),
@@ -436,7 +460,7 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void undeployBundle(String id, String connectionName) throws Exception {
+    public void uninstallBundle(String id, String connectionName) throws Exception {
         Connection connection = getConnection(connectionName);
         JMXConnector jmxConnector = connect(connection.getJmxUrl(),
                 connection.getKarafName(),

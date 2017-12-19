@@ -179,13 +179,13 @@ public class DeployerRest {
     @Path("/{connection}/bundle/{url}")
     @POST
     public void deployBundle(@PathParam("connection") String connection, @PathParam("url") String url) throws Exception {
-        deployer.deployBundle(url, connection);
+        deployer.installBundle(url, connection);
     }
 
     @Path("/{connection}/bundle/{id}")
     @DELETE
     public void undeployBundle(@PathParam("connection") String connection, @PathParam("id") String id) throws Exception {
-        deployer.undeployBundle(id, connection);
+        deployer.uninstallBundle(id, connection);
     }
 
     @Path("/{connection}/bundle/{id}/start")

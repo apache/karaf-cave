@@ -36,6 +36,7 @@
     <modules>
         <module>api</module>
         <module>service</module>
+        <module>command</module>
         <module>rest</module>
     </modules>
 
