@@ -434,7 +434,7 @@ public class DeployerRest {
         deployer.clusterAddFeaturesRepository(url, group, connection);
     }
 
-    @Path("/{connection}/cluster/{group}feature/repository/{url}")
+    @Path("/{connection}/cluster/{group}/feature/repository/{url}")
     @DELETE
     public void clusterRemoveFeaturesRepository(@PathParam("connection") String connection,
                                                 @PathParam("group") String group,
