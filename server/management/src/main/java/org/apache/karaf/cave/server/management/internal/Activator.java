@@ -1,14 +1,3 @@
-package org.apache.karaf.cave.server.management.internal;
-
-import java.util.Hashtable;
-
-import org.apache.karaf.cave.server.api.CaveFeatureGateway;
-import org.apache.karaf.cave.server.api.CaveRepositoryService;
-import org.apache.karaf.util.tracker.BaseActivator;
-import org.apache.karaf.util.tracker.annotation.RequireService;
-import org.apache.karaf.util.tracker.annotation.Services;
-import org.osgi.framework.ServiceRegistration;
-
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +11,16 @@ import org.osgi.framework.ServiceRegistration;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.karaf.cave.server.management.internal;
+
+import java.util.Hashtable;
+
+import org.apache.karaf.cave.server.api.CaveFeatureGateway;
+import org.apache.karaf.cave.server.api.CaveRepositoryService;
+import org.apache.karaf.util.tracker.BaseActivator;
+import org.apache.karaf.util.tracker.annotation.RequireService;
+import org.apache.karaf.util.tracker.annotation.Services;
+import org.osgi.framework.ServiceRegistration;
 
 @Services(
         requires = {
