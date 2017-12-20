@@ -44,7 +44,7 @@ public class DeployerRestTest {
         System.out.println("\t- The kar is uploaded on Maven repo (using mvn deploy:deploy-file or API");
         System.out.println("\t- The kar is exploded on the Maven repo");
 
-        UploadRequest uploadRequest = new UploadRequest();
+        DeployerRest.UploadRequest uploadRequest = new DeployerRest.UploadRequest();
         uploadRequest.setRepositoryUrl("file:target/test/repository");
         uploadRequest.setArtifactUrl("file:src/test/resources/test.kar");
         uploadRequest.setGroupId("kar-test");
@@ -52,7 +52,7 @@ public class DeployerRestTest {
         uploadRequest.setVersion("1.0-SNAPSHOT");
         rest.upload(uploadRequest);
 
-        KarExplodeRequest karExplodeRequest = new KarExplodeRequest();
+        DeployerRest.KarExplodeRequest karExplodeRequest = new DeployerRest.KarExplodeRequest();
         // TODO: the artifact URL should be the one on Maven repository
         // To simplify we use test resources location directly
         karExplodeRequest.setArtifactUrl("file:src/test/resources/test.kar");
