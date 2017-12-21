@@ -188,29 +188,18 @@ public class DeployerImpl implements Deployer {
         InputStream is = null;
         JarInputStream zipIs = null;
 
-        File repoDir = new File(baseDir, "repository");
-        File resourceDir = new File(baseDir, "resource");
-
         try {
             is = new URI(url).toURL().openStream();
-            repoDir.mkdirs();
+            baseDir.mkdirs();
 
             zipIs = new JarInputStream(is);
             boolean scanForRepos = true;
 
             ZipEntry entry = zipIs.getNextEntry();
             while (entry != null) {
-                if (entry.getName().startsWith("repository")) {
-                    String path = entry.getName().substring("repository/".length());
-                    File destFile = new File(repoDir, path);
-                    extract(zipIs, entry, destFile);
-                }
-
-                if (entry.getName().startsWith("resource")) {
-                    String path = entry.getName().substring("resource/".length());
-                    File destFile = new File(resourceDir, path);
-                    extract(zipIs, entry, destFile);
-                }
+                String path = entry.getName();
+                File destFile = new File(baseDir, path);
+                extract(zipIs, entry, destFile);
                 entry = zipIs.getNextEntry();
             }
         } finally {

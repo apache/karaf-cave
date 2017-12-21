@@ -43,6 +43,11 @@ public class DeployerImplTest {
     }
 
     @Test
+    public void extractTest() throws Exception {
+        deployer.extract("mvn:org.apache.karaf/apache-karaf-minimal/4.1.3/zip", "target/test/karaf");
+    }
+
+    @Test
     public void explodeKarTest() throws Exception {
         deployer.explode("mvn:org.apache.karaf.features/framework/4.1.3/kar", "file:target/test/repository/kar");
     }
