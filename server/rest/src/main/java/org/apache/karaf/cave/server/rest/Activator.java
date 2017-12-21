@@ -65,13 +65,13 @@ public class Activator extends BaseActivator implements ManagedService {
 
     @Override
     protected void doStop() {
-        super.doStop();
         if (httpService != null) {
             httpService.unregister(alias);
         }
         if (this.servlet != null) {
             this.servlet.destroy();
         }
+        super.doStop();
     }
 
 }
