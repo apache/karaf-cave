@@ -16,6 +16,7 @@
  */
 package org.apache.karaf.cave.server.storage;
 
+import java.io.File;
 import java.net.URL;
 import java.nio.file.Paths;
 
@@ -68,6 +69,27 @@ public class CaveRepositoryImplTest {
         } catch (IllegalArgumentException expected) {
             assertTrue("Wrong exception returned.", expected.getMessage().contains("artifact is already present in the Cave repository"));
         }
+    }
+
+    @Test
+    public void testPopulateWithFile() throws Exception {
+        repository.populate(new URL("http://repo1.maven.org/maven2/commons-lang/commons-lang/1.0/commons-lang-1.0.jar"), false);
+        File result = new File("target/test-repository/commons-lang-1.0.jar");
+        assertTrue(result.exists());
+    }
+
+    @Test
+    public void testPopulateWithDirectory() throws Exception {
+        repository.populate(new URL("http://repo1.maven.org/maven2/commons-lang/commons-lang/1.0/"), false);
+        File result = new File("target/test-repository/commons-lang-1.0.jar");
+        assertTrue(result.exists());
+    }
+
+    @Test
+    public void testPopulateWithDirectoryNoTrail() throws Exception {
+        repository.populate(new URL("http://repo1.maven.org/maven2/commons-lang/commons-lang/1.0"), false);
+        File result = new File("target/test-repository/commons-lang-1.0.jar");
+        assertTrue(result.exists());
     }
 
 }

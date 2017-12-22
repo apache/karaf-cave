@@ -571,13 +571,14 @@ public class CaveRepositoryImpl implements CaveRepository {
             if ("application/java-archive".equals(type)
                     || "application/x-java-archive".equals(type)
                     || "application/octet-stream".equals(type)
-                    || "application/vnd.osgi.bundle".equals(type)) {
+                    || "application/vnd.osgi.bundle".equals(type)
+                    || "application/xml".equals(type)
+                    || "application/json".equals(type)) {
                 try {
                     if ((filter == null) || (url.matches(filter))) {
                         // Make sure this is a valid bundle
                         URLConnection urlConnection = (URLConnection) new URL(url).openConnection();
                         urlConnection = (new Utils.Authorizer(properties)).authorize(urlConnection);
-                        ResourceImpl resource = createResource(urlConnection);
                         LOGGER.debug("Copy {} into the Cave repository storage", url);
                         int index = url.lastIndexOf("/");
                         if (index > 0) {
@@ -586,6 +587,7 @@ public class CaveRepositoryImpl implements CaveRepository {
                         Path destination = getLocationPath().resolve(url);
                         Files.copy(is, destination);
                         if (update) {
+                            ResourceImpl resource = createResource(urlConnection);
                             resource = createResource(destination.toUri().toURL());
                             LOGGER.debug("Update repository metadata with {}-{}", ResolverUtil.getSymbolicName(resource), ResolverUtil.getVersion(resource));
                             resources.add(resource);
@@ -596,10 +598,13 @@ public class CaveRepositoryImpl implements CaveRepository {
                 }
             } else {
                 // try to find link to "browse"
+                if (!url.endsWith("/")) {
+                    url = url + "/";
+                }
                 Document document = Jsoup.parse(is, "UTF-8", url);
                 for (Element link : document.select("a")) {
-                    String absoluteHref = link.attr("abs:href");
-                    if (absoluteHref.startsWith(url)) {
+                    if (!link.attr("href").startsWith(".")) {
+                        String absoluteHref = link.attr("abs:href");
                         populateFromHttp(absoluteHref, filter, properties, update, resources);
                     }
                 }
