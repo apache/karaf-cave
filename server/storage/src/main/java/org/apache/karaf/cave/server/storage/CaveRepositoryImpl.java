@@ -447,17 +447,15 @@ public class CaveRepositoryImpl implements CaveRepository {
                 }
             } else {
                 // try to find link to "browse"
-                try {
-                    Connection jConn = Jsoup.connect(url);
-                    Document document = (new Utils.Authorizer(properties)).authorize(jConn).get();
-                    for (Element link : document.select("a")) {
+                if (!url.endsWith("/")) {
+                    url = url + "/";
+                }
+                Document document = Jsoup.parse(is, "UTF-8", url);
+                for (Element link : document.select("a")) {
+                    if (!link.attr("href").startsWith(".")) {
                         String absoluteHref = link.attr("abs:href");
-                        if (absoluteHref.startsWith(url)) {
-                            proxyHttp(absoluteHref, filter, properties, resources);
-                        }
+                        proxyHttp(absoluteHref, filter, properties, resources);
                     }
-                } catch (UnsupportedMimeTypeException e) {
-                    // ignore
                 }
             }
         }
