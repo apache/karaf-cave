@@ -77,6 +77,9 @@
         <bundle dependency="true">mvn:com.google.inject/guice/3.0</bundle>
         <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
         <bundle>mvn:org.apache.karaf.cave.deployer/org.apache.karaf.cave.deployer.service/${project.version}</bundle>
+        <config name="org.apache.karaf.cave.deployer">
+            # Karaf Cave Deployer connection storage
+        </config>
     </feature>
 
     <feature name="cave-deployer-rest" version="${project.version}">
