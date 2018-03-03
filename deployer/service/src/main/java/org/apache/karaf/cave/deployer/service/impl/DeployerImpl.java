@@ -75,6 +75,9 @@ public class DeployerImpl implements Deployer {
     public void registerConnection(Connection connection) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(CONFIG_PID);
         Dictionary<String, Object> properties = configuration.getProperties();
+        if (properties == null) {
+            properties = new Hashtable<>();
+        }
         properties.put(connection.getName() + ".jmx", connection.getJmxUrl());
         properties.put(connection.getName() + ".instance", connection.getKarafName());
         properties.put(connection.getName() + ".username", connection.getUser());
@@ -86,11 +89,13 @@ public class DeployerImpl implements Deployer {
     public void deleteConnection(String connection) throws Exception {
         Configuration configuration = configurationAdmin.getConfiguration(CONFIG_PID);
         Dictionary<String, Object> properties = configuration.getProperties();
-        properties.remove(connection + ".jmx");
-        properties.remove(connection + ".instance");
-        properties.remove(connection + ".username");
-        properties.remove(connection + ".password");
-        configuration.update(properties);
+        if (properties != null) {
+            properties.remove(connection + ".jmx");
+            properties.remove(connection + ".instance");
+            properties.remove(connection + ".username");
+            properties.remove(connection + ".password");
+            configuration.update(properties);
+        }
     }
 
     @Override
@@ -99,18 +104,20 @@ public class DeployerImpl implements Deployer {
 
         Configuration configuration = configurationAdmin.getConfiguration(CONFIG_PID);
         Dictionary<String, Object> properties = configuration.getProperties();
-        Enumeration<String> keys = properties.keys();
-        while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            if (key.endsWith(".jmx")) {
-                String connectionName = key.substring(0, key.indexOf(".jmx"));
-                Connection connection = new Connection();
-                connection.setName(connectionName);
-                connection.setJmxUrl((String) properties.get(connectionName + ".jmx"));
-                connection.setKarafName((String) properties.get(connectionName + ".instance"));
-                connection.setUser((String) properties.get(connectionName + ".username"));
-                connection.setPassword((String) properties.get(connectionName + ".password"));
-                connections.add(connection);
+        if (properties != null) {
+            Enumeration<String> keys = properties.keys();
+            while (keys.hasMoreElements()) {
+                String key = keys.nextElement();
+                if (key.endsWith(".jmx")) {
+                    String connectionName = key.substring(0, key.indexOf(".jmx"));
+                    Connection connection = new Connection();
+                    connection.setName(connectionName);
+                    connection.setJmxUrl((String) properties.get(connectionName + ".jmx"));
+                    connection.setKarafName((String) properties.get(connectionName + ".instance"));
+                    connection.setUser((String) properties.get(connectionName + ".username"));
+                    connection.setPassword((String) properties.get(connectionName + ".password"));
+                    connections.add(connection);
+                }
             }
         }
 
@@ -121,18 +128,21 @@ public class DeployerImpl implements Deployer {
         Connection connection = new Connection();
         Configuration configuration = configurationAdmin.getConfiguration(CONFIG_PID);
         Dictionary<String, Object> properties = configuration.getProperties();
-        String jmx = (String) properties.get(name + ".jmx");
-        String instance = (String) properties.get(name + ".instance");
-        String username = (String) properties.get(name + ".username");
-        String password = (String) properties.get(name + ".password");
-        if (jmx == null || instance == null) {
-            throw new IllegalArgumentException("No connection found with name " + name);
+        if (properties != null) {
+            String jmx = (String) properties.get(name + ".jmx");
+            String instance = (String) properties.get(name + ".instance");
+            String username = (String) properties.get(name + ".username");
+            String password = (String) properties.get(name + ".password");
+            if (jmx == null || instance == null) {
+                throw new IllegalArgumentException("No connection found with name " + name);
+            }
+            connection.setJmxUrl(jmx);
+            connection.setKarafName(instance);
+            connection.setUser(username);
+            connection.setPassword(password);
+            return connection;
         }
-        connection.setJmxUrl(jmx);
-        connection.setKarafName(instance);
-        connection.setUser(username);
-        connection.setPassword(password);
-        return connection;
+        return null;
     }
 
     @Override
