@@ -66,9 +66,10 @@ public class CaveDeployerMBeanImpl extends StandardMBean implements CaveDeployer
         TabularType tabularType = new TabularType("Connections", "Table of all Cave Deployer connections", connectionType, new String[]{"Name"});
         TabularData table = new TabularDataSupport(tabularType);
         for (Connection connection : connections) {
+            String password = new String(new char[connection.getPassword().length()]).replace("\0", "*");
             CompositeData data = new CompositeDataSupport(connectionType,
                     new String[]{"Name", "JMX URL", "Karaf Name", "User", "Password"},
-                    new Object[]{connection.getName(), connection.getJmxUrl(), connection.getKarafName(), connection.getUser(), connection.getPassword()});
+                    new Object[]{connection.getName(), connection.getJmxUrl(), connection.getKarafName(), connection.getUser(), password});
             table.put(data);
         }
         return table;

@@ -24,6 +24,8 @@ import org.apache.karaf.shell.api.action.lifecycle.Reference;
 import org.apache.karaf.shell.api.action.lifecycle.Service;
 import org.apache.karaf.shell.support.table.ShellTable;
 
+import java.util.Collections;
+
 @Service
 @Command(scope = "cave", name = "deployer-connection", description = "List of registered connections in the deployer service")
 public class ConnectionListCommand implements Action {
@@ -41,7 +43,8 @@ public class ConnectionListCommand implements Action {
         table.column("Password");
 
         for (Connection connection : deployer.connections()) {
-            table.addRow().addContent(connection.getName(), connection.getJmxUrl(), connection.getKarafName(), connection.getUser(), connection.getPassword());
+            String password = new String(new char[connection.getPassword().length()]).replace("\0", "*");
+            table.addRow().addContent(connection.getName(), connection.getJmxUrl(), connection.getKarafName(), connection.getUser(), password);
         }
 
         table.print(System.out);
