@@ -55,6 +55,7 @@
         <module>server</module>
         <!-- <module>client</module> -->
         <module>deployer</module>
+        <module>manual</module>
         <module>assembly</module>
     </modules>
 
@@ -170,10 +171,6 @@
         </dependencies>
     </dependencyManagement>
     <dependencies>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -314,19 +311,13 @@
                     <releaseProfiles>release,deploy</releaseProfiles>
                     <preparationGoals>clean install</preparationGoals>
                     <goals>deploy</goals>
-                    <arguments>-Prelease,manual,deploy</arguments>
+                    <arguments>-Prelease,deploy</arguments>
                 </configuration>
             </plugin>
         </plugins>
     </build>
 
     <profiles>
-        <profile>
-            <id>manual</id>
-            <modules>
-                <module>manual</module>
-            </modules>
-        </profile>
         <profile>
             <id>release</id>
             <modules>
