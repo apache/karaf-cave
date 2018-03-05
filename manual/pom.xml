@@ -80,7 +80,6 @@
                 <configuration>
                     <instructions>
                         <Web-ContextPath>/documentation-cave</Web-ContextPath>
-                        <Private-Package>*</Private-Package>
                         <Import-Package>
                             org.slf4j;resolution:=optional
                         </Import-Package>
