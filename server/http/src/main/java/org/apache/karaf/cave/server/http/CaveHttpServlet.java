@@ -114,6 +114,19 @@ public class CaveHttpServlet extends HttpServlet {
 
         String uri = request.getPathInfo();
 
+        if (uri == null) {
+            response.setContentType("text/html");
+            PrintWriter writer = response.getWriter();
+            writer.println("<html><head><title>Apache Karaf Cave</title></head>");
+            writer.println("<body>");
+            writer.println("<center><b>Apache Karaf Cave</b><br>Please provide an URI</center>");
+            writer.println("</body>");
+            writer.println("</html>");
+            writer.flush();
+            writer.close();
+            return;
+        }
+
         // Cave Feature gateway
         if (uri.equals("/gateway")) {
             response.setContentType("application/xml");
