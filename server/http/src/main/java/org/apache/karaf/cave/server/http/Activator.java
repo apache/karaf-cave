@@ -61,10 +61,22 @@ public class Activator extends BaseActivator implements ManagedService {
     protected void doStop() {
         super.doStop();
         if (httpService != null) {
-            httpService.unregister(alias);
-        }
-        if (this.servlet != null) {
-            this.servlet.destroy();
+            try {
+                httpService.unregister(alias);
+            } catch (Throwable t) {
+                logger.debug("Exception caught while stopping", t);
+            } finally {
+                httpService = null;
+            }
+            }
+        if (servlet != null) {
+            try {
+                servlet.destroy();
+            } catch (Throwable t) {
+                logger.debug("Exception caught while stopping", t);
+            } finally {
+                servlet = null;
+            }
         }
     }
 }
