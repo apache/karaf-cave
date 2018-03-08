@@ -61,7 +61,7 @@ public class Activator extends BaseActivator implements ManagedService {
                 config.put(key, val);
             }
         }
-        this.resolver = MavenResolvers.createMavenResolver(null, config, pid);
+        this.resolver = MavenResolvers.createMavenResolver(config, pid);
         this.alias = alias;
         this.servlet = new CaveMavenServlet(this.resolver, poolSize, realm, downloadRole, uploadRole);
         this.httpService.registerServlet(this.alias, this.servlet, config, null);
@@ -69,7 +69,6 @@ public class Activator extends BaseActivator implements ManagedService {
 
     @Override
     protected void doStop() {
-        super.doStop();
         if (httpService != null) {
             try {
                 httpService.unregister(alias);
@@ -97,5 +96,6 @@ public class Activator extends BaseActivator implements ManagedService {
                 resolver = null;
             }
         }
+        super.doStop();
     }
 }

@@ -59,7 +59,6 @@ public class Activator extends BaseActivator implements ManagedService {
 
     @Override
     protected void doStop() {
-        super.doStop();
         if (httpService != null) {
             try {
                 httpService.unregister(alias);
@@ -78,5 +77,6 @@ public class Activator extends BaseActivator implements ManagedService {
                 servlet = null;
             }
         }
+        super.doStop();
     }
 }

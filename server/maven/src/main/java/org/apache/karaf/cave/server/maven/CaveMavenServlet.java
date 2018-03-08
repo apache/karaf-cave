@@ -117,7 +117,6 @@ public class CaveMavenServlet extends HttpServlet {
         this.uploadRole = uploadRole;
     }
 
-
     //
     //  Lifecycle
     //
@@ -145,8 +144,6 @@ public class CaveMavenServlet extends HttpServlet {
             }
         }
     }
-
-
 
     //
     // Security
@@ -258,10 +255,6 @@ public class CaveMavenServlet extends HttpServlet {
             return null;
         }
     }
-
-
-
-
 
     //
     // Download
@@ -400,8 +393,6 @@ public class CaveMavenServlet extends HttpServlet {
         }
 
     }
-
-
 
     //
     // Upload
