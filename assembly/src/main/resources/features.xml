@@ -21,13 +21,13 @@
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
 
     <feature name="cave-server" version="${project.version}">
-        <feature>cave-storage</feature>
-        <feature>cave-http</feature>
-        <feature>cave-rest</feature>
-        <feature>cave-maven</feature>
+        <feature>cave-server-storage</feature>
+        <feature>cave-server-http</feature>
+        <feature>cave-server-rest</feature>
+        <feature>cave-server-maven</feature>
     </feature>
 
-    <feature name="cave-storage" version="${project.version}">
+    <feature name="cave-server-storage" version="${project.version}">
         <configfile finalname="/etc/org.apache.karaf.cave.server.storage.cfg">mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/filesystem</configfile>
         <bundle>mvn:org.jsoup/jsoup/${jsoup.version}</bundle>
         <bundle>mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>
@@ -43,22 +43,22 @@
         </conditional>
     </feature>
 
-    <feature name="cave-http" version="${project.version}">
+    <feature name="cave-server-http" version="${project.version}">
         <feature prerequisite="true">http</feature>
         <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
-        <feature>cave-storage</feature>
+        <feature>cave-server-storage</feature>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.http/${project.version}</bundle>
     </feature>
 
-    <feature name="cave-rest" version="${project.version}">
+    <feature name="cave-server-rest" version="${project.version}">
         <feature prerequisite="true">http</feature>
         <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <feature version="[3,4)">cxf-jaxrs</feature>
-        <feature>cave-storage</feature>
+        <feature>cave-server-storage</feature>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.rest/${project.version}</bundle>
     </feature>
 
-    <feature name="cave-maven" version="${project.version}">
+    <feature name="cave-server-maven" version="${project.version}">
         <feature prerequisite="true">http</feature>
         <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
         <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.maven/${project.version}</bundle>
@@ -113,6 +113,5 @@
         <feature>war</feature>
         <bundle>mvn:org.apache.karaf.cave/manual/${project.version}</bundle>
     </feature>
-
 
 </features>
