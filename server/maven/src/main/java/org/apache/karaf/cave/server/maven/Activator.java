@@ -16,12 +16,13 @@
  */
 package org.apache.karaf.cave.server.maven;
 
-import java.io.IOException;
 import java.util.Enumeration;
 import java.util.Hashtable;
 
+import org.apache.karaf.cave.server.api.CaveMavenRepositoryListener;
 import org.apache.karaf.util.tracker.BaseActivator;
 import org.apache.karaf.util.tracker.annotation.Managed;
+import org.apache.karaf.util.tracker.annotation.ProvideService;
 import org.apache.karaf.util.tracker.annotation.RequireService;
 import org.apache.karaf.util.tracker.annotation.Services;
 import org.ops4j.pax.url.mvn.MavenResolver;
@@ -30,7 +31,8 @@ import org.osgi.service.cm.ManagedService;
 import org.osgi.service.http.HttpService;
 
 @Services(
-        requires = @RequireService(HttpService.class)
+        requires = @RequireService(HttpService.class),
+        provides = @ProvideService(CaveMavenRepositoryListener.class)
 )
 @Managed("org.apache.karaf.cave.server.maven")
 public class Activator extends BaseActivator implements ManagedService {
@@ -48,10 +50,10 @@ public class Activator extends BaseActivator implements ManagedService {
         }
 
         String pid = getString("cave.maven.pid", "org.ops4j.pax.url.mvn");
-        String alias = getString("cave.maven.alias", "/cave/maven");
+        String alias = getString("cave.maven.alias", "/cave/maven/proxy");
         String realm = getString("cave.maven.realm", "karaf");
         String downloadRole = getString("cave.maven.downloadRole", null);
-        String uploadRole = getString("cave.maven.uploadRole", "karaf");
+        String uploadRole = getString("cave.maven.uploadRole", null);
         int poolSize = getInt("cave.maven.poolSize", 8);
         Hashtable<String, String> config = new Hashtable<>();
         if (getConfiguration() != null) {
@@ -65,6 +67,10 @@ public class Activator extends BaseActivator implements ManagedService {
         this.alias = alias;
         this.servlet = new CaveMavenServlet(this.resolver, poolSize, realm, downloadRole, uploadRole);
         this.httpService.registerServlet(this.alias, this.servlet, config, null);
+
+        CaveMavenRepositoryListenerImpl repositoryListener = new CaveMavenRepositoryListenerImpl(httpService,
+                poolSize, realm, downloadRole, uploadRole);
+        register(CaveMavenRepositoryListener.class, repositoryListener);
     }
 
     @Override
@@ -72,12 +78,13 @@ public class Activator extends BaseActivator implements ManagedService {
         if (httpService != null) {
             try {
                 httpService.unregister(alias);
+                httpService.unregister("/cave/maven/repositories/test");
             } catch (Throwable t) {
                 logger.debug("Exception caught while stopping", t);
             } finally {
                 httpService = null;
             }
-            }
+        }
         if (servlet != null) {
             try {
                 servlet.destroy();
@@ -86,7 +93,7 @@ public class Activator extends BaseActivator implements ManagedService {
             } finally {
                 servlet = null;
             }
-            }
+        }
         if (resolver != null) {
             try {
                 resolver.close();

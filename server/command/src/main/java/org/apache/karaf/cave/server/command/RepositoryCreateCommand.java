@@ -32,6 +32,15 @@ public class RepositoryCreateCommand extends CaveRepositoryCommandSupport {
     @Option(name = "-l", aliases = {"--location"}, description = "Location of the repository on the file system", required = false, multiValued = false)
     String location;
 
+    @Option(name = "-r", aliases = {"--realm"}, description = "JAAS realm to use for repository security", required = false, multiValued = false)
+    String realm;
+
+    @Option(name = "-d", aliases = {"--download-role"}, description = "Users role allowed to download artifacts", required = false, multiValued = false)
+    String downloadRole;
+
+    @Option(name = "-u", aliases = {"--upload-role"}, description = "Users role allowed to upload artifacts", required = false, multiValued = false)
+    String uploadRole;
+
     @Option(name = "-no", aliases = {"--no-generate"}, description = "Do not generate repository metadata", required = false, multiValued = false)
     boolean noGenerate = false;
 
@@ -47,7 +56,7 @@ public class RepositoryCreateCommand extends CaveRepositoryCommandSupport {
             return null;
         }
         if (location != null) {
-            getCaveRepositoryService().create(name, location, false);
+            getCaveRepositoryService().create(name, location, realm, downloadRole, uploadRole, false);
         } else {
             getCaveRepositoryService().create(name, false);
         }

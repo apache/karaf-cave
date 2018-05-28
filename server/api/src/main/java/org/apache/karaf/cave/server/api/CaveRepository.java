@@ -27,24 +27,33 @@ public interface CaveRepository {
 
     /**
      * Get the name of the repository.
-     *
-     * @return the name of the repository
      */
-    public String getName();
+    String getName();
 
     /**
      * Get the location (filesystem) of this repository.
-     *
-     * @return the location of this repository.
      */
-    public String getLocation();
+    String getLocation();
 
     /**
      * Get the last modification date of this repository.
-     *
-     * @return the last modification date.
      */
-    public long getIncrement();
+    long getIncrement();
+
+    /**
+     * Get the JAAS realm used to control access to this repository.
+     */
+    String getRealm();
+
+    /**
+     * Get the JAAS users role to download artifacts from this repository.
+     */
+    String getDownloadRole();
+
+    /**
+     * Get the JAAS users role to upload artifacts to this repository.
+     */
+    String getUploadRole();
 
     /**
      * Upload an artifact from the given URL into the repository.

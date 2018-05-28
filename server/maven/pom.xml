@@ -66,6 +66,10 @@
 
     <dependencies>
         <dependency>
+            <groupId>org.apache.karaf.cave.server</groupId>
+            <artifactId>org.apache.karaf.cave.server.api</artifactId>
+        </dependency>
+        <dependency>
             <groupId>${servlet.spec.groupId}</groupId>
             <artifactId>${servlet.spec.artifactId}</artifactId>
         </dependency>

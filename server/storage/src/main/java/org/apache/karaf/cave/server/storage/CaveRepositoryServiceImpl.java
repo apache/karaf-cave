@@ -16,10 +16,12 @@
  */
 package org.apache.karaf.cave.server.storage;
 
+import org.apache.karaf.cave.server.api.CaveMavenRepositoryListener;
 import org.apache.karaf.cave.server.api.CaveRepository;
 import org.apache.karaf.cave.server.api.CaveRepositoryService;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
+import org.osgi.framework.ServiceReference;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.repository.Repository;
 import org.slf4j.Logger;
@@ -74,7 +76,7 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      */
     public synchronized CaveRepository create(String name, boolean scan) throws Exception {
         File location = new File(storageLocation, name);
-        return create(name, location.getAbsolutePath(), scan);
+        return create(name, location.getAbsolutePath(), "karaf", null, null, scan);
     }
 
     /**
@@ -86,13 +88,22 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
-    public synchronized CaveRepository create(String name, String location, boolean scan) throws Exception {
+    public synchronized CaveRepository create(String name, String location, String realm, String downloadRole, String uploadRole, boolean scan) throws Exception {
         if (repositories.get(name) != null) {
             throw new IllegalArgumentException("Cave repository " + name + " already exists");
         }
-        CaveRepositoryImpl repository = new CaveRepositoryImpl(name, location, scan);
+        CaveRepositoryImpl repository = new CaveRepositoryImpl(name, location, realm, downloadRole, uploadRole, scan);
         repositories.put(name, repository);
         save();
+        // register the Maven repository if available
+        ServiceReference<CaveMavenRepositoryListener> listenerServiceRef =  bundleContext.getServiceReference(CaveMavenRepositoryListener.class);
+        if (listenerServiceRef != null) {
+            CaveMavenRepositoryListener listener = bundleContext.getService(listenerServiceRef);
+            if (listener != null) {
+                listener.addRepository(name, location);
+            }
+            bundleContext.ungetService(listenerServiceRef);
+        }
         return repository;
     }
 
@@ -125,6 +136,15 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
             throw new IllegalArgumentException("Cave repository " + name + " doesn't exist");
         }
         repositories.remove(name);
+        // remove the corresponding Maven repository if present
+        ServiceReference<CaveMavenRepositoryListener> listenerServiceRef =  bundleContext.getServiceReference(CaveMavenRepositoryListener.class);
+        if (listenerServiceRef != null) {
+            CaveMavenRepositoryListener listener = bundleContext.getService(listenerServiceRef);
+            if (listener != null) {
+                listener.removeRepository(name);
+            }
+            bundleContext.ungetService(listenerServiceRef);
+        }
         save();
     }
 
@@ -142,6 +162,15 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         }
         repositories.remove(name);
         repository.cleanup();
+        // remove the corresponding Maven repository if present
+        ServiceReference<CaveMavenRepositoryListener> listenerServiceRef =  bundleContext.getServiceReference(CaveMavenRepositoryListener.class);
+        if (listenerServiceRef != null) {
+            CaveMavenRepositoryListener listener = bundleContext.getService(listenerServiceRef);
+            if (listener != null) {
+                listener.removeRepository(name);
+            }
+            bundleContext.ungetService(listenerServiceRef);
+        }
         save();
     }
 
@@ -197,6 +226,15 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
         for (int i = 0; i < repositories.length; i++) {
             storage.setProperty("item." + i + ".name", repositories[i].getName());
             storage.setProperty("item." + i + ".location", repositories[i].getLocation());
+            if (repositories[i].getRealm() != null) {
+                storage.setProperty("item." + i + ".realm", repositories[i].getRealm());
+            }
+            if (repositories[i].getDownloadRole() != null) {
+                storage.setProperty("item." + i + ".downloadRole", repositories[i].getDownloadRole());
+            }
+            if (repositories[i].getUploadRole() != null) {
+                storage.setProperty("item." + i + ".uploadRole", repositories[i].getUploadRole());
+            }
             storage.setProperty("item." + i + ".installed", Boolean.toString(services.containsKey(repositories[i].getName())));
         }
         saveStorage(storage, new File(storageLocation, STORAGE_FILE), "Cave Service storage");
@@ -261,10 +299,22 @@ public class CaveRepositoryServiceImpl implements CaveRepositoryService {
             for (int i = 0; i < count; i++) {
                 String name = storage.getProperty("item." + i + ".name");
                 String location = storage.getProperty("item." + i + ".location");
+                String realm = storage.getProperty("item." + i + ".realm");
+                String downloadRole = storage.getProperty("item." + i + ".downloadRole");
+                String uploadRole = storage.getProperty("item." + i + ".uploadRole");
                 boolean installed = Boolean.parseBoolean(storage.getProperty("item." + i + ".installed"));
                 if (name != null) {
-                    CaveRepositoryImpl repository = new CaveRepositoryImpl(name, location, false);
+                    CaveRepositoryImpl repository = new CaveRepositoryImpl(name, location, realm, downloadRole, uploadRole, false);
                     repositories.put(name, repository);
+                    // register the Maven repository if available
+                    ServiceReference<CaveMavenRepositoryListener> listenerServiceRef =  bundleContext.getServiceReference(CaveMavenRepositoryListener.class);
+                    if (listenerServiceRef != null) {
+                        CaveMavenRepositoryListener listener = bundleContext.getService(listenerServiceRef);
+                        if (listener != null) {
+                            listener.addRepository(name, location);
+                        }
+                        bundleContext.ungetService(listenerServiceRef);
+                    }
                     if (installed) {
                         install(name);
                     }

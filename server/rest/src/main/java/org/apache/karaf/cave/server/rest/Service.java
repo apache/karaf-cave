@@ -59,6 +59,9 @@ public class Service {
      *
      * @param name the name of the repository.
      * @param location the storage location of the repository.
+     * @param realm the JAAS realm
+     * @param downloadRole the users role allowed to download
+     * @param uploadRole the users role allowed to upload
      * @param scan if true, the repository is scanned at creation time, and the repository metadata are created.
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
@@ -66,8 +69,13 @@ public class Service {
     @POST
     @Path("/repositories")
     @Produces("application/json")
-    public Repository create(@QueryParam(value = "name") String name, @QueryParam(value = "location") String location, @QueryParam(value = "scan") boolean scan) throws Exception {
-        return new Repository(service.create(name, location, scan));
+    public Repository create(@QueryParam(value = "name") String name,
+                             @QueryParam(value = "location") String location,
+                             @QueryParam(value = "realm") String realm,
+                             @QueryParam(value = "downloadRole") String downloadRole,
+                             @QueryParam(value = "uploadRole") String uploadRole,
+                             @QueryParam(value = "scan") boolean scan) throws Exception {
+        return new Repository(service.create(name, location, realm, downloadRole, uploadRole, scan));
     }
 
     /**

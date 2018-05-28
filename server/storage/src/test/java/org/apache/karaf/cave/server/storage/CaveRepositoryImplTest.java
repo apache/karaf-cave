@@ -41,7 +41,7 @@ public class CaveRepositoryImplTest {
     @Before
     public void setUp() throws Exception {
         deleteRecursive(Paths.get("target/test-repository"));
-        repository = new CaveRepositoryImpl("test", "target/test-repository", false);
+        repository = new CaveRepositoryImpl("test", "target/test-repository", null, null, null, false);
     }
 
     @Test

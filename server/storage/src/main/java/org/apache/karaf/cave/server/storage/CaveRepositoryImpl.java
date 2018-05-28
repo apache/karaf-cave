@@ -49,9 +49,7 @@ import org.apache.karaf.features.internal.resolver.ResolverUtil;
 import org.apache.karaf.features.internal.resolver.ResourceBuilder;
 import org.apache.karaf.features.internal.resolver.ResourceImpl;
 import org.apache.karaf.features.internal.resolver.ResourceUtils;
-import org.jsoup.Connection;
 import org.jsoup.Jsoup;
-import org.jsoup.UnsupportedMimeTypeException;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.osgi.framework.BundleException;
@@ -75,13 +73,20 @@ public class CaveRepositoryImpl implements CaveRepository {
 
     private String name;
     private String location;
+    private String realm;
+    private String downloadRole;
+    private String uploadRole;
+
     private OsgiRepository repository;
 
-    public CaveRepositoryImpl(String name, String location, boolean scan) throws Exception {
+    public CaveRepositoryImpl(String name, String location, String realm, String downloadRole, String uploadRole, boolean scan) throws Exception {
         super();
 
         this.name = name;
         this.location = location;
+        this.realm = realm;
+        this.downloadRole = downloadRole;
+        this.uploadRole = uploadRole;
 
         createRepositoryDirectory();
         if (scan) {
@@ -109,6 +114,33 @@ public class CaveRepositoryImpl implements CaveRepository {
 
     public void setLocation(String location) {
         this.location = location;
+    }
+
+    @Override
+    public String getRealm() {
+        return realm;
+    }
+
+    public void setRealm(String realm) {
+        this.realm = realm;
+    }
+
+    @Override
+    public String getDownloadRole() {
+        return downloadRole;
+    }
+
+    public void setDownloadRole(String downloadRole) {
+        this.downloadRole = downloadRole;
+    }
+
+    @Override
+    public String getUploadRole() {
+        return uploadRole;
+    }
+
+    public void setUploadRole(String uploadRole) {
+        this.uploadRole = uploadRole;
     }
 
     @Override
