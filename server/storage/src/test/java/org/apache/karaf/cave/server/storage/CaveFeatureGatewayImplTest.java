@@ -73,6 +73,7 @@ public class CaveFeatureGatewayImplTest {
         while ((line = reader.readLine()) != null) {
             builder.append(line);
         }
+        reader.close();
         return builder.toString();
     }
 
