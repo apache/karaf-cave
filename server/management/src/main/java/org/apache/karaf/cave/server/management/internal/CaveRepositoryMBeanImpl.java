@@ -67,12 +67,12 @@ public class CaveRepositoryMBeanImpl extends StandardMBean implements CaveReposi
         return table;
     }
 
-    public void createRepository(String name, String location, boolean generate, boolean install) throws Exception {
+    public void createRepository(String name, String location, String realm, String downloadRole, String uploadRole, boolean generate, boolean install) throws Exception {
         if (getCaveRepositoryService().getRepository(name) != null) {
             throw new IllegalArgumentException("Cave repository " + name + " already exists");
         }
         if (location != null) {
-            getCaveRepositoryService().create(name, location, false);
+            getCaveRepositoryService().create(name, location, realm, downloadRole, uploadRole, false);
         } else {
             getCaveRepositoryService().create(name, false);
         }

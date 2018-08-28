@@ -36,11 +36,14 @@ public interface CaveRepositoryService {
      *
      * @param name the name of the repository.
      * @param location the storage location of the repository.
+     * @param realm the JAAS realm to use to control access to this repository.
+     * @param downloadRole the users role to download artifacts from this repository.
+     * @param uploadRole the users role to upload artifacts to this repository.
      * @param scan if true, the repository is scanned at creation time, and the repository metadata are created.
      * @return the Cave repository.
      * @throws Exception in case of creation failure.
      */
-    CaveRepository create(String name, String location, boolean scan) throws Exception;
+    CaveRepository create(String name, String location, String realm, String downloadRole, String uploadRole, boolean scan) throws Exception;
 
     /**
      * Uninstall a Cave repository from the repository service.
