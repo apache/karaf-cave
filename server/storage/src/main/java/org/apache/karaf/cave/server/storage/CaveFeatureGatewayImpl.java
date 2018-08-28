@@ -21,6 +21,7 @@ import org.apache.karaf.features.internal.model.Features;
 import org.apache.karaf.features.internal.model.JaxbUtil;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +44,8 @@ public class CaveFeatureGatewayImpl implements CaveFeatureGateway {
             throw new IllegalArgumentException("Features repository " + url + " already registered in the gateway");
         }
         features.getRepository().add(url);
-        JaxbUtil.marshal(features, new FileOutputStream(storage));
+        
+        marshalStorageFile(storage, features);
     }
 
     @Override
@@ -59,7 +61,8 @@ public class CaveFeatureGatewayImpl implements CaveFeatureGateway {
             throw new IllegalArgumentException("Features repository " + url + " is not registered in the gateway");
         }
         features.getRepository().remove(url);
-        JaxbUtil.marshal(features, new FileOutputStream(storage));
+        
+        marshalStorageFile(storage, features);
     }
 
     @Override
@@ -83,4 +86,11 @@ public class CaveFeatureGatewayImpl implements CaveFeatureGateway {
         }
         return false;
     }
+    
+    private void marshalStorageFile(File storage, Features features)
+			throws Exception {
+        OutputStream storageFileOs = new FileOutputStream(storage);
+        JaxbUtil.marshal(features, storageFileOs);
+        storageFileOs.close();
+	}
 }
