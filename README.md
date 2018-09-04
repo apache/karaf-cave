@@ -1,27 +1,34 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
 
-Welcome to Apache Karaf Cave
-============================
-Apache Karaf Cave is an Apache Karaf subproject. It provides an implementation of the OSGi Repository specification, with
-additional feature such as a complete Maven repository support, a REST API for management, support of remote repository
-proxy.
+      http://www.apache.org/licenses/LICENSE-2.0
 
-Cave deals with the requirements and capabilities of all artifacts.
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+    KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+
+# Apache Karaf Cave
+
+Apache Karaf Cave is an Apache Karaf subproject. It provides a complete repository manager and deployer for Apache Karaf.
+
+## Overview
+
+Apache Karaf Cave supports:
+
+* Maven repository management
+* OSGi Repository management
+* Deployer on multiple Apache Karaf instances
+* Complete REST API and JMX MBeans
 
 Apache Karaf Cave provides the following features:
 * Storage: Cave includes a storage backend. The default one is a simple filesystem backend. As the Cave backend
@@ -32,25 +39,31 @@ repository storage.
 * REST API: Cave provides a REST API to manipulate the repositories.
 * Artifact Upload: Users can upload OSGi bundle in a Cave repository. It supports URLs like mvn:groupId/artifactId/version,
 file:, http:, etc.
+* Deployer: to deploy and manage your "farm" of Apache Karaf instances.
 * Repository proxy: Cave is able to proxy an existing repository, for instance an existing Maven repository.
 The artifacts are located on the "external" repository, Cave handles the repository metadata. Cave supports file: and http:
 URLs, it means that Cave is able to browse a remote HTTP Maven repository for instance.
 * Repository population: Cave is able to get artifacts present on an "external" repository (local file: or
 remote http:), looking for OSGi bundles, and copy the artifacts in the Cave repository storage.
 
+## Getting Started
 
-Getting Started
-===============
 For an Apache Karaf Cave source distribution, please read
-BUILDING for instructions on building Apache Karaf Cave.
+BUILDING.md for instructions on building Apache Karaf Cave.
 
 To install Apache Karaf Cave, first you have to register the Cave features descriptor:
 
+```
 karaf@root()> feature:repo-add mvn:org.apache.karaf.cave/apache-karaf-cave/4.0.0/xml/features
+```
 
-Now, you can install the Cave feature simply by typing:
+Now, you can install the Cave simply by typing:
 
-karaf@root()> feature:install cave-server
+```
+karaf@root()> feature:install cave
+```
+
+## More Information
 
 The PDF manual is the right place to find any information about Karaf Cave.
 
@@ -71,5 +84,4 @@ contribute, please see:
 
 Many thanks for using Apache Karaf Cave.
 
-
-The Karaf Team
+**The Apache Karaf Team**
