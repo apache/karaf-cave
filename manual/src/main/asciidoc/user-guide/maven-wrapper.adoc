@@ -33,7 +33,7 @@ my-repository | /opt/apache-karaf-4.0.0/data/cave/my-repository
 You can access the corresponding Maven repository using:
 
 ----
-http://localhost:8181/cave/maven
+http://localhost:8181/cave/maven/repositories/my-repository
 ----
 
 [NOTE]
@@ -44,11 +44,11 @@ The port 8181 is the default one of the Apache Karaf HTTP service.
 You can see that the URL follows the format:
 
 ----
-http://[cave_server_hostname]:[http_service_port]/cave/maven/
+http://[cave_server_hostname]:[http_service_port]/cave/maven/repositories/my-repository
 ----
 
 For instance, if a Cave repository contains the commons-lang 2.6 artifact, it's accessible using:
 
 ----
-http://localhost:8181/cave/maven/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
+http://localhost:8181/cave/maven/repositories/my-repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
 ----

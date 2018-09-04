@@ -53,8 +53,8 @@
 
     <modules>
         <module>server</module>
-        <!-- <module>client</module> -->
         <module>deployer</module>
+        <module>rest</module>
         <module>manual</module>
         <module>assembly</module>
     </modules>
@@ -464,7 +464,9 @@
                             <excludes>
                                 <exclude>**/target/**/*</exclude>
                                 <exclude>**/*.iml</exclude>
+                                <exclude>**/*.kar</exclude>
                             </excludes>
+                            <consoleOutput>true</consoleOutput>
                         </configuration>
                     </plugin>
                 </plugins>

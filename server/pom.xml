@@ -39,7 +39,6 @@
         <module>management</module>
         <module>command</module>
         <module>http</module>
-        <module>rest</module>
         <module>maven</module>
     </modules>
 

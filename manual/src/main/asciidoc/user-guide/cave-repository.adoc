@@ -17,7 +17,7 @@
 A Cave repository is a container for:
 
 * Artifacts (files)
-* Repository metadata
+* Repository metadata (optional, only used for OSGi repository)
 
 By default, a repository uses a filesystem backend for the storage, the directory used is KARAF_BASE/cave.
 
