@@ -1,0 +1,126 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+=== Deployer
+
+Cave Deployer allows you to manage a "farm" of Apache Karaf instances local or remote from the deployer itself.
+
+You have specific commands: `cave:deployer-*`.
+
+==== Connections
+
+The first component of the deployer is the connection. A connection describe an access to a Apache Karaf instance.
+
+You can create a connection via `cave:deployer-connection-register` command or the REST Deployer API.
+
+A connection contains:
+
+* an unique name for the connection
+* the JMX URL to the give Apache Karaf instance
+* the name of the Apache Karaf instance
+* username and password to connect to the Apache Karaf instance
+
+For instance:
+
+----
+karaf@root()> cave:deployer-connection-register myconnection service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root root karaf karaf
+----
+
+You can list the connections using the `cave:deployer-connection` command:
+
+----
+karaf@root()> cave:deployer-connection
+Name         │ JMX URL                                                 │ Instance │ Username │ Password
+─────────────┼─────────────────────────────────────────────────────────┼──────────┼──────────┼─────────
+myconnection │ service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root │ root     │ karaf    │ *****
+
+----
+
+or via REST (with `curl` for instance):
+
+----
+curl -X GET -H "Content-Type: application/json" http://localhost:8181/cave/rest/deployer/connections
+[{"name":"myconnection","jmxUrl":"service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root","karafName":"root","user":"karaf","password":"karaf"}]
+----
+
+You can remove a connection using `cave:deployer-connection-delete` command:
+
+----
+karaf@root()> cave:deployer-connection-delete myconnection
+----
+
+or via REST:
+
+----
+curl -X DELETE http://localhost:8181/cave/rest/deployer/connections/myconnection
+----
+
+==== Artifacts
+
+Cave Deployer to extract zip or kar files to a given Maven repository or local directory, thanks to the `cave:deployer-explode` and `cave:deployer-extract` commands
+and the `/cave/rest/deployer/artifact/explode` and `/cave/rest/deployer/artifact/extract` REST operations.
+
+You can also download an artifact from a Maven repository with the `cave:deployer-download` command (or `/cave/rest/deployer/artifact/download` REST operation)
+or even upload an artifact to a Maven repository thanks to the `cave:deployer-upload` command (or `/cave/rest/deployer/artifact/upload` REST operation).
+
+==== Features
+
+Apache Karaf Cave Deployer provides the "classy" operations that you can do around Karaf features:
+
+* add a features repository
+* remove a features repository
+* list of features repositories
+* installing a feature
+* uninstalling a feature
+* list of features
+
+You have dedicated Cave Deployer commands and REST operations for that.
+
+You can also create a new "meta" feature by assembling existing features, configurations and bundles. This is done by the `assemble` operation:
+
+* `cave:deployer-assemble-feature`
+* `/cave/rest/deployer/feature/assemble`
+
+==== Bundles
+
+Apache Karaf Cave Deployer supports:
+
+* install bundle
+* start bundle
+* stop bundle
+* uninstall bundle
+* list bundles
+
+==== KAR
+
+Apache Karaf Cave Deployer supports:
+
+* install KAR
+* uninstall KAR
+* list KARs
+
+==== Config
+
+Apache Karaf Cave Deployer supports:
+
+* creating a new configuration
+* update an existing configuration
+* add a new property to a configuration
+* delete a property from a configuration
+* delete a configuration
+* list of configurations
+
+==== Cellar
+
+Apache Karaf Cave Deployer supports features handling on a Cellar cluster.

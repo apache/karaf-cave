@@ -50,8 +50,5 @@ http://localhost:8181/cave/rest
 8181 is the default port of the Apache Karaf HTTP service.
 ====
 
-You can get the WADL:
-
-----
-http://localhost:8181/cave/rest?_wadl
-----
+* `/cave/rest/repository` allows you to manipulate the Cave repositories.
+* `/cave/rest/deployer` allows you to manipulate the Cave deployer.
