@@ -49,6 +49,7 @@ public interface CaveDeployerMBean {
     void uninstallFeature(String feature, String connection) throws Exception;
     TabularData getFeatures(String connection) throws Exception;
 
+    List<String> configs(String connection) throws Exception;
     void createConfig(String pid, String connection) throws Exception;
     Map<String, String> getConfigProperties(String pid, String connection) throws Exception;
     void deleteConfig(String pid, String connection) throws Exception;

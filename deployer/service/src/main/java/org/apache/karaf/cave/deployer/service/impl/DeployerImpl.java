@@ -721,6 +721,25 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
+    public List<String> configs(String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
+        try {
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            List<String> result = (List<String>) mBeanServerConnection.getAttribute(name, "Configs");
+            return result;
+        } finally {
+            if (jmxConnector != null) {
+                jmxConnector.close();
+            }
+        }
+    }
+
+    @Override
     public void createConfig(String pid, String connectionName) throws Exception {
         Connection connection = getConnection(connectionName);
         JMXConnector jmxConnector = connect(connection.getJmxUrl(),

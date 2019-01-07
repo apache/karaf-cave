@@ -173,6 +173,11 @@ public interface Deployer {
     List<String> installedFeatures(String connection) throws Exception;
 
     /**
+     * Simple remote operation to list the configuration PIDs on a remote Karaf instance.
+     */
+    List<String> configs(String connection) throws Exception;
+
+    /**
      * Simple remote operation to create an empty configuration on a remote Karaf instance.
      */
     void createConfig(String pid, String connection) throws Exception;
