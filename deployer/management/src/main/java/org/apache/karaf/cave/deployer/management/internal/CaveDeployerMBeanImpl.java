@@ -218,6 +218,11 @@ public class CaveDeployerMBeanImpl extends StandardMBean implements CaveDeployer
     }
 
     @Override
+    public List<String> configs(String connection) throws Exception {
+        return deployer.configs(connection);
+    }
+
+    @Override
     public void createConfig(String pid, String connection) throws Exception {
         deployer.createConfig(pid, connection);
     }
