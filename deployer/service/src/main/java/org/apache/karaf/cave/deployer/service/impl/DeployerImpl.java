@@ -558,6 +558,18 @@ public class DeployerImpl implements Deployer {
         }
     }
 
+    public List<org.apache.karaf.cave.deployer.api.Feature> providedFeatures(String featureRepositoryUrl) throws Exception {
+        Features features = JaxbUtil.unmarshal(featureRepositoryUrl, true);
+        List<org.apache.karaf.cave.deployer.api.Feature> wrappedFeatures = new ArrayList<>();
+        for (Feature feature : features.getFeature()) {
+            org.apache.karaf.cave.deployer.api.Feature wrappedFeature = new org.apache.karaf.cave.deployer.api.Feature();
+            wrappedFeature.setName(feature.getName());
+            wrappedFeature.setVersion(feature.getVersion());
+            wrappedFeatures.add(wrappedFeature);
+        }
+        return wrappedFeatures;
+    }
+
     @Override
     public void addFeaturesRepository(String artifactUrl, String connectionName) throws Exception {
         Connection connection = getConnection(connectionName);

@@ -45,6 +45,7 @@ public interface CaveDeployerMBean {
     void removeFeatureRepository(String repository, String connection) throws Exception;
     TabularData getFeatureRepositories(String connection) throws Exception;
 
+    TabularData getProvidedFeatures(String featuresRepositoryUrl) throws Exception;
     void installFeature(String feature, String connection) throws Exception;
     void uninstallFeature(String feature, String connection) throws Exception;
     TabularData getFeatures(String connection) throws Exception;
