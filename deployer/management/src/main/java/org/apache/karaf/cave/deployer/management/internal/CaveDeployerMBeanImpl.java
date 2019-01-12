@@ -187,6 +187,26 @@ public class CaveDeployerMBeanImpl extends StandardMBean implements CaveDeployer
     }
 
     @Override
+    public TabularData getProvidedFeatures(String featuresRepositoryUrl) throws Exception {
+        List<Feature> features = deployer.providedFeatures(featuresRepositoryUrl);
+
+        CompositeType featureType = new CompositeType("Feature", "Feature",
+                new String[]{ "Name", "Version" },
+                new String[]{ "The feature name", "The feature version" },
+                new OpenType[]{SimpleType.STRING, SimpleType.STRING});
+        TabularType tableType = new TabularType("Provided Features", "Table of provided features by a repository", featureType, new String[]{ "Name", "Version"});
+        TabularData table = new TabularDataSupport(tableType);
+
+        for (Feature feature : features) {
+            CompositeData data = new CompositeDataSupport(featureType,
+                    new String[]{"Name", "Version"},
+                    new Object[]{feature.getName(), feature.getVersion()});
+            table.put(data);
+        }
+        return table;
+    }
+
+    @Override
     public void installFeature(String feature, String connection) throws Exception {
         deployer.installFeature(feature, connection);
     }

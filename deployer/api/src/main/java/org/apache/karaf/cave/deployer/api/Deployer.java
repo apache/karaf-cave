@@ -138,6 +138,11 @@ public interface Deployer {
     List<String> kars(String connection) throws Exception;
 
     /**
+     * Return the list of features provided by a features repository.
+     */
+    List<Feature> providedFeatures(String featuresRepositoryUrl) throws Exception;
+
+    /**
      * Simple remote operation to add a features repository to a remote Karaf instance.
      */
     void addFeaturesRepository(String featuresRepositoryUrl, String connection) throws Exception;
