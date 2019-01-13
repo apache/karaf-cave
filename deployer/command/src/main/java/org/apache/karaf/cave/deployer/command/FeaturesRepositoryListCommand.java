@@ -30,7 +30,7 @@ import org.apache.karaf.shell.support.table.ShellTable;
 import java.util.List;
 
 @Service
-@Command(scope = "cave", name = "deployer-features-repo-list", description = "List the features repositories on a remote instance")
+@Command(scope = "cave", name = "deployer-feature-repo-list", description = "List the features repositories on a remote instance")
 public class FeaturesRepositoryListCommand implements Action {
 
     @Reference

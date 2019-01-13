@@ -28,13 +28,13 @@ import org.apache.karaf.shell.support.table.ShellTable;
 import java.util.List;
 
 @Service
-@Command(scope = "cave", name = "deployer-features-repo-provide", description = "List the features provided by a given features repository")
+@Command(scope = "cave", name = "deployer-feature-repo-provide", description = "List the features provided by a given features repository")
 public class FeaturesRepositoryProvideCommand implements Action {
 
     @Reference
     private Deployer deployer;
 
-    @Argument(index = 0, name = "featuresRepositoryUrl", description = "The location")
+    @Argument(index = 0, name = "featuresRepositoryUrl", description = "The location", required = true, multiValued = false)
     String featuresRepositoryUrl;
 
     @Override
