@@ -49,7 +49,10 @@ public class DeployerImplTest {
 
     @Test
     public void explodeKarTest() throws Exception {
-        deployer.explode("mvn:org.apache.karaf.features/framework/4.1.3/kar", "file:target/test/repository/kar");
+        List<String> featuresRepositories = deployer.explode("mvn:org.apache.karaf.features/framework/4.1.6/kar", "file:target/test/repository/kar");
+        for (String featuresRepository : featuresRepositories) {
+            System.out.println(featuresRepository);
+        }
     }
 
     @Test
