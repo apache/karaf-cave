@@ -22,9 +22,14 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 public class DeployerImplTest {
 
@@ -50,9 +55,27 @@ public class DeployerImplTest {
     @Test
     public void explodeKarTest() throws Exception {
         List<String> featuresRepositories = deployer.explode("mvn:org.apache.karaf.features/framework/4.1.6/kar", "file:target/test/repository/kar");
-        for (String featuresRepository : featuresRepositories) {
-            System.out.println(featuresRepository);
-        }
+        Assert.assertEquals(1, featuresRepositories.size());
+        Assert.assertEquals("mvn:org.apache.karaf.features/framework/4.1.6/xml/features", featuresRepositories.get(0));
+    }
+
+    @Test
+    public void explodeBadZipTest() throws Exception {
+        File badZipFile = new File("target/test/bad.zip");
+        ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(badZipFile));
+        ZipEntry zipEntry = new ZipEntry("../../../../foo.bar");
+        zos.putNextEntry(zipEntry);
+
+        byte[] data = "Test Data".getBytes();
+        zos.write(data, 0, data.length);
+        zos.closeEntry();
+        zos.close();
+
+        deployer.extract("file:target/test/bad.zip", "target/test/badzip");
+
+        File extractDirectory = new File("target/test/badzip");
+        File[] files = extractDirectory.listFiles();
+        Assert.assertEquals(0, files.length);
     }
 
     @Test
