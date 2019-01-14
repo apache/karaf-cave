@@ -307,8 +307,12 @@ public class DeployerImpl implements Deployer {
             ZipEntry entry = zipIs.getNextEntry();
             while (entry != null) {
                 String path = entry.getName();
-                File destFile = new File(baseDir, path);
-                extract(zipIs, entry, destFile);
+                if (path.contains("..")) {
+                    LOGGER.warn("zip entry {} contains .. relative path. For security reasons, it's not allowed.", path);
+                } else {
+                    File destFile = new File(baseDir, path);
+                    extract(zipIs, entry, destFile);
+                }
                 entry = zipIs.getNextEntry();
             }
         } finally {
