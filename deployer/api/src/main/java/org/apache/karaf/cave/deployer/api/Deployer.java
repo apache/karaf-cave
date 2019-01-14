@@ -41,9 +41,10 @@ public interface Deployer {
      *
      * @param url The location of the file.
      * @param repository The location of the Maven repository where to upload.
+     * @return the list of features XML found in the file (empty if nothing found).
      * @throws Exception in case of failure.
      */
-    void explode(String url, String repository) throws Exception;
+    List<String> explode(String url, String repository) throws Exception;
 
     /**
      * Extract a file (KAR or zip) to a local Karaf directory.

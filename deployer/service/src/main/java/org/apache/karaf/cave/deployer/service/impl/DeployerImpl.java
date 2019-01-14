@@ -41,6 +41,10 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.xml.sax.ErrorHandler;
+import org.xml.sax.SAXException;
+import org.xml.sax.SAXParseException;
 
 import javax.management.MBeanServerConnection;
 import javax.management.ObjectName;
@@ -49,6 +53,10 @@ import javax.management.openmbean.TabularData;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
@@ -155,11 +163,15 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
-    public void explode(String artifact, String repository) throws Exception {
+    public List<String> explode(String artifact, String repository) throws Exception {
+        List<String> featuresRepositories = new ArrayList<>();
+
         File tempDirectory = Files.createTempDir();
         extract(artifact, tempDirectory);
         File karRepository = new File(tempDirectory, "repository");
-        browseKar(karRepository, karRepository.getPath(), repository);
+        browseKar(karRepository, karRepository.getPath(), repository, featuresRepositories);
+
+        return featuresRepositories;
     }
 
     @Override
@@ -169,12 +181,12 @@ public class DeployerImpl implements Deployer {
         extract(artifact, directoryFile);
     }
 
-    protected void browseKar(File entry, String basePath, String repositoryUrl) {
+    protected void browseKar(File entry, String basePath, String repositoryUrl, List<String> featuresRepositories) {
         if (entry.isDirectory()) {
             File[] files = entry.listFiles();
             for (File file : files) {
                 if (file.isDirectory()) {
-                    browseKar(file, basePath, repositoryUrl);
+                    browseKar(file, basePath, repositoryUrl, featuresRepositories);
                 } else {
                     String path = file.getParentFile().getParentFile().getParentFile().getPath();
                     if (path.startsWith(basePath)) {
@@ -185,14 +197,77 @@ public class DeployerImpl implements Deployer {
                     String artifactId = file.getParentFile().getParentFile().getName();
                     String version = file.getParentFile().getName();
                     String extension = file.getName().substring(file.getName().lastIndexOf('.') + 1);
+                    String classifier = null;
+                    if (file.getName().lastIndexOf("-") != -1) {
+                        classifier = file.getName().substring(file.getName().lastIndexOf("-") + 1, file.getName().lastIndexOf("."));
+                    }
+                    if (isFeaturesRepository(file)) {
+                        if (classifier == null) {
+                            featuresRepositories.add("mvn:" + groupId + "/" + artifactId + "/" + version + "/" + extension);
+                        } else {
+                            featuresRepositories.add("mvn:" + groupId + "/" + artifactId + "/" + version + "/" + extension + "/" + classifier);
+                        }
+                    }
                     try {
-                        uploadArtifact(groupId, artifactId, version, extension, file, repositoryUrl);
+                        uploadArtifact(groupId, artifactId, version, extension, classifier, file, repositoryUrl);
                     } catch (Exception e) {
                         LOGGER.warn("Can't upload artifact {}/{}/{}/{}", new String[]{groupId, artifactId, version, extension}, e);
                     }
                 }
             }
         }
+    }
+
+
+    /**
+     * Check if a file is a features XML.
+     *
+     * @param artifact the file to check.
+     * @return true if the artifact is a features XML, false else.
+     */
+    private boolean isFeaturesRepository(File artifact) {
+        try {
+            if (artifact.isFile() && artifact.getName().endsWith(".xml") && !artifact.getName().startsWith("maven-metadata")) {
+                Document doc = parse(artifact);
+                String name = doc.getDocumentElement().getLocalName();
+                String uri  = doc.getDocumentElement().getNamespaceURI();
+                if ("features".equals(name) && (uri == null || "".equals(uri) || uri.startsWith("http://karaf.apache.org/xmlns/features/v"))) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.debug("File '{}' is not a features file.", artifact.getName(), e);
+        }
+        return false;
+    }
+
+    /**
+     * Parse a features XML.
+     *
+     * @param artifact the features XML to parse.
+     * @return the parsed document.
+     * @throws Exception in case of parsing failure.
+     */
+    private Document parse(File artifact) throws Exception {
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        try {
+            dbf.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+            dbf.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        } catch (ParserConfigurationException ex) {
+            // nothing to do
+        }
+        dbf.setNamespaceAware(true);
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        db.setErrorHandler(new ErrorHandler() {
+            public void warning(SAXParseException exception) throws SAXException {
+            }
+            public void error(SAXParseException exception) throws SAXException {
+            }
+            public void fatalError(SAXParseException exception) throws SAXException {
+                throw exception;
+            }
+        });
+        return db.parse(artifact);
     }
 
     protected static boolean isMavenUrl(String url) {
