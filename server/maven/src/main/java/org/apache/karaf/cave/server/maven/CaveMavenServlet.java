@@ -16,11 +16,16 @@
  */
 package org.apache.karaf.cave.server.maven;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
@@ -109,12 +114,17 @@ public class CaveMavenServlet extends HttpServlet {
 
     final MavenResolver resolver;
 
-    public CaveMavenServlet(MavenResolver resolver, int threadMaximumPoolSize, String realm, String downloadRole, String uploadRole) {
+    final String name;
+    final String location;
+
+    public CaveMavenServlet(MavenResolver resolver, String name, String location, int threadMaximumPoolSize, String realm, String downloadRole, String uploadRole) {
         this.resolver = resolver;
         this.threadMaximumPoolSize = threadMaximumPoolSize;
         this.realm = realm;
         this.downloadRole = downloadRole;
         this.uploadRole = uploadRole;
+        this.name = name;
+        this.location = location;
     }
 
     //
@@ -324,7 +334,37 @@ public class CaveMavenServlet extends HttpServlet {
                         resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
                     }
                 } else {
-                    resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    // browsing
+                    try {
+                        File requested = new File(location, path);
+                        if (requested.exists()) {
+                            if (requested.isDirectory()) {
+                                Writer writer = new OutputStreamWriter(resp.getOutputStream());
+                                writer.write("<html>");
+                                writer.write("<head><title>Cave Repository " + name + ": " + path + "</title></head>");
+                                writer.write("<body>");
+                                writer.write("<header><h1>" + path + "</h1></header>");
+                                writer.write("<hr/>");
+                                writer.write("<main><pre id=\"contents\">");
+                                if (!path.isEmpty()) {
+                                    writer.write("<a href=\"" + req.getRequestURI() + "../\">..</a><br/>");
+                                }
+                                for (File child : requested.listFiles()) {
+                                    writer.write("<a href=\"" + req.getRequestURI() + child.getName() + "/\" title=\"" + child.getName() + "\">" + child.getName() + "</a><br/>");
+                                }
+                                writer.write("</pre><hr/></main>");
+                                writer.write("</body></html>");
+                                writer.flush();
+                            } else {
+                                StreamUtils.copy(new FileInputStream(requested), resp.getOutputStream());
+                            }
+                        } else {
+                            resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                        }
+                    } catch (Exception e) {
+                        LOGGER.warn("", e);
+                        resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+                    }
                 }
                 future.release();
                 try {

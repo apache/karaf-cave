@@ -65,7 +65,7 @@ public class Activator extends BaseActivator implements ManagedService {
         }
         this.resolver = MavenResolvers.createMavenResolver(config, pid);
         this.alias = alias;
-        this.servlet = new CaveMavenServlet(this.resolver, poolSize, realm, downloadRole, uploadRole);
+        this.servlet = new CaveMavenServlet(this.resolver, null, null, poolSize, realm, downloadRole, uploadRole);
         this.httpService.registerServlet(this.alias, this.servlet, config, null);
 
         CaveMavenRepositoryListenerImpl repositoryListener = new CaveMavenRepositoryListenerImpl(httpService,
@@ -78,7 +78,6 @@ public class Activator extends BaseActivator implements ManagedService {
         if (httpService != null) {
             try {
                 httpService.unregister(alias);
-                httpService.unregister("/cave/maven/repositories/test");
             } catch (Throwable t) {
                 logger.debug("Exception caught while stopping", t);
             } finally {

@@ -143,13 +143,13 @@ public class MavenProxyServletTest {
 
     @Test(expected = InvalidMavenArtifactRequest.class)
     public void testConvertNullPath() throws InvalidMavenArtifactRequest {
-        CaveMavenServlet servlet = new CaveMavenServlet(createResolver(), 5, null, null, null);
+        CaveMavenServlet servlet = new CaveMavenServlet(createResolver(), null, null, 5, null, null, null);
         servlet.convertArtifactPathToCoord(null);
     }
 
     @Test
     public void testConvertNormalPath() throws InvalidMavenArtifactRequest {
-        CaveMavenServlet servlet = new CaveMavenServlet(createResolver(), 5, null, null, null);
+        CaveMavenServlet servlet = new CaveMavenServlet(createResolver(), null, null, 5, null, null, null);
 
         assertEquals("groupId:artifactId:extension:version",servlet.convertArtifactPathToCoord("groupId/artifactId/version/artifactId-version.extension").toString());
         assertEquals("group.id:artifactId:extension:version",servlet.convertArtifactPathToCoord("group/id/artifactId/version/artifactId-version.extension").toString());
@@ -166,7 +166,7 @@ public class MavenProxyServletTest {
 
     @Test
     public void testConvertNormalPathWithClassifier() throws InvalidMavenArtifactRequest {
-        CaveMavenServlet servlet = new CaveMavenServlet(createResolver(), 5, null, null, null);
+        CaveMavenServlet servlet = new CaveMavenServlet(createResolver(), null, null, 5, null, null, null);
 
         assertEquals("groupId:artifactId:extension:classifier:version",servlet.convertArtifactPathToCoord("groupId/artifactId/version/artifactId-version-classifier.extension").toString());
         assertEquals("group.id:artifactId:extension:classifier:version",servlet.convertArtifactPathToCoord("group/id/artifactId/version/artifactId-version-classifier.extension").toString());
@@ -190,7 +190,7 @@ public class MavenProxyServletTest {
         System.setProperty("karaf.data", new File("target").getCanonicalPath());
         try {
             MavenResolver resolver = createResolver();
-            CaveMavenServlet servlet = new CaveMavenServlet(resolver, 5, null, null, null);
+            CaveMavenServlet servlet = new CaveMavenServlet(resolver, null, null, 5, null, null, null);
             servlet.init();
         } finally {
             if (old != null) {
@@ -370,7 +370,7 @@ public class MavenProxyServletTest {
             int localPort = ((NetworkConnector) server.getConnectors()[0]).getLocalPort();
             // TODO: local repo should point to target/tmp
             MavenResolver resolver = createResolver("target/tmp", "http://relevant.not/repo1@id=repo1,http://relevant.not/repo2@id=repo2", "http", "localhost", localPort, "fuse", "fuse", null);
-            CaveMavenServlet servlet = new CaveMavenServlet(resolver, 5, null, null, null);
+            CaveMavenServlet servlet = new CaveMavenServlet(resolver, null, null, 5, null, null, null);
 
             AsyncContext context = EasyMock.createMock(AsyncContext.class);
 
@@ -463,7 +463,7 @@ public class MavenProxyServletTest {
             int localPort = ((NetworkConnector) server.getConnectors()[0]).getLocalPort();
             // TODO: local repo should point to target/tmp
             MavenResolver resolver = createResolver("target/tmp", "http://relevant.not/maven2@id=central", "http", "localhost", localPort, "fuse", "fuse", null);
-            CaveMavenServlet servlet = new CaveMavenServlet(resolver, 5, null, null, null);
+            CaveMavenServlet servlet = new CaveMavenServlet(resolver, null, null, 5, null, null, null);
 
             AsyncContext context = EasyMock.createMock(AsyncContext.class);
 
@@ -667,7 +667,7 @@ public class MavenProxyServletTest {
         try {
             int localPort = ((NetworkConnector) server.getConnectors()[0]).getLocalPort();
             MavenResolver resolver = createResolver("target/tmp", "http://relevant.not/maven2@id=central", "http", "localhost", localPort, "fuse", "fuse", null);
-            CaveMavenServlet servlet = new CaveMavenServlet(resolver, 5, null, null, null);
+            CaveMavenServlet servlet = new CaveMavenServlet(resolver, null, null,5, null, null, null);
 
             HttpServletRequest request = EasyMock.createMock(HttpServletRequest.class);
             EasyMock.expect(request.getPathInfo()).andReturn(path);
