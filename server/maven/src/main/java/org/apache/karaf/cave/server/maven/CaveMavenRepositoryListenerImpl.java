@@ -48,7 +48,7 @@ public class CaveMavenRepositoryListenerImpl implements CaveMavenRepositoryListe
         config.put("localRepository", location);
         config.put("repositories", "file:" + location + "@id=" + name + "@snapshots");
         MavenResolver resolver = MavenResolvers.createMavenResolver(config, null);
-        CaveMavenServlet servlet = new CaveMavenServlet(resolver, poolSize, realm, downloadRole, uploadRole);
+        CaveMavenServlet servlet = new CaveMavenServlet(resolver, name, location, poolSize, realm, downloadRole, uploadRole);
         httpService.registerServlet("/cave/maven/repositories/" + name, servlet, null, null);
     }
 
