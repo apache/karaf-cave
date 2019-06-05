@@ -24,7 +24,7 @@ This MBean uses the following object name:
 org.apache.karaf.cave:type=repository,name=*
 ----
 
-Thanks to this MBean, using any JMX client (like jconsole for instance), you can do all actions as you can using the `cave:*` commands:
+Thanks to this MBean, using any JMX client (like jconsole for instance), you can do all the same actions as you can using the `cave:*` commands:
 
 * void createRepository(String name, String location, boolean generate, boolean install) throws Exception;
 * void destroyRepository(String name) throws Exception;

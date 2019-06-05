@@ -63,14 +63,14 @@ A repository is identified by a name, `my-repository` in our example.
 
 Apache Karaf Cave creates the repository storage for you.
 
-If you want to use an existing directory, and avoid Cave to create one in the storage location, you can use the `-l`
+If you want to use an existing directory, and avoid Cave creating one in the storage location, you can use the `-l`
 ('--location') option:
 
 ----
 karaf@root()> cave:repository-create -l /home/user/.m2/repository m2
 ----
 
-By default, Apache Karaf Cave scans the repository storage and create the repository metadata. You can use the `-no` (`--no-generate`)
+By default, Apache Karaf Cave scans the repository storage and creates the repository metadata. You can use the `-no` (`--no-generate`)
 option to avoid this step:
 
 ----
