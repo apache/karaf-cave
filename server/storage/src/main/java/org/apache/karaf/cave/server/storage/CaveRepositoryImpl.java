@@ -184,7 +184,14 @@ public class CaveRepositoryImpl implements CaveRepository {
             Files.copy(is, temp);
         }
         // update the repository.xml
-        ResourceImpl resource = createResource(temp.toUri().toURL());
+        ResourceImpl resource = null;
+        try {
+            resource = createResource(temp.toUri().toURL());
+        } catch (BundleException ex) {
+            Files.delete(temp);
+            throw ex;
+        }
+
         Path destination = getLocationPath().resolve(ResolverUtil.getSymbolicName(resource) + "-" + ResolverUtil.getVersion(resource) + ".jar");
         if (Files.exists(destination)) {
             Files.delete(temp);
@@ -194,6 +201,7 @@ public class CaveRepositoryImpl implements CaveRepository {
         Files.move(temp, destination);
         resource = createResource(destination.toUri().toURL());
         addResources(Collections.<Resource>singletonList(resource));
+
     }
 
     /**
