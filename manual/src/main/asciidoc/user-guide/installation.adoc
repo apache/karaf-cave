@@ -18,10 +18,10 @@ This chapter describes how to install Apache Karaf Cave into an existing Apache 
 
 ==== Pre-installation requirements
 
-As Apache Karaf Cave is a Apache Karaf sub-project, it has to be installed into a running Apache Karaf instance.
+As Apache Karaf Cave is an Apache Karaf sub-project, it has to be installed into a running Apache Karaf instance.
 
 Apache Karaf Cave is available as Apache Karaf features. The easiest way to install is just to have an internet
-connection from the Apache Karaf running instance.
+connection from the running Apache Karaf instance.
 
 Apache Karaf Cave 4.0.x is designed to work on Apache Karaf 4.0.x.
 
@@ -30,8 +30,8 @@ Apache Karaf Cave 4.0.x is designed to work on Apache Karaf 4.0.x.
 Simply register the Apache Karaf Cave features URL in your Apache Karaf instance:
 
 ----
-karaf@root()> feature:repo-add cave
-Adding feature url mvn:org.apache.karaf.cave/apache-karaf-cave/4.1.1/xml/features
+karaf@root()> feature:repo-add cave 4.1.2
+Adding feature url mvn:org.apache.karaf.cave/apache-karaf-cave/4.1.2/xml/features
 ----
 
 ==== Starting Apache Karaf Cave

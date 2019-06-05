@@ -16,7 +16,7 @@
 
 Apache Karaf Cave is an Apache Karaf sub-project.
 
-Apache Karaf Cave is an implementation an artifact repository and deployment platform for Apache Karaf supporting:
+Apache Karaf Cave is an implementation of an artifact repository and deployment platform for Apache Karaf supporting:
 
 * OSGi Repository specification
 * Maven Repository manager
@@ -29,15 +29,15 @@ Apache Karaf Cave provides the following features:
 
 * *Storage*: Cave includes a storage backend. The default one is a simple filesystem backend. As the Cave backend
 is designed in a plugin way, you can implement your own backend (for instance, JDBC or LDAP backend).
-* *Repository Metadata Generation*: Cave creates the repository metadata for you, using the artifacts presents in the
+* *Repository Metadata Generation*: Cave creates the repository metadata for you, using the artifacts present in the
 repository storage.
 * *Maven Repository*: Cave repositories act as a complete Maven repository, allowing you to use Cave directly with Maven.
 * *REST API*: Cave provides a REST API to manipulate the repositories.
-* *Artifact Upload*: Users can upload OSGi bundle in a Cave repository. It supports URLs like mvn:groupId/artifactId/version,
+* *Artifact Upload*: Users can upload OSGi bundles to a Cave repository. It supports URLs like mvn:groupId/artifactId/version,
 file:, http:, etc.
 * *OSGi Repository proxy*: Cave is able to proxy an existing repository, for instance an existing Maven repository.
 The artifacts are located on the "external" repository, Cave handles the repository metadata. Cave supports file: and http:
 URLs, it means that Cave is able to browse a remote HTTP Maven repository for instance.
 * *OSGi Repository population*: Cave is able to get artifacts present on an "external" repository (local file: or
-remote http:), looking for OSGi bundles, and copy the artifacts in the Cave repository storage.
-* *Deployer*: Cave Deployer is able to control and deployer applications on a "farm" of Apache Karaf instances.
+remote http:), looking for OSGi bundles, and copy the artifacts to the Cave repository storage.
+* *Deployer*: Cave Deployer is able to control and deploy applications on a "farm" of Apache Karaf instances.

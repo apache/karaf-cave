@@ -20,14 +20,14 @@ You have specific commands: `cave:deployer-*`.
 
 ==== Connections
 
-The first component of the deployer is the connection. A connection describe an access to a Apache Karaf instance.
+The first component of the deployer is the connection. A connection describes an access to an Apache Karaf instance.
 
 You can create a connection via `cave:deployer-connection-register` command or the REST Deployer API.
 
 A connection contains:
 
 * an unique name for the connection
-* the JMX URL to the give Apache Karaf instance
+* the JMX URL to the given Apache Karaf instance
 * the name of the Apache Karaf instance
 * username and password to connect to the Apache Karaf instance
 

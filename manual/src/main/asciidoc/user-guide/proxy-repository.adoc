@@ -14,7 +14,7 @@
 
 === Proxy repository
 
-As you can populate repository, you can also proxy an "external" repository.
+As you can populate a repository, you can also proxy an "external" repository.
 
 It means that the artifacts stay on the remote repository, Apache Karaf Cave generates the repository metadata in the local repository
 for the remote artifacts:
@@ -34,13 +34,13 @@ have to call the `cave:proxy-repository` command each time the remote repository
 A best practice is to create a Cave repository dedicated for each proxied repository.
 ====
 
-The `cave:repository-proxy` command accepts the filter option, as the `cave:repository-populate` command:
+The `cave:repository-proxy` command accepts the filter option, like the `cave:repository-populate` command:
 
 ----
 karaf@root()> cave:repository-proxy --filter .*joda-time-2.* my-repository http://repo2.maven.org/maven2/joda-time/joda-time
 ----
 
-The `cave:repository-proxy` command accepts the properties option, as the `cave:repository-populate` command:
+The `cave:repository-proxy` command accepts the properties option, like the `cave:repository-populate` command:
 
 ----
 karaf@root()> cave:repository-proxy --properties <properties-file-path> my-repository <remote-repository-url>

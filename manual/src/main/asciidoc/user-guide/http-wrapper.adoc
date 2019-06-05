@@ -16,7 +16,7 @@
 
 When you install the Apache Karaf Cave Server, it starts a HTTP service wrapper.
 
-It means that all artifacts and repository metadata presents in local repositories are exposed over HTTP.
+It means that all artifacts and repository metadata present in local repositories are exposed over HTTP.
 
 ==== Repository metadata access
 

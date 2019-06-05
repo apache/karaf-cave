@@ -25,7 +25,7 @@ The Cave Features Gateway is automatically installed by the `cave-server` featur
 
 ==== Cave Features Gateway server
 
-You can manipulate the Features Gateway using specific shell commands or corresponding MBean.
+You can manipulate the Features Gateway using specific shell commands or the corresponding MBean.
 
 ===== Shell commands
 
