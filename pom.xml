@@ -35,8 +35,8 @@
     <name>Apache Karaf :: Cave</name>
 
     <properties>
-        <commons-io.version>2.4</commons-io.version>
-        <cxf.version>3.1.6</cxf.version>
+        <commons-io.version>2.6</commons-io.version>
+        <cxf.version>3.1.18</cxf.version>
         <httpclient.version>4.3.4</httpclient.version>
         <jsoup.version>1.7.3</jsoup.version>
         <karaf.version>4.1.7</karaf.version>
