@@ -52,6 +52,10 @@ public interface CaveDeployerMBean {
 
     List<String> configs(String connection) throws Exception;
     void createConfig(String pid, String connection) throws Exception;
+    String createConfigFactory(String factoryPid, String connection) throws Exception;
+    String createConfigFactory(String factoryPid, String alias, String connection) throws Exception;
+    String createConfigFactory(String factoryPid, Map<String, String> properties, String connection) throws Exception;
+    String createConfigFactory(String factoryPid, String alias, Map<String, String> properties, String connection) throws Exception;
     Map<String, String> getConfigProperties(String pid, String connection) throws Exception;
     void deleteConfig(String pid, String connection) throws Exception;
     void appendConfigProperty(String pid, String key, String value, String connection) throws Exception;

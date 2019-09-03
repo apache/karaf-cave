@@ -405,6 +405,18 @@ public class DeployerRest {
         deployer.createConfig(pid, connection);
     }
 
+    @Path("/{connection}/configfactory/{pid}")
+    @POST
+    public void createConfigFactory(@PathParam("connection") String connection, @PathParam("factoryPid") String factoryPid) throws Exception {
+        deployer.createConfigurationFactory(factoryPid, connection);
+    }
+
+    @Path("/{connection}/configfactory/{pid}/{alias}")
+    @POST
+    public void createConfigFactory(@PathParam("connection") String connection, @PathParam("factoryPid") String factoryPid, @PathParam("alias") String alias) throws Exception {
+        deployer.createConfigurationFactory(factoryPid, alias, connection);
+    }
+
     @Path("/{connection}/config/{pid}")
     @DELETE
     public void deleteConfig(@PathParam("connection") String connection, @PathParam("pid") String pid) throws Exception {

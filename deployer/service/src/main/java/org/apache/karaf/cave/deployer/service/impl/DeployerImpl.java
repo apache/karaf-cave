@@ -849,6 +849,82 @@ public class DeployerImpl implements Deployer {
     }
 
     @Override
+    public String createConfigurationFactory(String factoryPid, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
+        try {
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            String configPid = (String) mBeanServerConnection.invoke(name, "createFactoryConfiguration", new Object[]{ factoryPid }, new String[]{ String.class.getName() });
+            return configPid;
+        } finally {
+            if (jmxConnector != null) {
+                jmxConnector.close();
+            }
+        }
+    }
+
+    @Override
+    public String createConfigurationFactory(String factoryPid, String alias, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
+        try {
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            String configPid = (String) mBeanServerConnection.invoke(name, "createFactoryConfiguration", new Object[] { factoryPid, alias }, new String[]{ String.class.getName(), String.class.getName() });
+            return configPid;
+        } finally {
+            if (jmxConnector != null) {
+                jmxConnector.close();
+            }
+        }
+    }
+
+    @Override
+    public String createConfigurationFactory(String factoryPid, Map<String, String> properties, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
+        try {
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            String configPid = (String) mBeanServerConnection.invoke(name, "createFactoryConfiguration", new Object[] { factoryPid, properties }, new String[]{ String.class.getName(), Map.class.getName() });
+            return configPid;
+        } finally {
+            if (jmxConnector != null) {
+                jmxConnector.close();
+            }
+        }
+    }
+
+    @Override
+    public String createConfigurationFactory(String factoryPid, String alias, Map<String, String> properties, String connectionName) throws Exception {
+        Connection connection = getConnection(connectionName);
+        JMXConnector jmxConnector = connect(connection.getJmxUrl(),
+                connection.getKarafName(),
+                connection.getUser(),
+                connection.getPassword());
+        try {
+            MBeanServerConnection mBeanServerConnection = jmxConnector.getMBeanServerConnection();
+            ObjectName name = new ObjectName("org.apache.karaf:type=config,name=" + connection.getKarafName());
+            String configPid = (String) mBeanServerConnection.invoke(name, "createFactoryConfiguration", new Object[] { factoryPid, alias, properties }, new String[]{ String.class.getName(), String.class.getName(), Map.class.getName() });
+            return configPid;
+        } finally {
+            if (jmxConnector != null) {
+                jmxConnector.close();
+            }
+        }
+    }
+
+    @Override
     public void deleteConfig(String pid, String connectionName) throws Exception {
         Connection connection = getConnection(connectionName);
         JMXConnector jmxConnector = connect(connection.getJmxUrl(),

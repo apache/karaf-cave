@@ -189,6 +189,26 @@ public interface Deployer {
     void createConfig(String pid, String connection) throws Exception;
 
     /**
+     * Create an empty configuration factory on a Karaf instance.
+     */
+    String createConfigurationFactory(String factoryPid, String connection) throws Exception;
+
+    /**
+     * Create an empty configuration factory on a Karaf instance.
+     */
+    String createConfigurationFactory(String factoryPid, String alias, String connection) throws Exception;
+
+    /**
+     * Create a configuration factory on a Karaf instance.
+     */
+    String createConfigurationFactory(String factoryPid, Map<String, String> properties, String connection) throws Exception;
+
+    /**
+     * Create a configuration factory on a Karaf instance.
+     */
+    String createConfigurationFactory(String factoryPid, String alias, Map<String, String> properties, String connection) throws Exception;
+
+    /**
      * Simple remote operation to get the properties of a given configuration on a remote Karaf instance.
      */
     Map<String, String> configProperties(String pid, String connection) throws Exception;
