@@ -248,6 +248,26 @@ public class CaveDeployerMBeanImpl extends StandardMBean implements CaveDeployer
     }
 
     @Override
+    public String createConfigFactory(String factoryPid, String connection) throws Exception {
+        return deployer.createConfigurationFactory(factoryPid, connection);
+    }
+
+    @Override
+    public String createConfigFactory(String factoryPid, String alias, String connection) throws Exception {
+        return deployer.createConfigurationFactory(factoryPid, alias, connection);
+    }
+
+    @Override
+    public String createConfigFactory(String factoryPid, Map<String, String> properties, String connection) throws Exception {
+        return deployer.createConfigurationFactory(factoryPid, properties, connection);
+    }
+
+    @Override
+    public String createConfigFactory(String factoryPid, String alias, Map<String, String> properties, String connection) throws Exception {
+        return deployer.createConfigurationFactory(factoryPid, alias, properties, connection);
+    }
+
+    @Override
     public Map<String, String> getConfigProperties(String pid, String connection) throws Exception {
         return deployer.configProperties(pid, connection);
     }
