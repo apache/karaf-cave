@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf.cave</groupId>
         <artifactId>org.apache.karaf.cave.deployer</artifactId>
-        <version>4.1.3-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -43,7 +43,7 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.apache.karaf.cave.deployer.api
+                            org.apache.karaf.cave.deployer
                         </Export-Package>
                     </instructions>
                 </configuration>

@@ -12,115 +12,423 @@
 // limitations under the License.
 //
 
-=== Deployer
-
 Cave Deployer allows you to manage a "farm" of Apache Karaf instances local or remote from the deployer itself.
-
-You have specific commands: `cave:deployer-*`.
 
 ==== Connections
 
-The first component of the deployer is the connection. A connection describes an access to an Apache Karaf instance.
+To interact with a Apache Karaf instance, you have to create a connection describing the access to this instance.
 
-You can create a connection via `cave:deployer-connection-register` command or the REST Deployer API.
-
-A connection contains:
+A connection has:
 
 * an unique name for the connection
 * the JMX URL to the given Apache Karaf instance
 * the name of the Apache Karaf instance
 * username and password to connect to the Apache Karaf instance
 
-For instance:
+===== Create connections
 
-----
+====== `cave:deployer-connection-register` shell command
+
+You can add a new Apache Karaf connection using `cave:deployer-connection-register` shell command:
+
+```
 karaf@root()> cave:deployer-connection-register myconnection service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root root karaf karaf
-----
+```
 
-You can list the connections using the `cave:deployer-connection` command:
+====== REST API
 
-----
-karaf@root()> cave:deployer-connection
+You can create a connection via the Cave Deployer REST API on `/cave/deployer/api/connections` using a JSON description of your connection.
+For instance, using `curl`:
+
+```
+curl -X POST -H "Content-Type: application/json" http://localhost:8181/cave/deployer/api/connections -d '{
+ "name": "myconnection",
+ "jmxUrl": "service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root",
+ "karafName": "root",
+ "user": "karaf",
+ "password": "karaf"
+}'
+```
+
+====== JMX MBean
+
+The `org.apache.karaf.cave:type=deployer` MBean provides the `registerConnection(String name, String jmxUrl, String karafName, String user, String password)` operation
+allowing you to create a new connection.
+
+====== Service
+
+The `org.apache.karaf.cave.deployer.DeployerService` service provides the `registerConnection(Connection connection)` method allowing you to create a new connection.
+
+===== List connections
+
+====== `cave:deployer-connection-list` shell command
+
+You can list available connections using the `cave:deployer-connection-list` command:
+
+```
+karaf@root()> cave:deployer-connection-list
 Name         │ JMX URL                                                 │ Instance │ Username │ Password
 ─────────────┼─────────────────────────────────────────────────────────┼──────────┼──────────┼─────────
 myconnection │ service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root │ root     │ karaf    │ *****
+```
 
-----
+====== REST API
 
-or via REST (with `curl` for instance):
+You can list available connections using the Cave Deployer REST API on `/cave/deployer/api/connections` (GET) URL.
 
-----
-curl -X GET -H "Content-Type: application/json" http://localhost:8181/cave/rest/deployer/connections
+For instance, using `curl`:
+
+```
+curl -X GET -H "Content-Type: application/json" http://localhost:8181/cave/deployer/api/connections
 [{"name":"myconnection","jmxUrl":"service:jmx:rmi:///jndi/rmi://localhost:1099/karaf-root","karafName":"root","user":"karaf","password":"karaf"}]
-----
+```
 
-You can remove a connection using `cave:deployer-connection-delete` command:
+====== JMX MBean
 
-----
+The `org.apache.karaf.cave:type=deployer` MBean provides the `connections` attribute. It's a tabular data where you can find all connections available.
+
+====== Service
+
+The `org.apache.karaf.cave.deployer.DeployerService` service provides the `connections()` method providing the list of all connections available.
+
+===== Delete a connection
+
+====== `cave:deployer-connection-delete` shell command
+
+You can delete an existing connection with `cave:deployer-connection-delete` shell command:
+
+```
 karaf@root()> cave:deployer-connection-delete myconnection
-----
+```
 
-or via REST:
+====== REST API
 
-----
-curl -X DELETE http://localhost:8181/cave/rest/deployer/connections/myconnection
-----
+You can delete an existing connection using Cave Deployer Rest API on `/cave/deployer/api/connections/{name}` URL (DELETE).
+For instance, using `curl`:
+
+```
+curl -X DELETE http://localhost:8181/cave/deployer/api/connections/myconnection
+```
+
+====== JMX MBean
+
+The `org.apache.karaf.cave:type=deployer` MBean provides the `deleteConnection(String name)` operation to delete an existing connection.
+
+====== Service
+
+The `org.apache.karaf.cave.deployer.DeployerService` service provides the `deleteConnection(String connectionName)` method to delete an existing connection.
 
 ==== Artifacts
 
-Cave Deployer to extract zip or kar files to a given Maven repository or local directory, thanks to the `cave:deployer-explode` and `cave:deployer-extract` commands
-and the `/cave/rest/deployer/artifact/explode` and `/cave/rest/deployer/artifact/extract` REST operations.
+===== Download & upload artifacts
 
-You can also download an artifact from a Maven repository with the `cave:deployer-download` command (or `/cave/rest/deployer/artifact/download` REST operation)
-or even upload an artifact to a Maven repository thanks to the `cave:deployer-upload` command (or `/cave/rest/deployer/artifact/upload` REST operation).
+Cave Deployer is able to download an artifacts into a target directory.
+
+For instance you can download an artifact using `cave:deployer-download` shell command:
+
+```
+karaf@root()> cave:deployer-download mvn:commons-lang/commons-lang/2.6 /path/to/my/repo
+```
+
+You can also use Cave Deployer REST API on `/cave/deployer/api/download` (POST). The artifact URL is passed using `artifact` header and the directory is passed using `directory` header.
+
+For instance, using `curl`:
+
+```
+curl -X POST -H "artifact: mvn:commons-lang/commons-lang/2.6" -H "directory: /path/to/my/repo" http://localhost:8181/cave/deployer/api/download
+```
+
+You can also use the `download(String url, String directory)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+
+On the `org.apache.karaf.cave.deployer.DeployerService` service, you can also use the `download(String artifact, String directory)` method.
+
+On the other hand, you can also upload an artifact to a target repository providing the Maven coordinates. It's exactly the same as doing `mvn deploy:deploy-file`.
+
+To upload an artifact, you can use the `cave:deployer-upload` shell command:
+
+```
+karaf@root()> cave:deployer-upload -g groupId -a artifactId -v 1.0-SNAPSHOT mvn:foo/bar/x.x http://host/repository
+```
+
+You can also use the Cave Deployer REST API on `/cave/deployer/api/upload` (POST) with the following header parameters:
+
+* `groupId`
+* `artifactId`
+* `version`
+* `artifactUrl`
+* `repositoryUrl`
+
+For instance, using `curl`:
+
+```
+curl -X POST -H "groupId: groupId" -H "artifactId: artifactId" -H "version: 1.0-SNAPSHOT" -H "artifactUrl: mvn:foo/bar/x.x" -H "repositoryUrl: http://host/repository" http://localhost:8181/cave/deployer/api/upload
+```
+
+You can also use the `upload(String groupId, String artifactId, String version, String artifactUrl, String repositoryUrl)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+
+The `org.apache.karaf.cave.deployer.DeployerService` service also provides the `upload(String groupId, String artifactId, String version, String artifactUrl, String repositoryUrl)` method.
+
+===== Extract & explode artifacts
+
+Cave Deployer is also able to process zip and kar artifacts.
+
+Cave Deployer is able to extract zip or kar files to a given Maven repository or local directory:
+
+* explode will download and extract an artifact into a target folder/repository, looking for features repositories XML (typically in KAR files)
+* extract will download and extract an artifact into a target folder/repository
+
+To explode an artifact into a target Maven repository, you can use `cave:deployer-explode` shell command:
+
+```
+karaf@root()> cave:deployer-explode mvn:foo/bar/1.0/kar /path/to/repository
+```
+
+You can also use the Cave Deployer REST API on `/cave/deployer/api/explode` URL (POST) with `url` header for the artifact URL, and `repository` header for the repository URL. For instance, using `curl`:
+
+```
+curl -X POST -H "url: mvn:foo/bar/1.0/kar" -H "repository: /path/to/repository" http://localhost:8181/cave/deployer/api/explode
+["foo.xml"]
+```
+
+You can also use `explode(String url, String repository)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+
+The `org.apache.karaf.cave.deployer.DeployerService` also provides the `explode(String url, String repository)` method.
+
+Similar to explode, you can extract artifact (without looking for features repositories XML).
+
+You can use the `cave:deployer-extract` shell command to extract an artifact:
+
+```
+karaf@root()> cave:deployer-extract mvn:foo/bar/1.0/zip /path/to/directory
+```
+
+You can also use the Cave Deployer REST API on `/cave/deployer/api/extract` URL (POST) with `url` header for the artifact URL, and `directory` header for the directory. For instance, using `curl`:
+
+```
+curl -X POST -H "url: mvn:foo/bar/1.0/zip" -H "directory: /path/to/directory" http://localhost:8181/cave/deployer/api/extract
+```
+
+The `org.apache.karaf.cave:type=deployer` MBean also provides `extract(String url, String directory)` operation to extract an artifact into a directory.
+
+You can also programmatically use ` extract(String url, String directory)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
 
 ==== Features
 
-Apache Karaf Cave Deployer provides the "classy" operations that you can do around Karaf features:
+===== Assemble features
 
-* add a features repository
-* remove a features repository
-* list of features repositories
-* installing a feature
-* uninstalling a feature
-* list of features
+You can create new Karaf features by composing existing features, configurations or bundles.
 
-You have dedicated Cave Deployer commands and REST operations for that.
+For instance, you can create `myfeature` composed by `feature1`, `feature2`, `bundle1`, `bundle2`.
 
-You can also create a new "meta" feature by assembling existing features, configurations and bundles. This is done by the `assemble` operation:
+* `karaf@root()> cave:deployer-assemble-feature -g groupId -a artifactId -v 1.0-SNAPSHOT myfeature http://myrepo feature1 feature2`
+* Using `assembleFeature(String groupId, String artifactId, String version, String repositoryUrl, String feature, List<String> repositories, List<String> features, List<String> bundles)` operation on the `org.apache.karaf.cave:type=deployer` MBean
+* Using `assembleFeature(String groupId, String artifactId, String version, String repositoryUrl, String feature, List<String> featureRepositoryUrls, List<String> features, List<String> bundles, List<Config> configs)` method on the `org.apache.karaf.cave.deployer.DeployerService` service
 
-* `cave:deployer-assemble-feature`
-* `/cave/rest/deployer/feature/assemble`
+===== Add features repositories
+
+* `karaf@root()> cave:deployer-feature-repo-add myconnection mvn:foo/bar/1.0/xml/features`
+* `curl -X POST -H "artifactUrl: mvn:foo/bar/1.0/xml/features" http://localhost:8181/cave/deployer/api/connections/myconnection/features/repositories`
+* `addFeatureRepository(String url, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `addFeaturesRepository(String featuresRepositoryUrl, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== List features repositories
+
+* `karaf@root()> cave:deployer-feature-repo-list myconnection`
+* `curl -X GET http://localhost:8181/cave/deployer/api/connections/myconnection/features/repositories`
+* `getFeatureRepositories(String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `featuresRepositories(String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== List features provided by a features repository
+
+* `karaf@root()> cave:deployer-feature-repo-provide mvn:foo/bar/1.0/xml/features`
+* `curl -X GET -H "featuresRepositoryUrl: mvn:foo/bar/1.0/xml/features" http://localhost:8181/cave/deployer/api/features/repository`
+* `getProvidedFeatures(String featuresRepositoryUrl)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `providedFeatures(String featuresRepositoryUrl)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Remove features repositories
+
+* `karaf@root()> cave:deployer-feature-repo-remove myconnection mvn:foo/bar/1.0/xml/features`
+* `curl -X DELETE -H "artifactUrl: mvn:foo/bar/1.0/xml/features" http://localhost:8181/cave/deployer/api/connections/myconnection/features/repositories`
+* `removeFeatureRepository(String repository, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `removeFeaturesRepository(String featuresRepositoryUrl, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Install features
+
+* `karaf@root()> cave:deployer-feature-install myconnection myfeature`
+* `curl -X POST http://localhost:8181/cave/deployer/api/connections/myconnection/features/myfeature`
+* `installFeature(String feature, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `installFeature(String feature, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== List features
+
+* `karaf@root()> cave:deployer-feature-list myconnection`
+* `curl -X GET http://localhost:8181/cave/deployer/api/connections/myconnection/features`
+* `getFeatures(String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `features(String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== List installed features
+
+* `karaf@root()> cave:deployer-feature-installed-list myconnection`
+* `installedFeatures(String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Uninstall features
+
+* `karaf@root()> cave:deployer-feature-uninstall myconnection myfeature`
+* `curl -X DELETE http://localhost:8181/cave/deployer/api/connections/myconnection/features/myfeature`
+* `uninstallFeature(String feature, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `uninstallFeature(String feature, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+==== KARs
+
+===== Install KAR
+
+* `karaf@root()> cave:deployer-kar-install myconnection mvn:foo/bar/1.0/kar`
+* `curl -X POST -H "artifactUrl: mvn:foo/bar/1.0/kar" http://localhost:8181/cave/deployer/api/connections/myconnection/kars`
+* `installKar(String url, String connection)` operation on the `org.apache.karaf.cave:typye=deployer` MBean.
+* `installKar(String karUrl, String connection)` on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== List KARs
+
+* `karaf@root()> cave:deployer-kar-list myconnection`
+* `curl -X GET http://localhost:8181/cave/deployer/api/connections/myconnection/kars`
+* `getKars(String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `kars(String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Uninstall KAR
+
+* `karaf@root()> cave:deployer-kar-uninstall myconnection mykar`
+* `curl -X DELETE http://localhost:8181/cave/deployer/api/connections/myconnection/kars/mykar`
+* `uninstallKar(String id, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `uninstallKar(String id, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
 
 ==== Bundles
 
-Apache Karaf Cave Deployer supports:
+===== Install bundle
 
-* install bundle
-* start bundle
-* stop bundle
-* uninstall bundle
-* list bundles
+* `karaf@root()> cave:deployer-bundle-install myconnection mvn:foo/bar/1.0`
+* `curl -X POST -H "artifactUrl: mvn:foo/bar/1.0" http://localhost:8181/cave/deployer/api/connections/myconnection/bundles`
+* `installBundle(String url, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `installBundle(String artifactUrl, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
 
-==== KAR
+===== List bundles
 
-Apache Karaf Cave Deployer supports:
+* `karaf@root()> cave:deployer-bundle-list myconnection`
+* `curl -X GET http://localhost:8181/cave/deployer/api/connections/myconnection/bundles`
+* `getBundles(String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `bundles(String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
 
-* install KAR
-* uninstall KAR
-* list KARs
+===== Start bundle
 
-==== Config
+* `karaf@root()> cave:deployer-bundle-start myconnection 81`
+* `curl -X POST http://localhost:8181/cave/deployer/api/connections/myconnection/bundles/81/start`
+* `startBundle(String id, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `startBundle(String id, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
 
-Apache Karaf Cave Deployer supports:
+===== Stop bundle
 
-* creating a new configuration
-* update an existing configuration
-* add a new property to a configuration
-* delete a property from a configuration
-* delete a configuration
-* list of configurations
+* `karaf@root()> cave:deployer-bundle-stop myconnection 81`
+* `curl -X POST http://localhost:8181/cave/deployer/api/connections/myconnection/bundles/81/stop`
+* `stopBundle(String id, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `stopBundle(String id, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
 
-==== Cellar
+===== Uninstall bundle
 
-Apache Karaf Cave Deployer supports features handling on a Cellar cluster.
+* `karaf@root()> cave:deployer-bundle-uninstall myconnection 81`
+* `curl -X DELETE http://localhost:8181/cave/deployer/api/connections/myconnection/bundles/81`
+* `uninstallBundle(String id, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `uninstallBundle(String id, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+==== Configurations
+
+===== Create configuration
+
+* `karaf@root()> cave:deployer-config-create myconnection myconfig`
+* `curl -X POST http://localhost:8181/cave/deployer/api/connections/myconnection/configurations/myconfig`
+* `createConfig(String pid, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `createConfig(String pid, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Create configuration factory
+
+* `karaf@root()> cave:deployer-config-factory-create myconnection myfactory alias`
+* `curl -X POST http://localhost:8181/cave/deployer/api/connections/myconnection/configurations/factories/myfactory`
+* `createConfigFactory(String factoryPid, String alias, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `createConfigurationFactory(String factoryPid, String alias, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== List configurations
+
+* `karaf@root()> cave:deployer-config-list myconnection`
+* `curl -X GET http://localhost:8181/cave/deployer/api/connections/myconnection/configurations`
+* `configs(String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `configs(String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Set configuration property
+
+* `karaf@root()> cave:deployer-config-property-set myconnection myconfiguration myproperty myvalue`
+* `setConfigProperty(String pid, String key, String value, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `setConfigProperty(String pid, String key, String value, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== List configuration properties
+
+* `karaf@root()> cave:deployer-config-property-list myconnection myconfiguration`
+* `curl -X GET http://localhost:8181/cave/deployer/api/connections/myconnection/configurations/myconfiguration/properties`
+* `getConfigProperties(String pid, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `configProperties(String pid, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Delete configuration property
+
+* `karaf@root()> cave:deployer-config-property-delete myconnection myconfiguration myproperty`
+* `deleteConfigProperty(String pid, String key, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `deleteConfigProperty(String pid, String key, String connection)` methood on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Delete configuration
+
+* `karaf@root()> cave:deployer-config-delete myconnection myconfiguration`
+* `curl -X DELETE http://localhost:8181/cave/deployer/api/connections/myconnection/configurations/myconfiguration`
+* `deleteConfig(String pid, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `deleteConfig(String pid, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+==== Karaf Cellar cluster
+
+Cave Deployer is able to administrate a Karaf Cellar cluster.
+
+===== List cluster nodes
+
+* `cave:deployer-cluster-node-list myconnection`
+* `curl -X GET http://localhost:8181/cave/deployer/api/cluster/nodes`
+* `getClusterNodes(String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `clusterNodes(String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== List cluster groups
+
+* `cave:deployer-cluster-group-list myconnection`
+* `curl -X GET http://localhost:8181/cave/deployer/api/cluster/groups`
+* `getClusterGroups(String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `clusterGroups(String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Add features repository to cluster group
+
+* `cave:deployer-cluster-feature-repo-add myconnection myclustergroup mvn:foo/bar/1.0/xml/features`
+* `curl -X POST -H "url: mvn:foo/bar/1.0/xml/features" http://localhost:8181/cave/deployer/api/connections/myconnection/cluster/groups/myclustergroup/features/repositories`
+* `clusterFeatureRepositoryAdd(String url, String clusterGroup, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `clusterAddFeaturesRepository(String url, String clusterGroup, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Remove features repository from cluster group
+
+* `cave:cluster-feature-repo-remove myconnection myclustergroup mvn:foo/bar/1.0/xml/features`
+* `curl -X DELETE -H "url: mvn:foo/bar/1.0/xml/features" http://localhost:8181/cave/deployer/api/connections/myconnection/cluster/groups/myclustergroup/features/repositories`
+* `clusterFeatureRepositoryRemove(String url, String clusterGroup, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `clusterRemoveFeaturesRepository(String url, String clusterGroup, String Connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Install feature on cluster group
+
+* `cave:deployer-cluster-feature-install myconnection mygroup myfeature`
+* `curl -X POST http://localhost:8181/cave/deployer/api/connections/myconnection/cluster/groups/mygroup/features/myfeature`
+* `clusterFeatureInstall(String feature, String clusterGroup, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `clusterFeatureInstall(String feature, String clusterGroup, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.
+
+===== Uninstall feature from cluster group
+
+* `cave:deployer-cluster-feature-uninstall myconnection mygroup myfeature`
+* `curl -X DELETE http://localhost:8181/cave/deployer/api/connections/myconnection/cluster/groups/mygroup/features/myfeature`
+* `clusterFeatureUninstall(String feature, String clusterGroup, String connection)` operation on the `org.apache.karaf.cave:type=deployer` MBean.
+* `clusterFeatureUninstall(String feature, String clusterGroup, String connection)` method on the `org.apache.karaf.cave.deployer.DeployerService` service.

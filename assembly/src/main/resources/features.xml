@@ -16,95 +16,50 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 -->
-<features name="karaf-cave-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.3.0 http://karaf.apache.org/xmlns/features/v1.3.0">
+<features name="karaf-cave-${project.version}" xmlns="http://karaf.apache.org/xmlns/features/v1.4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://karaf.apache.org/xmlns/features/v1.4.0 http://karaf.apache.org/xmlns/features/v1.4.0">
 
     <repository>mvn:org.apache.cxf.karaf/apache-cxf/${cxf.version}/xml/features</repository>
 
-    <feature name="cave" version="${project.version}">
-        <feature prerequisite="true">cave-server</feature>
-        <feature prerequisite="true">cave-deployer</feature>
-        <feature>cave-rest</feature>
-    </feature>
-
-    <feature name="cave-server" version="${project.version}">
-        <feature>cave-server-storage</feature>
-        <feature>cave-server-http</feature>
-        <feature>cave-server-maven</feature>
-    </feature>
-
-    <feature name="cave-server-storage" version="${project.version}">
-        <configfile finalname="/etc/org.apache.karaf.cave.server.storage.cfg">mvn:org.apache.karaf.cave/apache-karaf-cave/${project.version}/cfg/filesystem</configfile>
-        <bundle>mvn:org.jsoup/jsoup/${jsoup.version}</bundle>
-        <bundle>mvn:commons-codec/commons-codec/${commons-codec.version}</bundle>
-        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.api/${project.version}</bundle>
-        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.storage/${project.version}</bundle>
-        <conditional>
-            <condition>management</condition>
-            <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.management/${project.version}</bundle>
-        </conditional>
-        <conditional>
-            <condition>shell</condition>
-            <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.command/${project.version}</bundle>
-        </conditional>
-    </feature>
-
-    <feature name="cave-server-http" version="${project.version}">
+    <feature name="cave-common" version="${project.version}">
         <feature prerequisite="true">http</feature>
-        <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
-        <feature>cave-server-storage</feature>
-        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.http/${project.version}</bundle>
+        <feature prerequisite="true">scr</feature>
+        <feature version="${cxf.version}">cxf-jaxrs</feature>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/${jackson.version}</bundle>
+        <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/${jackson.version}</bundle>
     </feature>
 
-    <feature name="cave-server-maven" version="${project.version}">
-        <feature prerequisite="true">http</feature>
-        <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
-        <bundle>mvn:org.apache.karaf.cave.server/org.apache.karaf.cave.server.maven/${project.version}</bundle>
+    <feature name="cave-repository-api" version="${project.version}">
+        <bundle>mvn:org.apache.karaf.cave.repository/org.apache.karaf.cave.repository.api/${project.version}</bundle>
+    </feature>
+
+    <feature name="cave-repository" version="${project.version}">
+        <feature prerequisite="true">cave-common</feature>
+        <feature version="[4.2,4.3)">cave-repository-api</feature>
+        <feature prerequisite="true">scheduler</feature>
+        <bundle>mvn:org.apache.karaf.cave.repository/org.apache.karaf.cave.repository.service/${project.version}</bundle>
+    </feature>
+
+    <feature name="cave-features-gateway-api" version="${project.version}">
+        <bundle>mvn:org.apache.karaf.cave.gateway/org.apache.karaf.cave.gateway.api/${project.version}</bundle>
+    </feature>
+
+    <feature name="cave-features-gateway" version="${project.version}">
+        <feature prerequisite="true">cave-common</feature>
+        <feature version="[4.2,4.3)">cave-features-gateway-api</feature>
+        <bundle>mvn:org.apache.karaf.cave.gateway/org.apache.karaf.cave.gateway.service/${project.version}</bundle>
+    </feature>
+
+    <feature name="cave-deployer-api" version="${project.version}">
+        <bundle>mvn:org.apache.karaf.cave.deployer/org.apache.karaf.cave.deployer.api/${project.version}</bundle>
     </feature>
 
     <feature name="cave-deployer" version="${project.version}">
-        <feature>cave-deployer-service</feature>
-        <feature>cave-deployer-command</feature>
-        <feature>cave-deployer-management</feature>
-    </feature>
-
-    <feature name="cave-deployer-service" version="${project.version}">
-        <bundle>mvn:org.apache.karaf.cave.deployer/org.apache.karaf.cave.deployer.api/${project.version}</bundle>
-        <bundle dependency="true">mvn:org.apache.httpcomponents/httpcore-osgi/4.2.5</bundle>
-        <bundle dependency="true">mvn:org.apache.httpcomponents/httpclient-osgi/4.2.5</bundle>
-        <bundle dependency="true">mvn:com.google.inject/guice/3.0</bundle>
-        <bundle dependency="true">mvn:com.google.guava/guava/18.0</bundle>
+        <feature prerequisite="true">cave-common</feature>
+        <feature version="[4.2,4.3)">cave-deployer-api</feature>
         <bundle>mvn:org.apache.karaf.cave.deployer/org.apache.karaf.cave.deployer.service/${project.version}</bundle>
-        <config name="org.apache.karaf.cave.deployer">
-            # Karaf Cave Deployer connection storage
-        </config>
-    </feature>
-
-    <feature name="cave-deployer-command" version="${project.version}">
-        <feature version="${project.version}">cave-deployer-service</feature>
-        <conditional>
-            <condition>shell</condition>
-            <bundle>mvn:org.apache.karaf.cave.deployer/org.apache.karaf.cave.deployer.command/${project.version}</bundle>
-        </conditional>
-    </feature>
-
-    <feature name="cave-deployer-management" version="${project.version}">
-        <feature version="${project.version}">cave-deployer-service</feature>
-        <conditional>
-            <condition>management</condition>
-            <bundle>mvn:org.apache.karaf.cave.deployer/org.apache.karaf.cave.deployer.management/${project.version}</bundle>
-        </conditional>
-    </feature>
-
-    <feature name="cave-rest" version="${project.version}">
-        <feature prerequisite="true">http</feature>
-        <requirement>osgi.service;effective:=active;filter:=(objectClass=org.osgi.service.http.HttpService)</requirement>
-        <feature version="${cxf.version}">cxf-jaxrs</feature>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-core/2.4.6</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-annotations/2.4.6</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.core/jackson-databind/2.4.6</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-base/2.4.6</bundle>
-        <bundle dependency="true">mvn:com.fasterxml.jackson.jaxrs/jackson-jaxrs-json-provider/2.4.6</bundle>
-        <bundle>mvn:org.apache.karaf.cave/org.apache.karaf.cave.rest/${project.version}</bundle>
     </feature>
 
     <feature name="cave-documentation" description="Documentation of Karaf Cave sub-project in HTML" version="${project.version}">
