@@ -16,6 +16,16 @@
 
 Apache Karaf Cave is an Apache Karaf sub-project.
 
+Apache Karaf Cave provides three different services:
+
+* Artifact repositories manager
+* Karaf features gateway
+* Deployer
+
+Each service is atomic and doesn't depend to another one. You can only use one service or combine the services.
+
+
+
 Apache Karaf Cave is an implementation of an artifact repository and deployment platform for Apache Karaf supporting:
 
 * OSGi Repository specification

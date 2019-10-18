@@ -1,0 +1,583 @@
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+
+Cave Repositories Manager is a simple but complete artifacts repository manager. You can create repositories used
+to store artifact.
+The repositories are Maven and OSGi Bundle Repository compliant. A repository doesn't necessary store the artifacts, it
+can also serve as proxy or mirror to other remote repositories.
+
+==== Installation
+
+The first step is to register Cave features repository XML in a running Karaf instance:
+
+```
+karaf@root()> features:repo-add cave 4.2.0
+```
+
+Once it's done, you can install the `cave-repository` feature:
+
+```
+karaf@root()> feature:install cave-repository
+```
+
+The Cave Repository Manager service providing:
+
+* shell commands to manipulate the repositories
+* MBean to manipulate the repositories via JMX
+* REST API to manipulate the repositories with REST client (like `curl` for instance)
+
+==== Repositories
+
+A Cave repository is a artifact storage that clients can use (download or uploading artifacts).
+
+Repositories are managed by a `RepositoryService` and each repository has:
+
+* `name` is unique in the repository service.
+* `location` is where the artifacts are actually stored on the filesystem (it can be null if the repository is a proxy).
+* `url` is the HTTP location where the repository is accessible remotely.
+* `proxy` is a list of remote repositories that a repository can proxy.
+* `mirror` is a boolean used when the repository is a proxy. If `true`, when a client download an artifact from the repository, the artifact is download on remote repositories and cached on local repository storage. If `false`, the artifact is not cached on local repository storage.
+* `realm` is a JAAS security realm used to secure the users able to download/upload artifacts on the repository.
+* `download role` is the user role (on the realm) to secure artifacts download operation.
+* `scheduling` is the scheduler configuration (cron or date) to trigger an action on the repository. For instance `cron:0/20 * * * * ?` with execute action on the repository every 20 seconds.
+* `schedulingAction` is the action when scheduler is triggered. Possible actions are `PURGE`, `DELETE`, `COPY targetRepositoryName` and can be combined (comma separated). For instance: `PURGE,DELETE`.
+* `upload role` is the user role (on the realm) to secure artifacts upload operation.
+
+==== Creating repository and repository details
+
+===== `cave:repository-create` and `cave:repository-info` shell commands
+
+You can simply create a repository with the `cave:repository-create` command:
+
+```
+karaf@root()> cave:repository-create myrepo
+```
+
+By the default, `myrepo` repository has the following setup:
+
+* `myrepo` `location` is set to `${KARAF_DATA}/cave/repository/myrepo`. It can be changed at repository creation or later using `cave:repository-location` command (see later).
+* `myrepo` `url` is set to `/cave/repository/myrepo` (based on the Apache Karaf HTTP service). It can be changed at repository creation or later using `cave:repository-url` command (see later).
+* `myrepo` `proxy` is empty as, by default, repositories are "concrete" repository (with storage).
+* `myrepo` `realm` is `karaf` by default. It means that you can use roles defined in the `karaf` JAAS realm. You can take a look on the security and JAAS section of the Apache Karaf user guide for details.
+* `myrepo` `downloadRole` is empty, meaning that anyone can download artifacts from this repository.
+* `myrepo` `uploadRole` is empty, meaning that anyone can upload artifacts to this repository.
+* `myrepo` `scheduling` is empty, meaning no scheduler.
+* `myrepo` `schedulingAction` is empty, meaning no scheduler.
+
+The `cave:repository-create` command provides the options allowing you to specify repository settings:
+
+```
+DESCRIPTION
+        cave:repository-create
+
+        Create a new repository
+
+SYNTAX
+        cave:repository-create [options] name
+
+ARGUMENTS
+        name
+                The repository name
+                (required)
+
+OPTIONS
+        -m, --mirror
+                Enable repository mirror mode (for proxy)
+        -sa, --scheduling-action, --action, --actions
+                The repository scheduling action (DELETE, PURGE, COPY)
+        --help
+                Display this help message
+        -dr, --download-role
+                The repository security download role
+        -r, --realm
+                The repository security realm
+                (defaults to karaf)
+        -ur, --upload-role
+                The repository security upload role
+        -p, --proxy
+                The repository proxy locations
+        -l, --location
+                The repository location
+        -u, --url
+                The repository URL
+        -ps, --pool-size
+                The repository pool size for the HTTP service
+                (defaults to 8)
+        -s, --scheduling, --schedule
+                The repository scheduling (cron: or at:)
+```
+
+You can have details about existing repository using `cave:repository-info` command:
+
+```
+karaf@root()> cave:repository-info myrepo
+Name: myrepo
+Location: /opt/karaf/data/cave/repository/myrepo
+URL: /cave/repository/myrepo
+Proxy:
+Mirror: false
+Realm: karaf
+Download role:
+Upload role:
+Scheduling:
+Scheduling Actions:
+Pool size: 8
+```
+
+You can use "regular" Apache Karaf commands related to the services used by the repository.
+
+For instance, you can see the repository HTTP binding using `http:list` command:
+
+```
+karaf@root()> http:list
+ID  │ Servlet               │ Servlet-Name               │ State       │ Alias                   │ Url
+────┼───────────────────────┼────────────────────────────┼─────────────┼─────────────────────────┼─────────────────
+102 │ CXFNonSpringServlet   │ cxf-osgi-transport-servlet │ Deployed    │ /cxf                    │ [/cxf/*]
+116 │ MavenServlet          │ ServletModel-2             │ Deployed    │ /cave/repository/myrepo │ [/cave/repository/myrepo/*]
+116 │ RepositoryRestServlet │ ServletModel-4             │ Deployed    │ /cave/repository/api    │ [/cave/repository/api/*]
+```
+
+NB: `/cave/repository/api` URL is the default REST API repository service.
+
+It means, using your Internet browser, you can browse `myrepo` on `http://localhost:8181/cave/repository/myrepo/`.
+
+You can also see the realm and login modules with corresponding `jaas:realm-list` command.
+
+===== REST API
+
+It's also possible to create a repository using the REST API. You can find the WADL of the REST API on `/cave/repository/api?_wadl` URL.
+
+For instance, you can create a repository using `curl`:
+
+```
+curl -X POST -H "Content-Type: application/json" http://localhost:8181/cave/repository/api/repositories -d '{ "name":"myrepo", "location": "", "url": "", "proxy":"", "mirror": false,"realm":"karaf","downloadRole":"","uploadRole":"","poolSize":8}'
+```
+
+You can also have details about a repository using the REST API. For instance, using `curl`:
+
+```
+curl -X GET http://localhost:8181/cave/repository/api/repositories/myrepo
+{"name":"myrepo","location":"/opt/karaf/data/cave/repository/myrepo","url":"/cave/repository/myrepo","proxy":null,"mirror":false,"realm":"karaf","downloadRole":null,"uploadRole":null,"poolSize":8}
+```
+
+===== JMX MBean
+
+You can also create a repository using the `create(String name)` or `create(String name, String location, String url, String proxy, boolean mirror, String realm, String downloadRole, String uploadRole, int poolSize)` operations on the `org.apache.karaf.cave:type=repository` MBean.
+
+On the `Repositories` attribute on the `org.apache.karaf.cave:type=repository` MBean, you can get all details about any repository.
+
+===== Service
+
+You can also create a repository programmatically using `create(String name)` or `create(String name, String location, String url, String proxy, boolean mirror, String realm, String downloadRole, String uploadRole, int poolSize)` methods on the `org.apache.karaf.cave.repository.RepositoryService`.
+
+You just have to look for the `RepositoryService` in the Karaf service registry. For instance using DS programming model, you can do:
+
+```
+@Reference
+private org.apache.karaf.cave.repository.RepositoryService repositoryService;
+```
+
+==== Listing repositories
+
+===== `cave:repository-list` shell command
+
+You can list all repositories using the `cave:repository-list` shell command:
+
+```
+karaf@root()> cave:repository-list
+Name   │ Location                               │ URL
+───────┼────────────────────────────────────────┼────────────────────────
+myrepo │ /opt/karaf/data/cave/repository/myrepo │ /cave/repository/myrepo
+```
+
+===== REST API
+
+You can get the list of all repositories via the Cave Repository REST API using GET method on `/cave/repository/api/repositories`. For instance using `curl`:
+
+```
+curl -X GET http://localhost:8181/cave/repository/api/repositories
+[{"name":"myrepo","location":"/home/jbonofre/Downloads/apache-karaf-4.2.7/data/cave/repository/myrepo","url":"/cave/repository/myrepo","proxy":null,"mirror":false,"realm":"karaf","downloadRole":null,"uploadRole":null,"poolSize":8}]
+```
+
+===== JMX MBean
+
+The `repositories` attribute on the `org.apache.karaf.cave:type=repository` MBean provides a tabular data with all repositories.
+
+===== Service
+
+On the `org.apache.karaf.cave.repository.RepositoryService`, you can programmatically get `org.apache.karaf.cave.repository.Repository` collection using `repositories()` method.
+
+==== Changing repository settings
+
+You can change repository settings after it has been created using dedicated operation.
+
+===== `cave:repository-url`, `cave:repository-proxy`, `cave:repository-location`, `cave:repository-security` shell commands
+
+You can see or change the repository location using `cave:repository-location` command:
+
+```
+karaf@root()> cave:repository-location myrepo 
+/opt/karaf/data/cave/repository/myrepo
+karaf@root()> cave:repository-location myrepo /path/to/foo
+/path/to/foo
+```
+
+NB: The repository service will then move the repository location filesystem to the new location.
+
+You can see or change the repository binding HTTP URL using `cave:repository-url` command:
+
+```
+karaf@root()> cave:repository-url myrepo
+/cave/repository/myrepo
+karaf@root()> cave:repository-url myrepo /foo
+/foo
+```
+
+NB: The repository service will stop the repository HTTP service to start a new one on the new URL.
+
+You can see or change the repository proxy settings using `cave:repository-proxy` command:
+
+```
+karaf@root()> cave:repository-proxy myrepo
+null
+karaf@root()> cave:repository-proxy -m myrepo http://repo1.maven.org/maven2@id=central
+http://repo1.maven.org/maven2@id=central (mirror)
+```
+
+NB: When change the proxy settings, the repository location is not changed.
+
+You can see or change the repository security settings using `cave:repository-security` command:
+
+```
+karaf@root()> cave:repository-security myrepo
+Realm: karaf
+Download Role: null
+Upload Role: null
+karaf@root()> cave:repository-security -ur admin myrepo karaf
+Realm: karaf
+Download Role: null
+Upload Role: admin
+```
+
+NB: The repository service will restart the repository HTTP service with the new security settings.
+
+===== REST API
+
+You can use `/cave/repository/api/repositories/myrepo` URL with a updated repository json to update the repository settings. For instance using `curl`:
+
+```
+curl -X POST -H "Content-Type: application/json" http://localhost:8181/cave/repository/api/repositories/myrepo -d '{ "name":"myrepo", "location": "", "url": "", "proxy":"", "mirror": false,"realm":"karaf","downloadRole":"","uploadRole":"","poolSize":8}'
+```
+
+===== JMX MBean
+
+You have dedicated operations on `org.apache.karaf.cave:type=repository` MBean to change repository settings:
+
+* `changeLocation(String repositoryName, String newLocation)` to change the location of a repository. The repository service will actually move the location filesystem.
+* `changeUrl(String repositoryName, String new URL)` to change the URL of a repository. The repository service will stop the previous HTTP repository service to crerate start a new one.
+* `changeProxy(String repositoryName, String proxy, boolean mirror)` to change the proxy settings (URLs and mirror mode). The repository location is not changed.
+* `changeSecurity(String repositoryName, String realm, String downloadRole, String uploadRole)` to change the security settings (realm, download, and upload roles). The repository HTTP service will be restarted with the new security settings.
+
+===== Service
+
+On the `org.apache.karaf.cave.repository.RepositoryService`, you have the following methods to change repository settings:
+
+* `changeLocation(String repositoryName, String newLocation)` to change the location of a repository. The repository service will actually move the location filesystem.
+* `changeUrl(String repositoryName, String new URL)` to change the URL of a repository. The repository service will stop the previous HTTP repository service to crerate start a new one.
+* `changeProxy(String repositoryName, String proxy, boolean mirror)` to change the proxy settings (URLs and mirror mode). The repository location is not changed.
+* `changeSecurity(String repositoryName, String realm, String downloadRole, String uploadRole)` to change the security settings (realm, download, and upload roles). The repository HTTP service will be restarted with the new security settings.
+
+==== Upload artifacts
+
+You can upload artifacts in a repository using a regular HTTP client (via `curl` for instance).
+
+You can also directly use Maven (in your project using `distributionManagement` in the `pom.xml`) or Gradle.
+With Maven, you can also using `deploy:deploy-file` goal:
+
+```
+mvn deploy:deploy-file -Dfile=my.jar -Durl=http://localhost:8181/cave/repository/myrepo -DgroupId=foo -DartifactId=bar -Dversion=1.0-SNAPSHOT -Dpackaging=jar
+```
+
+===== `cave:repository-artifact-add` shell command
+
+
+For convenience, Cave Repository provides `cave:repository-artifact-add` command to upload artifact in a repository:
+
+```
+karaf@root()> cave:repository-artifact-add myrepo mvn:commons-lang/commons-lang/2.6
+```
+
+===== REST API
+
+You can upload an artifact using the Cave Repository REST API via `/cave/repository/api/repositories/myrepo/artifact` URL and providing the artifact URL as header:
+
+```
+curl -X POST -H "artifactUrl: mvn:commons-lang/commons-lang/2.6" http://localhost:8181/cave/repository/api/repositories/myrepo/artifact
+```
+
+===== JMX MBean
+
+The `org.apache.karaf.cave:type=repository` MBean provides the `addArtifact(String repositoryName, String artifactUrl)` operation allowing you to add an artifact in a repository.
+
+===== Service
+
+You can programmatically add artifact in a repository using `org.apache.karaf.cave.repository.RepositoryService` and the `addArtifact(String repositoryName, String artifactUrl)` method.
+
+==== Delete artifacts
+
+===== `cave:repository-artifact-delete` shell command
+
+The `cave:repository-artifact-delete` shell command allows you to delete an artifact from a repository:
+
+```
+karaf@root()> cave:repository-artifact-delete myrepo mvn:commons-lang/commons-lang/2.6
+```
+
+===== REST API
+
+You can delete an artifact from a repository using the Cave Repository REST API via `/cave/repository/api/repositories/myrepo/artifact` URL and providing the artifact URL as header:
+
+```
+curl -X DELETE -H "artifactUrl: mvn:commons-lang/commons-lang/2.6" http://localhost:8181/cave/repository/api/repositories/myrepo/artifact
+```
+
+===== JMX MBean
+
+The `org.apache.karaf.cave:type=repository` MBean provides the `deleteArtifact(String repositoryName, String artifactUrl)` operation allowing you to delete an artifact in a repository.
+
+===== Service
+
+You can programmatically delete artifact in a repository using `org.apache.karaf.cave.repository.RepositoryService` and the `addArtifact(String repositoryName, String artifactUrl)` method.
+
+==== Copy repositories content
+
+You can copy the whole content of a repository location into another repository location (it's a full recursive copy).
+
+===== `cave:repository-copy` shell command
+
+The `cave:repository-copy` shell command copies the whole content of a source repository to a destination repository:
+
+```
+karaf@root()> cave:repository-copy myrepo anotherrepo
+```
+
+===== REST API
+
+Copy is not allowed on the Cave Repository REST API.
+
+===== JMX MBean
+
+The `org.apache.karaf.cave:type=repository` MBean provides the `copy(String sourceRepository, String destinationRepository)` operation.
+
+===== Service
+
+The `org.apache.karaf.cave.repository.RepositoryService` service provides `copy(String sourceRepository, String destinationRepository)` method.
+
+==== Proxy and mirror
+
+A repository can proxy other repositories. The client (for instance Maven) request an artifact on the repository which "proxy" the request to other repositories define.
+
+If the mirror mode is enabled, the artifacts are copied into the repository storage location in addition of being delivered to the client (it's kind of artifacts caching).
+If the mirror mode is disabled, the repository storage is not used at all, and the artifact is passed directly.
+
+The proxy setting define the list of remote repositories (separated with coma). In addition, you can use `@id=` to give a name to the remote repository (just like in the `settings.xml`, but this is optional but recommended), `@snapshots` to indicate the remote repository can contains SNAPSHOT artifacts, `@noreleases` to indicate the remote repository doesn't only contains release artifacts.
+
+For instance, you can proxy Maven Central with the following command:
+
+```
+karaf@root()> cave:repository-create -p http://repo1.maven.org/maven2@id=central myrepo
+karaf@root()> cave:repository-info myrepo
+Name: myrepo
+Location: null
+URL: /cave/repository/myrepo
+Proxy: http://repo1.maven.org/maven2@id=central
+Mirror: false
+Realm: karaf
+Download role:
+Upload role:
+Pool size: 8
+```
+
+Now, let's request an artifact on `myrepo` repository using `http://localhost:8181/cave/repository/myrepo/commons-lang/commons-lang/2.6/commons-lang-2.6.jar` (remember `myrepo` is empty and doesn't have any location):
+
+```
+curl -O http://localhost:8181/cave/repository/myrepo/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  277k  100  277k    0     0  16.9M      0 --:--:-- --:--:-- --:--:-- 16.9M
+```
+
+We can see here, `myrepo` has correctly proxy the request to Maven Central.
+
+Now, let's add a location and enable `mirror` on `myrepo` repository:
+
+```
+karaf@root()> cave:repository-location myrepo /tmp
+karaf@root()> cave:repository-proxy -m myrepo http://repo1.apache.org/maven2@id=Central
+karaf@root()> cave:repository-info myrepo
+Name: myrepo
+Location: /tmp
+URL: /cave/repository/myrepo
+Proxy: http://repo1.apache.org/maven2@id=Central
+Mirror: true
+Realm: karaf
+Download role:
+Upload role:
+Scheduling:
+Scheduling Actions:
+Pool size: 8
+```
+
+And now, we perform the same request using `curl`:
+
+```
+curl -O http://localhost:8181/cave/repository/myrepo/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  277k  100  277k    0     0  16.9M      0 --:--:-- --:--:-- --:--:-- 16.9M
+```
+
+Now, if we check in the `myrepo` storage location (that we defined to `/tmp`), we can see the "cached" artifact:
+
+```
+ls -ltr /tmp/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
+-rw-r--r-- 1 karaf karaf 284220 oct.  13 10:56 /tmp/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
+```
+
+==== OSGi Bundle Repository
+
+Cave Repository supports OSGi Bundle Repository descriptor generation (aka `repository.xml`).
+
+It can scan all artifacts in a repository to generate the `repository.xml`.
+
+===== `cave:repository-update-bundle-descriptor` shell command
+
+The `cave:repository-update-bundle-descriptor` shell command trigger the scan of all artifacts in a repository to generate a `repository.xml`:
+
+```
+karaf@root()> cave:repository-update-bundle-descriptor myrepo
+```
+
+We now have a `repository.xml` generated (or updated) in the repository storage location. Of course, it's also available via HTTP on `http://localhost:8181/cave/repository/myrepo/repository.xml`.
+
+===== REST API
+
+You can trigger `repository.xml` update via the Cave Repository REST API on `/cave/repository/api/repositories/myrepo/bundle`. For instance using `curl`:
+
+```
+curl -X POST http://localhost:8181/cave/repository/api/repositories/myrepo/bundle
+```
+
+===== JMX MBean
+
+The `org.apache.karaf.cave:type=repository` MBean provides the `updateBundleRepositoryDescriptor(String repositoryName)` operation to update the OSGi Bundle Repository `repository.xml`.
+
+===== Service
+
+The `org.apache.karaf.cave.repository.RepositoryService` service provides the `updateBundleRepositoryDescriptor(String name)` method to update the OSGi Bundle Repository `repository.xml`.
+
+==== Purge
+
+You can completely purge a repository store, removing all artifacts.
+
+===== `cave:repository-purge` shell command
+
+You can cleanup completely a repository storage location using `cave:repository-purge` command:
+
+```
+karaf@root()> cave:repository-purge myrepo
+```
+
+NB: you will have an error if the repository doesn't have any storage location defined, for instance when the repository is only a proxy.
+
+===== REST API
+
+You can cleanup completely a repository storage using `/cave/repository/api/repositories/myrepo/purge` URL (POST). For instance, using `curl`:
+
+```
+curl X POST http://localhost:8181/cave/repository/api/repositories/myrepo/purge
+```
+
+===== JMX MBean
+
+The `org.apache.karaf.cave:type=repository` MBean provides the `purge(String repositoryName)` operation to trigger a repository location purge.
+
+===== Service
+
+The `org.apache.karaf.cave.repository.RepositoryService` service provides the `purge(String repositoryName)` method to trigger a repository location purge.
+
+==== Remove
+
+You can completely remove a repository from the Cave Repository Service (by default, the repository storage is not deleted). Optionally, you can also purge the storage location.
+
+===== `cave:repository-remove` shell command
+
+The `cave:repository-remove` shell command removes a repository, optionally (using `-p, --purge` option) removing the repository storage:
+
+```
+karaf@root()> cave:repository-remove -p myrepo
+```
+
+===== REST API
+
+You can delete a repository using `/cave/repository/api/repositories/myrepo` (DELETE). For instance, using `curl`:
+
+```
+curl -X DELETE http://localhost:8181/cave/repository/api/repositories/myrepo
+```
+
+NB: it's not possible to purge the repository storage when removing the repository via the REST API. You have first to purge the repository location before removing the repository.
+
+===== JMX MBean
+
+The `org.apache.karaf.cave;type=repository` MBean provides the `remove(String repositoryName, boolean purgeLocation)` operation to remove a repository. If `purgeLocation` is true, the repository storage will be cleanup, `false` else.
+
+===== Service
+
+The `org.apache.karaf.cave.repository.RepositoryService` service provides the `remove(String repositoryName, boolean purgeLocation)` method to remove a repository. If `purgeLocation` is true, the repository storage will be cleanup, `false` else.
+
+==== Repository Scheduler
+
+You can trigger action on a repository using Cave Scheduling feature.
+
+The repository scheduling supports cron (to periodically perform actions) or date (to execute actions at a specific time). For instance, you can perform actions every 5 seconds using `cron:0/5 * * * * ?` as repository scheduling.
+You can also execute actions at a certain date using `at:2020-05-13T13:56:45`.
+
+The valid repository scheduling actions are:
+
+* `PURGE` to cleanup the repository storage location.
+* `DELETE` to remove the repository.
+* `COPY targetRepositoryName` to copy all artifacts from the repository storage to another repository.
+
+The actions can be combined (comma separated). For instance, you can copy and purge using `COPY myrepo,PURGE` or purge and remove using `PURGE,DELETE`, etc.
+
+The repository scheduling and actions can be defined at repository creation time (using `-s` and `-sa` options on `cave:repository-create` shell command for instance), or later.
+
+===== `cave:repository-schedule` shell command
+
+The `cave:repository-schedule` shell command displays or set the current repository scheduling.
+
+For instance, you can set the scheduling using:
+
+```
+karaf@root()> cave:repository-schedule myrepo "cron:0/20 * * * * ?" "COPY destination"
+```
+
+===== JMX MBean
+
+The `org.apache.karaf.cave:type=repository` MBean provides the `changeScheduling(String name, String scheduling, String actions)` operation to change the repository scheduling.
+
+===== Service
+
+The `org.apache.karaf.cave.repository.RepositoryService` service provides the `changeScheduling(String name, String scheduling, String schedulingAction)` method to change the repository scheduling.

@@ -24,7 +24,7 @@
     <parent>
         <groupId>org.apache.karaf</groupId>
         <artifactId>cave</artifactId>
-        <version>4.1.3-SNAPSHOT</version>
+        <version>4.2.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
@@ -36,8 +36,6 @@
     <modules>
         <module>api</module>
         <module>service</module>
-        <module>command</module>
-        <module>management</module>
     </modules>
 
 </project>
