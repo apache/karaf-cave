@@ -22,12 +22,12 @@
 Initial Setup
 -------------
 
-1. Install J2SE 7.0 SDK (or later), which can be downloaded from
+1. Install Java SDK 11 (or later), which can be downloaded from
    http://www.oracle.com/technetwork/java/javase/downloads.
 2. Make sure that your JAVA_HOME environment variable is set to the newly installed
    JDK location, and that your PATH includes `%JAVA_HOME%\bin` (windows) or
    `$JAVA_HOME/bin` (unix).
-3. Install Maven 3.0.3 (or later), which can be downloaded from
+3. Install Maven 3.6.2 (or later), which can be downloaded from
    http://maven.apache.org/download.html. Make sure that your PATH includes
    the `MVN_HOME/bin` directory.
 

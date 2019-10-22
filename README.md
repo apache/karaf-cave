@@ -23,45 +23,63 @@ Apache Karaf Cave is an Apache Karaf subproject. It provides a complete reposito
 
 ## Overview
 
-Apache Karaf Cave supports:
+Apache Karaf Cave provides three different services:
 
-* Maven repository management
-* OSGi Repository management
-* Deployer on multiple Apache Karaf instances
-* Complete REST API and JMX MBeans
-
-Apache Karaf Cave provides the following features:
-* Storage: Cave includes a storage backend. The default one is a simple filesystem backend. As the Cave backend
-is designed in a plugin way, you can implement your own backend (for instance, JDBC or LDAP backend).
-* Repository Metadata Generation: Cave creates the repository metadata for you, using the artifacts presents in the
-repository storage.
-* Maven support: Cave repositories act as a complete Maven repository, allowing you to use Cave directly with Maven.
-* REST API: Cave provides a REST API to manipulate the repositories.
-* Artifact Upload: Users can upload OSGi bundle in a Cave repository. It supports URLs like mvn:groupId/artifactId/version,
-file:, http:, etc.
-* Deployer: to deploy and manage your "farm" of Apache Karaf instances.
-* Repository proxy: Cave is able to proxy an existing repository, for instance an existing Maven repository.
-The artifacts are located on the "external" repository, Cave handles the repository metadata. Cave supports file: and http:
-URLs, it means that Cave is able to browse a remote HTTP Maven repository for instance.
-* Repository population: Cave is able to get artifacts present on an "external" repository (local file: or
-remote http:), looking for OSGi bundles, and copy the artifacts in the Cave repository storage.
+* Artifact repositories manager
+* Karaf features gateway
+* Deployer
 
 ## Getting Started
 
-For an Apache Karaf Cave source distribution, please read
-BUILDING.md for instructions on building Apache Karaf Cave.
+For an Apache Karaf Cave source distribution, please read BUILDING.md for instructions on building Apache Karaf Cave.
 
-To install Apache Karaf Cave, first you have to register the Cave features descriptor:
-
-```
-karaf@root()> feature:repo-add mvn:org.apache.karaf.cave/apache-karaf-cave/4.0.0/xml/features
-```
-
-Now, you can install the Cave simply by typing:
+Before using Apache Karaf Cave services, you have to register the Karaf Cave features repository. For example, on a running Apache Karaf instance:
 
 ```
-karaf@root()> feature:install cave
+karaf@root()> feature:repo-add cave 4.2.0
 ```
+
+### Artifact repositories manager
+
+Cave Repository service is a complete artifacts repository manager, supporting Maven, OSGi Bundle Repository and HTTP wrapping.
+
+You can install the artifact repositories manager service with:
+
+```
+karaf@root()> feature:install cave-repository
+```
+
+You now have the service running. You can manipulate the artifact repositories using the `cave:repository-*` shell commands.
+
+For details, take a look on the Apache Karaf Cave documentation.
+
+### Karaf features gateway
+
+Cave Karaf Features Gatewey is able to gather several features repositories in one, providing a single repository containing the union of all features.
+
+You can install the gateway service with:
+
+```
+karaf@root()> feature:install cave-features-gateway
+```
+
+You now have the service running. You can manipulate the gateway using the `cave:features-gateway-*` shell commands.
+
+For details, take a look on the Apache Karaf Cave documentation.
+
+### Deployer
+
+Cave Deployer allows you to control and provision a farm of Apache Karaf instances (deploying features, application, etc).
+
+You can install the deployer service with:
+
+```
+karaf@root()> feature:install cave-deployer
+```
+
+You now have the service running. You can manipulate the deployer using the `cave:deployer-*` shell commands.
+
+For details, take a look on the Apache Karaf Cave documentation.
 
 ## More Information
 
