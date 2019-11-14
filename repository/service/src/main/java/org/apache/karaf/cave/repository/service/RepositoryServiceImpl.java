@@ -178,7 +178,7 @@ public class RepositoryServiceImpl implements RepositoryService {
         if (url == null || url.isEmpty()) {
             url = httpContext + "/" + name;
         }
-        if (proxy == null || proxy.isEmpty()) {
+        if (location == null || location.isEmpty()) {
             location = new File(baseStorage, name).getAbsolutePath();
         }
         // create the repository storage
