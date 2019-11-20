@@ -18,6 +18,7 @@ package org.apache.karaf.cave.deployer.service.rest;
 
 import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import org.apache.cxf.Bus;
+import org.apache.cxf.endpoint.Server;
 import org.apache.cxf.jaxrs.JAXRSServerFactoryBean;
 import org.apache.cxf.jaxrs.JAXRSServiceFactoryBean;
 import org.apache.cxf.transport.http.DestinationRegistry;
@@ -29,6 +30,7 @@ import javax.servlet.ServletException;
 public class DeployerRestServlet extends CXFNonSpringServlet {
 
     private DeployerRestApi restApi;
+    private Server server;
 
     public DeployerRestServlet(DeployerRestApi restApi, DestinationRegistry destinationRegistry, Bus bus) {
         super(destinationRegistry, false);
@@ -45,8 +47,16 @@ public class DeployerRestServlet extends CXFNonSpringServlet {
             bean.setBus(getBus());
             bean.setProvider(new JacksonJsonProvider());
             bean.setServiceBean(restApi);
-            bean.create();
+            server = bean.create();
         }
+    }
+
+    @Override
+    public void destroy() {
+        if (server != null) {
+            server.destroy();
+        }
+        super.destroy();
     }
 
 }
