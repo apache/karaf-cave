@@ -22,7 +22,7 @@ can also serve as proxy or mirror to other remote repositories.
 The first step is to register Cave features repository XML in a running Karaf instance:
 
 ```
-karaf@root()> features:repo-add cave 4.2.0
+karaf@root()> feature:repo-add cave 4.2.0
 ```
 
 Once it's done, you can install the `cave-repository` feature:
