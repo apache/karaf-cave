@@ -27,6 +27,10 @@ import org.ops4j.pax.exam.karaf.options.KarafDistributionOption;
 import org.ops4j.pax.exam.spi.reactors.ExamReactorStrategy;
 import org.ops4j.pax.exam.spi.reactors.PerClass;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.stream.Stream;
 
 @RunWith(PaxExam.class)
@@ -61,6 +65,28 @@ public class FeaturesGatewayTest extends KarafTestSupport {
         System.out.println("==== HTTP List ====");
         System.out.println(httpList);
         assertContains("/cave/features-gateway/api", httpList);
+
+        // add camel features in the gateway
+        System.out.println(executeCommand("cave:features-gateway-register mvn:org.apache.camel.karaf/apache-camel/2.24.2/xml/features"));
+        String gatewayList = executeCommand("cave:features-gateway-list");
+        System.out.println(gatewayList);
+        assertContains("mvn:org.apache.camel.karaf/apache-camel/2.24.2/xml/features", gatewayList);
+
+        // get the gateway features XML
+        URL url = new URL("http://localhost:" + getHttpPort() + "/cave/features-gateway-repository");
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setDoInput(true);
+        urlConnection.setDoOutput(true);
+        urlConnection.setRequestMethod("GET");
+        StringBuilder builder = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(urlConnection.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                builder.append(line).append("\n");
+            }
+        }
+        System.out.println(builder.toString());
+        assertContains("mvn:org.apache.camel.karaf/apache-camel/2.24.2/xml/features", builder.toString());
     }
 
 }
