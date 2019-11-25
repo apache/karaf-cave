@@ -36,7 +36,7 @@ For an Apache Karaf Cave source distribution, please read BUILDING.md for instru
 Before using Apache Karaf Cave services, you have to register the Karaf Cave features repository. For example, on a running Apache Karaf instance:
 
 ```
-karaf@root()> feature:repo-add cave 4.2.0
+karaf@root()> feature:repo-add cave 4.2.1
 ```
 
 ### Artifact repositories manager
