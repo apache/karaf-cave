@@ -41,19 +41,14 @@ public class DeployerTest extends KarafTestSupport {
         return Stream.of(super.config(), options).flatMap(Stream::of).toArray(Option[]::new);
     }
 
-    @Test
+    @Test(timeout = 60000L)
     public void test() throws Exception {
         System.out.println(executeCommand("feature:repo-add cave " + System.getProperty("cave.version")));
         System.out.println(executeCommand("feature:install cave-deployer", new RolePrincipal("admin")));
         String featureList = executeCommand("feature:list -i");
-        int count = 0;
-        while (!featureList.contains("cave-deployer") && count < 100) {
+        while (!featureList.contains("cave-deployer")) {
             featureList = executeCommand("feature:list -i");
             Thread.sleep(100);
-            count++;
-        }
-        if (count >= 100) {
-            throw new RuntimeException("cave-deployer feature is not installed");
         }
         System.out.println("==== Installed Features ====");
         System.out.println(featureList);
