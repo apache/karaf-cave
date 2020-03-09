@@ -41,7 +41,7 @@
         <httpclient.version>4.5.10</httpclient.version>
         <jackson.version>2.10.0</jackson.version>
         <jsoup.version>1.12.1</jsoup.version>
-        <karaf.version>4.2.7</karaf.version>
+        <karaf.version>4.2.8</karaf.version>
         <osgi.version>6.0.0</osgi.version>
         <commons-codec.version>1.13</commons-codec.version>
         <wagon.version>1.0</wagon.version>
