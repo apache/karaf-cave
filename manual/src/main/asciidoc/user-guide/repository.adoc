@@ -251,8 +251,8 @@ You can see or change the repository proxy settings using `cave:repository-proxy
 ```
 karaf@root()> cave:repository-proxy myrepo
 null
-karaf@root()> cave:repository-proxy -m myrepo http://repo1.maven.org/maven2@id=central
-http://repo1.maven.org/maven2@id=central (mirror)
+karaf@root()> cave:repository-proxy -m myrepo https://repo1.maven.org/maven2@id=central
+https://repo1.maven.org/maven2@id=central (mirror)
 ```
 
 NB: When change the proxy settings, the repository location is not changed.
@@ -396,12 +396,12 @@ The proxy setting define the list of remote repositories (separated with coma). 
 For instance, you can proxy Maven Central with the following command:
 
 ```
-karaf@root()> cave:repository-create -p http://repo1.maven.org/maven2@id=central myrepo
+karaf@root()> cave:repository-create -p https://repo1.maven.org/maven2@id=central myrepo
 karaf@root()> cave:repository-info myrepo
 Name: myrepo
 Location: null
 URL: /cave/repository/myrepo
-Proxy: http://repo1.maven.org/maven2@id=central
+Proxy: https://repo1.maven.org/maven2@id=central
 Mirror: false
 Realm: karaf
 Download role:

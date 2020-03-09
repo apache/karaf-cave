@@ -194,7 +194,7 @@ public class RepositoryServiceImplTest {
     @Test
     public void testAddArtifactViaHttp() throws Exception {
         repositoryService.create("test");
-        repositoryService.addArtifact("http://repo1.maven.org/maven2/commons-lang/commons-lang/2.6/commons-lang-2.6.jar", "test");
+        repositoryService.addArtifact("https://repo1.maven.org/maven2/commons-lang/commons-lang/2.6/commons-lang-2.6.jar", "test");
         Assert.assertTrue(Files.exists(Paths.get("target/repositories/test/commons-lang-2.6/commons-lang-2.6-.jar")));
     }
 

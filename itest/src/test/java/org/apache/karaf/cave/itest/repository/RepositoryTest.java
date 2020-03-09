@@ -108,7 +108,7 @@ public class RepositoryTest extends KarafTestSupport {
         assertContainsNot("TEST", repositoryList);
 
         System.out.println("==== Create PROXY repository ====");
-        executeCommand("cave:repository-create -p http://repo1.maven.org/maven2\\@id=Central PROXY");
+        executeCommand("cave:repository-create -p https://repo1.maven.org/maven2\\@id=Central PROXY");
 
         System.out.println("==== Repository List ====");
         repositoryList = executeCommand("cave:repository-list");
