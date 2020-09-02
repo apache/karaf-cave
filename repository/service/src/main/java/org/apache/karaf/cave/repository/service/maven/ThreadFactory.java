@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * A {@link ThreadFactory} which sets the thread name to an unique name.
  *
- * <p>The thread name uses the following syntax <tt>name #counter</tt>, where counter in an unique counter, starting from 1.</p>
+ * The thread name uses the following syntax <code>name #counter</code>, where counter in an unique counter, starting from 1.
  */
 public final class ThreadFactory implements java.util.concurrent.ThreadFactory {
 
