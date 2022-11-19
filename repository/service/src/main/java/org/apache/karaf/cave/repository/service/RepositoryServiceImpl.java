@@ -429,7 +429,7 @@ public class RepositoryServiceImpl implements RepositoryService {
             throw new IllegalStateException("Repository " + name + " location is not defined");
         }
 
-        File artifactFile = File.createTempFile(artifactId, type);
+        File artifactFile = Files.createTempFile(artifactId, type).toFile();
         try (FileOutputStream os = new FileOutputStream(artifactFile)) {
             copyStream(new URI(artifactUrl).toURL().openStream(), os);
             os.flush();
