@@ -61,6 +61,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
 import java.net.URI;
+import java.nio.file.Files;
 import java.util.*;
 import java.util.jar.JarInputStream;
 import java.util.regex.Matcher;
@@ -367,7 +368,7 @@ public class DeployerServiceImpl implements DeployerService {
             }
         }
 
-        File artifactFile = File.createTempFile(artifactId, coordonates.get("extension"));
+        File artifactFile = Files.createTempFile(artifactId, coordonates.get("extension")).toFile();
 
         FileOutputStream os = new FileOutputStream(artifactFile);
         copyStream(new URI(artifactUrl).toURL().openStream(), os);
@@ -470,7 +471,7 @@ public class DeployerServiceImpl implements DeployerService {
             }
         }
         featuresModel.getFeature().add(wrapFeature);
-        File featuresFile = File.createTempFile(artifactId, "xml");
+        File featuresFile = Files.createTempFile(artifactId, "xml").toFile();
         FileOutputStream os = new FileOutputStream(featuresFile);
         JaxbUtil.marshal(featuresModel, os);
         uploadArtifact(groupId, artifactId, version, "xml", "features", featuresFile, repositoryUrl);
